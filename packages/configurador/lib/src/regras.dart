@@ -209,6 +209,10 @@ class RegrasConfigurador {
   static const linhasPorSaida = 10;
   static const linhasSemAlternadorObrigatorio = 12;
 
+  /// Padrão sem alternador: 2 chicotes painel de 4 m.
+  static const chicotesPainelSemAlternador = 2;
+  static const comprimentoPainelSemAlternador = 4;
+
   static int get capacidadeMaxima => saidasPorAlternador * linhasPorSaida;
 
   /// Alternador é obrigatório a partir de 13 linhas.
@@ -401,21 +405,17 @@ class RegrasConfigurador {
     required List<int> opcoes,
     required int? escolhido,
     int? quantidadeRecomendada,
-    String? outraPendencia,
   }) {
     final valido = escolhido != null && opcoes.contains(escolhido);
-    final pendencias = [
-      ?outraPendencia,
-      if (!valido)
-        'Escolher o comprimento conforme o tamanho da máquina '
-            '(${_metros(opcoes)}).',
-    ];
     return ItemConfiguracao(
       componente: componente,
       quantidade: quantidade,
       motivo: motivo,
-      status: pendencias.isEmpty ? StatusItem.definido : StatusItem.pendente,
-      pendencia: pendencias.isEmpty ? null : pendencias.join(' '),
+      status: valido ? StatusItem.definido : StatusItem.pendente,
+      pendencia: valido
+          ? null
+          : 'Escolher o comprimento conforme o tamanho da máquina '
+                '(${_metros(opcoes)}).',
       comprimento: valido ? escolhido : null,
       opcoesComprimento: opcoes,
       quantidadeRecomendada: quantidadeRecomendada,
@@ -430,7 +430,7 @@ class RegrasConfigurador {
   ) {
     final int recomendado;
     final String motivo;
-    String? pendencia;
+    var comprimento = e.comprimentoChicotePainel;
     if (distribuicao != null) {
       final saidas = distribuicao.saidas.length;
       final trocas = distribuicao.trechos.length - saidas;
@@ -440,11 +440,11 @@ class RegrasConfigurador {
           'linha. Recomendado: $recomendado ($saidas saídas usadas'
           '${trocas > 0 ? ' + $trocas trocas de seção dentro de uma saída' : ''}).';
     } else if (e.temAlternador == false) {
-      recomendado = e.secoes.length;
+      recomendado = chicotesPainelSemAlternador;
+      comprimento ??= comprimentoPainelSemAlternador;
       motivo =
-          'Leva a alimentação até os chicotes de linha. Recomendado: '
-          '$recomendado (1 por seção).';
-      pendencia = 'Recomendação sem alternador a confirmar com a engenharia.';
+          'Obrigatório em máquina sem alternador: padrão de '
+          '$chicotesPainelSemAlternador de $comprimentoPainelSemAlternador m.';
     } else {
       return null;
     }
@@ -453,9 +453,8 @@ class RegrasConfigurador {
       quantidade: e.quantidadeChicotePainel ?? recomendado,
       motivo: motivo,
       opcoes: Comprimentos.chicotePainel,
-      escolhido: e.comprimentoChicotePainel,
+      escolhido: comprimento,
       quantidadeRecomendada: recomendado,
-      outraPendencia: pendencia,
     );
   }
 

@@ -87,6 +87,8 @@ Cada saída alimenta um **conjunto** de no máximo 10 linhas vizinhas.
 - Distribuição global: 6 saídas com 10, 9, 9, 9, 9 e 9 linhas.
 - Saídas que cruzam a divisão entre seções ficam marcadas para validação.
 
+A distribuição é **indicativa**. O limitante é sempre a saída do alternador (no máximo 10 linhas); na montagem, o técnico ajusta as saídas conforme a máquina e as seções reais.
+
 ## Chicotes
 
 A montagem segue a sequência: alternador → de cada saída sai um **chicote painel** → conexão com os **chicotes de linha** que alimentam o conjunto daquela saída. Quando o conjunto passa de uma seção para outra, outro chicote painel liga os chicotes de linha de uma seção aos da seguinte.
@@ -106,12 +108,11 @@ Os chicotes de linha **nunca** são calculados pelo total de linhas da máquina.
 A quantidade é **recomendada** pelas seções e saídas usadas, e o vendedor pode ajustar. O comprimento é escolhido pelo vendedor.
 
 - **Com alternador:** 1 por saída usada + 1 a cada troca de seção dentro de uma saída. Ex.: 45 linhas (17 + 17 + 11) usam 6 saídas sem troca de seção → 6. 55 linhas (21 + 21 + 13) usam 6 saídas, duas delas trocam de seção → 8.
-- **Sem alternador:** 1 por seção, **a confirmar com a engenharia**.
+- **Sem alternador:** obrigatório e padrão: **2 chicotes painel de 4 m** (o vendedor pode ajustar).
 
 ## Pendências técnicas (não tratar como resolvidas)
 
 - **Sugestão de comprimento** de cabo ISOBUS, chicote painel e mangueiras para cada tipo de plantadeira.
-- **Chicote painel sem alternador:** confirmar a recomendação de 1 por seção.
 - Se cada chicote painel da máquina pode ter um **comprimento diferente** (hoje é um comprimento para todos).
 - Demais regras de **cabeamento**.
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
@@ -122,7 +123,7 @@ A quantidade é **recomendada** pelas seções e saídas usadas, e o vendedor po
 
 | Caso | Resultado esperado |
 |---|---|
-| 8 linhas, 1 seção, sem alternador | conjuntos 8, ECU 1, levante 1, sensores 8, ISOBUS 1 (comprimento pendente), cabo da bateria 1 (obrigatório), 2 chicotes de 4 linhas; chicote painel recomendado 1 (a confirmar); sem alternador |
+| 8 linhas, 1 seção, sem alternador | conjuntos 8, ECU 1, levante 1, sensores 8, ISOBUS 1 (comprimento pendente), cabo da bateria 1 (obrigatório), 2 chicotes de 4 linhas, 2 chicotes painel de 4 m (obrigatório); sem alternador |
 | 12 linhas sem responder sobre o alternador | erro: responder se terá alternador |
 | 12 linhas com alternador, seções 6 + 6 | alternador 1; 2 saídas (6 e 6), sem mistura |
 | 13 linhas | alternador obrigatório, sem perguntar |

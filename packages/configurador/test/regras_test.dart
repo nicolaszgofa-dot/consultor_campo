@@ -50,7 +50,7 @@ void main() {
     final r = configurar(8, [8], alternador: false);
     expect(
       r.pendentes.map((i) => i.componente),
-      containsAll([Componentes.caboIsobus, Componentes.chicotePainel]),
+      contains(Componentes.caboIsobus),
     );
     for (final p in r.pendentes) {
       expect(p.pendencia, isNotNull);
@@ -146,9 +146,17 @@ void main() {
     expect(r.item(Componentes.chicote1), isNull);
     expect(r.item(Componentes.mangueiras), isNull);
     final p = r.item(Componentes.chicotePainel)!;
-    expect(p.quantidadeRecomendada, 1);
-    expect(p.status, StatusItem.pendente);
-    expect(p.pendencia, contains('confirmar com a engenharia'));
+    expect(p.quantidade, 2);
+    expect(p.comprimento, 4);
+    expect(p.status, StatusItem.definido);
+    expect(p.motivo, contains('Obrigatório'));
+  });
+
+  test('sem alternador: 2 chicotes painel de 4 m mesmo com várias seções', () {
+    final r = configurar(12, [6, 6], alternador: false);
+    expect(qtd(r, Componentes.chicotePainel), 2);
+    final ajustado = configurar(12, [6, 6], alternador: false, painel: 9);
+    expect(ajustado.item(Componentes.chicotePainel)!.comprimento, 9);
   });
 
   test('comprimentos ficam pendentes até o vendedor escolher', () {
