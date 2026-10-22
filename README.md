@@ -2,6 +2,8 @@
 
 Aplicativo para agrônomos e consultores usarem no campo. Modelo de teste: começa com a **avaliação de plantio** (plantabilidade e dose de fertilizante) e cresce por módulos.
 
+**Abrir no navegador:** https://nicolaszgofa-dot.github.io/consultor_campo/ (atualizado a cada merge na `main`).
+
 ## Rodar no computador (modo web)
 
 Requisitos: [Flutter](https://docs.flutter.dev/get-started/install) 3.47 ou mais novo e o Chrome ou o Edge.

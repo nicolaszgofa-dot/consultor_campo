@@ -346,10 +346,10 @@ showTab(TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'planta
 
 /* ---------- plantabilidade ---------- */
 const P_EXEMPLO = { spm: '4', esp: '0,5', leituras: [24, 50, 61, 87, 112, 150, 175, 199], exemplo: true };
-let P = store.get('gpd-plant') || { ...P_EXEMPLO };
+let P = store.get('cc-plant') || { ...P_EXEMPLO };
 $('p-spm').value = P.spm; $('p-esp').value = P.esp;
 
-function pSave() { store.set('gpd-plant', P); }
+function pSave() { store.set('cc-plant', P); }
 function pDeixaDeSerExemplo() { if (P.exemplo) { P.exemplo = false; } }
 
 function validaEsp(input, hint) {
@@ -477,10 +477,10 @@ $('p-clear').onclick = () => { P.leituras = []; pDeixaDeSerExemplo(); pSave(); p
 
 /* ---------- fertilizante ---------- */
 const F_EXEMPLO = { dose: '300', esp: '0,5', dist: '10', n: '4', gramas: ['148', '156', '139', '152'], exemplo: true };
-let F = store.get('gpd-fert') || { ...F_EXEMPLO, gramas: [...F_EXEMPLO.gramas] };
+let F = store.get('cc-fert') || { ...F_EXEMPLO, gramas: [...F_EXEMPLO.gramas] };
 $('f-dose').value = F.dose; $('f-esp').value = F.esp; $('f-dist').value = F.dist; $('f-n').value = F.n;
 
-function fSave() { store.set('gpd-fert', F); }
+function fSave() { store.set('cc-fert', F); }
 
 function fBuildLines() {
   const n = Math.max(0, Math.min(50, Math.round(num($('f-n').value) || 0)));
