@@ -63,9 +63,9 @@ O motor de regras é Dart puro, sem tela, com testes. Cada regra pendente aparec
 | Alternador hidráulico | obrigatório a partir de 13 linhas |
 | Kit de mangueiras do alternador | 1 quando há alternador: 3 mangueiras, uma mais fina para o dreno; comprimento de 6, 9, 12 ou 15 m |
 | Até 12 linhas | perguntar se a máquina terá alternador hidráulico |
-| Sem alternador | incluir cabo de alimentação direto da bateria |
-| Chicotes de linha | de 4 linhas e de 1 linha; ver "Chicotes" abaixo |
-| Chicote painel | leva a alimentação da saída do alternador até os chicotes de linha; comprimento de 4, 9 ou 14 m |
+| Sem alternador | cabo de alimentação direto da bateria **obrigatório** |
+| Chicotes de linha | de 4 linhas e de 1 linha, calculados **por seção**; ver "Chicotes" abaixo |
+| Chicote painel | leva a alimentação da saída do alternador até os chicotes de linha; quantidade **recomendada** (ajustável pelo vendedor); comprimento de 4, 9 ou 14 m |
 | Comprimentos | o vendedor escolhe conforme o tamanho da máquina; enquanto não escolhe, o item fica pendente |
 | Saídas do alternador | 6 saídas, no máximo 10 linhas por saída |
 | Capacidade | acima de 60 linhas (6 × 10) a configuração é **bloqueada** e precisa de validação técnica |
@@ -91,22 +91,27 @@ Cada saída alimenta um **conjunto** de no máximo 10 linhas vizinhas.
 
 A montagem segue a sequência: alternador → de cada saída sai um **chicote painel** → conexão com os **chicotes de linha** que alimentam o conjunto daquela saída. Quando o conjunto passa de uma seção para outra, outro chicote painel liga os chicotes de linha de uma seção aos da seguinte.
 
-- **Trecho:** linhas de uma saída dentro de uma mesma seção. Uma saída que atende duas seções tem dois trechos.
-- **Chicote painel:** 1 por trecho (1 por saída + 1 a cada troca de seção dentro de uma saída).
-- **Chicotes de linha** por trecho, conforme a escolha do vendedor:
-  - **4 + 1 (padrão):** o máximo de chicotes de 4 linhas, completando com de 1 linha. Ex.: 10 linhas = 2 de 4 + 2 de 1.
-  - **Só de 1 linha:** um chicote por linha. Ex.: 10 linhas = 10 de 1.
+### Chicotes de linha: sempre por seção
 
-**Exemplo** (55 linhas, seções 21 + 21 + 13, padrão 4 + 1):
-- Trechos: 10, 9, 2 | 7, 9, 5 | 4, 9 (as saídas 3 e 5 trocam de seção).
-- 8 chicotes painel, 11 chicotes de 4 linhas e 11 de 1 linha.
+Os chicotes de linha **nunca** são calculados pelo total de linhas da máquina. Como cada seção fecha sozinha, a montagem considera cada seção como uma **máquina separada**: em cada seção, o máximo de chicotes de 4 linhas, completando com chicotes de 1 linha.
 
-**Sem alternador** (até 12 linhas): os chicotes de linha são calculados por seção.
+**Exemplo** (45 linhas, seções 17 + 17 + 11):
+- Seção de 17 linhas: 4 chicotes de 4 + 1 de 1 (duas seções assim).
+- Seção de 11 linhas: 2 chicotes de 4 + 3 de 1.
+- Total: **10 chicotes de 4 linhas e 5 de 1 linha.**
+- Pelo total da máquina (45 linhas) daria 11 de 4 + 1 de 1, que não serve para montar uma máquina que fecha: é o erro que o configurador evita.
+
+### Chicote painel: quantidade recomendada
+
+A quantidade é **recomendada** pelas seções e saídas usadas, e o vendedor pode ajustar. O comprimento é escolhido pelo vendedor.
+
+- **Com alternador:** 1 por saída usada + 1 a cada troca de seção dentro de uma saída. Ex.: 45 linhas (17 + 17 + 11) usam 6 saídas sem troca de seção → 6. 55 linhas (21 + 21 + 13) usam 6 saídas, duas delas trocam de seção → 8.
+- **Sem alternador:** 1 por seção, **a confirmar com a engenharia**.
 
 ## Pendências técnicas (não tratar como resolvidas)
 
 - **Sugestão de comprimento** de cabo ISOBUS, chicote painel e mangueiras para cada tipo de plantadeira.
-- **Chicote painel sem alternador:** quantos e onde, quando a alimentação vem direto da bateria.
+- **Chicote painel sem alternador:** confirmar a recomendação de 1 por seção.
 - Se cada chicote painel da máquina pode ter um **comprimento diferente** (hoje é um comprimento para todos).
 - Demais regras de **cabeamento**.
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
@@ -117,13 +122,14 @@ A montagem segue a sequência: alternador → de cada saída sai um **chicote pa
 
 | Caso | Resultado esperado |
 |---|---|
-| 8 linhas, 1 seção, sem alternador | conjuntos 8, ECU 1, levante 1, sensores 8, ISOBUS 1 (comprimento pendente), cabo da bateria 1, 2 chicotes de 4 linhas; chicote painel pendente; sem alternador |
+| 8 linhas, 1 seção, sem alternador | conjuntos 8, ECU 1, levante 1, sensores 8, ISOBUS 1 (comprimento pendente), cabo da bateria 1 (obrigatório), 2 chicotes de 4 linhas; chicote painel recomendado 1 (a confirmar); sem alternador |
 | 12 linhas sem responder sobre o alternador | erro: responder se terá alternador |
 | 12 linhas com alternador, seções 6 + 6 | alternador 1; 2 saídas (6 e 6), sem mistura |
 | 13 linhas | alternador obrigatório, sem perguntar |
 | 30 linhas, seções 10 + 10 + 10 | 3 saídas, uma por seção; 3 chicotes painel, 6 de 4 linhas, 6 de 1 linha |
-| 55 linhas, seções 21 + 21 + 13 | 6 saídas (10, 9, 9, 9, 9, 9); aviso nas que atendem duas seções; 8 chicotes painel, 11 de 4 linhas, 11 de 1 linha |
-| 55 linhas, só chicotes de 1 linha | 55 chicotes de 1 linha |
+| 45 linhas, seções 17 + 17 + 11 | 10 chicotes de 4 linhas, 5 de 1 linha; chicote painel recomendado 6 |
+| 55 linhas, seções 21 + 21 + 13 | 6 saídas (10, 9, 9, 9, 9, 9); aviso nas que atendem duas seções; 13 chicotes de 4 linhas, 3 de 1 linha; chicote painel recomendado 8 |
+| Vendedor ajusta chicote painel para 7 | quantidade 7, recomendação 8 mantida; 0 é erro |
 | Comprimentos não escolhidos | ISOBUS, chicote painel e mangueiras pendentes, com as opções |
 | ISOBUS de 10 m | erro: comprimento não existe |
 | 61 linhas | bloqueado: acima de 60 linhas |

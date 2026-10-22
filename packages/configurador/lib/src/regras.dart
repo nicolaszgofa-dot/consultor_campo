@@ -27,19 +27,6 @@ enum TipoPlantadeira {
   const TipoPlantadeira(this.nome, {this.secoesSeparadas = true});
 }
 
-/// Como o vendedor monta os chicotes de linha de cada conjunto.
-enum ComposicaoChicotes {
-  /// O máximo de chicotes de 4 linhas, o resto com chicotes de 1 linha.
-  quatroEUm('Chicotes de 4 linhas, completando com de 1 linha'),
-
-  /// Um chicote de 1 linha por linha.
-  soUmaLinha('Só chicotes de 1 linha');
-
-  final String nome;
-
-  const ComposicaoChicotes(this.nome);
-}
-
 /// Comprimentos disponíveis, em metros.
 abstract final class Comprimentos {
   static const isobus = [5, 11, 14, 17];
@@ -59,12 +46,14 @@ class EntradaConfiguracao {
   /// Só é perguntado em máquinas de até 12 linhas. Nulo = não respondido.
   final bool? temAlternador;
 
-  final ComposicaoChicotes composicaoChicotes;
-
   /// Comprimentos escolhidos pelo vendedor, em metros. Nulo = não escolhido.
   final int? comprimentoIsobus;
   final int? comprimentoChicotePainel;
   final int? comprimentoMangueiras;
+
+  /// Quantidade de chicotes painel ajustada pelo vendedor. Nulo = usar a
+  /// recomendação.
+  final int? quantidadeChicotePainel;
 
   const EntradaConfiguracao({
     required this.tecnologia,
@@ -72,7 +61,7 @@ class EntradaConfiguracao {
     required this.totalLinhas,
     this.linhasPorSecao = const [],
     this.temAlternador,
-    this.composicaoChicotes = ComposicaoChicotes.quatroEUm,
+    this.quantidadeChicotePainel,
     this.comprimentoIsobus,
     this.comprimentoChicotePainel,
     this.comprimentoMangueiras,
@@ -101,6 +90,9 @@ class ItemConfiguracao {
   /// Comprimentos disponíveis; vazia quando o item não tem tamanho.
   final List<int> opcoesComprimento;
 
+  /// Quantidade sugerida pelas regras, quando o vendedor pode ajustar.
+  final int? quantidadeRecomendada;
+
   const ItemConfiguracao({
     required this.componente,
     required this.quantidade,
@@ -109,6 +101,7 @@ class ItemConfiguracao {
     this.pendencia,
     this.comprimento,
     this.opcoesComprimento = const [],
+    this.quantidadeRecomendada,
   });
 }
 
@@ -229,14 +222,10 @@ class RegrasConfigurador {
   static bool usaAlternador(EntradaConfiguracao e) =>
       alternadorObrigatorio(e.totalLinhas) || (e.temAlternador ?? false);
 
-  /// Chicotes de 4 e de 1 linha para um trecho de [linhas] em sequência.
-  static ({int quatro, int um}) chicotesDoTrecho(
-    int linhas,
-    ComposicaoChicotes composicao,
-  ) => switch (composicao) {
-    ComposicaoChicotes.quatroEUm => (quatro: linhas ~/ 4, um: linhas % 4),
-    ComposicaoChicotes.soUmaLinha => (quatro: 0, um: linhas),
-  };
+  /// Chicotes de 4 e de 1 linha de uma seção. Cada seção é montada como se
+  /// fosse uma máquina separada, porque fecha sozinha.
+  static ({int quatro, int um}) chicotesDaSecao(int linhas) =>
+      (quatro: linhas ~/ 4, um: linhas % 4);
 
   static List<Validacao> validar(EntradaConfiguracao e) {
     final v = <Validacao>[];
@@ -314,6 +303,14 @@ class RegrasConfigurador {
       e.comprimentoMangueiras,
       Comprimentos.mangueiras,
     );
+    if (e.quantidadeChicotePainel != null && e.quantidadeChicotePainel! < 1) {
+      v.add(
+        const Validacao(
+          NivelValidacao.erro,
+          'A quantidade de chicotes painel precisa ser pelo menos 1.',
+        ),
+      );
+    }
     return v;
   }
 
@@ -403,19 +400,62 @@ class RegrasConfigurador {
     required String motivo,
     required List<int> opcoes,
     required int? escolhido,
+    int? quantidadeRecomendada,
+    String? outraPendencia,
   }) {
     final valido = escolhido != null && opcoes.contains(escolhido);
+    final pendencias = [
+      ?outraPendencia,
+      if (!valido)
+        'Escolher o comprimento conforme o tamanho da máquina '
+            '(${_metros(opcoes)}).',
+    ];
     return ItemConfiguracao(
       componente: componente,
       quantidade: quantidade,
       motivo: motivo,
-      status: valido ? StatusItem.definido : StatusItem.pendente,
-      pendencia: valido
-          ? null
-          : 'Escolher o comprimento conforme o tamanho da máquina '
-                '(${_metros(opcoes)}).',
+      status: pendencias.isEmpty ? StatusItem.definido : StatusItem.pendente,
+      pendencia: pendencias.isEmpty ? null : pendencias.join(' '),
       comprimento: valido ? escolhido : null,
       opcoesComprimento: opcoes,
+      quantidadeRecomendada: quantidadeRecomendada,
+    );
+  }
+
+  /// Chicote painel: quantidade recomendada pelas seções e saídas usadas,
+  /// ajustável pelo vendedor; comprimento escolhido pelo vendedor.
+  static ItemConfiguracao? _chicotePainel(
+    EntradaConfiguracao e,
+    DistribuicaoSaidas? distribuicao,
+  ) {
+    final int recomendado;
+    final String motivo;
+    String? pendencia;
+    if (distribuicao != null) {
+      final saidas = distribuicao.saidas.length;
+      final trocas = distribuicao.trechos.length - saidas;
+      recomendado = saidas + trocas;
+      motivo =
+          'Leva a alimentação de cada saída do alternador até os chicotes de '
+          'linha. Recomendado: $recomendado ($saidas saídas usadas'
+          '${trocas > 0 ? ' + $trocas trocas de seção dentro de uma saída' : ''}).';
+    } else if (e.temAlternador == false) {
+      recomendado = e.secoes.length;
+      motivo =
+          'Leva a alimentação até os chicotes de linha. Recomendado: '
+          '$recomendado (1 por seção).';
+      pendencia = 'Recomendação sem alternador a confirmar com a engenharia.';
+    } else {
+      return null;
+    }
+    return _porComprimento(
+      componente: Componentes.chicotePainel,
+      quantidade: e.quantidadeChicotePainel ?? recomendado,
+      motivo: motivo,
+      opcoes: Comprimentos.chicotePainel,
+      escolhido: e.comprimentoChicotePainel,
+      quantidadeRecomendada: recomendado,
+      outraPendencia: pendencia,
     );
   }
 
@@ -428,18 +468,20 @@ class RegrasConfigurador {
         ? distribuirSaidas(e.secoes)
         : null;
 
-    // Trechos ligados em sequência pelos chicotes de linha.
-    final trechos = distribuicao?.trechos ?? (bloqueada ? <int>[] : e.secoes);
+    // Chicotes de linha por seção, nunca pelo total da máquina.
+    final secoes = bloqueada ? <int>[] : e.secoes;
     var quatro = 0, um = 0;
-    for (final t in trechos) {
-      final c = chicotesDoTrecho(t, e.composicaoChicotes);
+    for (final s in secoes) {
+      final c = chicotesDaSecao(s);
       quatro += c.quatro;
       um += c.um;
     }
-    final composicao = switch (e.composicaoChicotes) {
-      ComposicaoChicotes.quatroEUm => 'até 4 linhas por chicote',
-      ComposicaoChicotes.soUmaLinha => 'um por linha',
-    };
+    final porSecao =
+        'Por seção, como se cada uma fosse uma máquina separada '
+        '(${secoes.map((s) {
+          final c = chicotesDaSecao(s);
+          return '$s linhas: ${c.quatro} de 4 + ${c.um} de 1';
+        }).join('; ')}).';
 
     final itens = <ItemConfiguracao>[
       if (linhas > 0)
@@ -492,39 +534,21 @@ class RegrasConfigurador {
         const ItemConfiguracao(
           componente: Componentes.caboBateria,
           quantidade: 1,
-          motivo: 'Máquina sem alternador: alimentação direto da bateria.',
+          motivo: 'Obrigatório em máquina sem alternador.',
         ),
       if (quatro > 0)
         ItemConfiguracao(
           componente: Componentes.chicote4,
           quantidade: quatro,
-          motivo: 'Chicotes de linha, $composicao.',
+          motivo: porSecao,
         ),
       if (um > 0)
         ItemConfiguracao(
           componente: Componentes.chicote1,
           quantidade: um,
-          motivo: 'Chicotes de linha, $composicao.',
+          motivo: porSecao,
         ),
-      if (distribuicao != null)
-        _porComprimento(
-          componente: Componentes.chicotePainel,
-          quantidade: trechos.length,
-          motivo:
-              'Um por saída do alternador até os chicotes de linha, mais '
-              'um a cada passagem de uma seção para outra.',
-          opcoes: Comprimentos.chicotePainel,
-          escolhido: e.comprimentoChicotePainel,
-        )
-      else if (e.temAlternador == false)
-        const ItemConfiguracao(
-          componente: Componentes.chicotePainel,
-          quantidade: 0,
-          motivo: 'Ligação da alimentação até os chicotes de linha.',
-          status: StatusItem.pendente,
-          pendencia: 'Quantidade sem alternador a definir.',
-          opcoesComprimento: Comprimentos.chicotePainel,
-        ),
+      ?_chicotePainel(e, distribuicao),
     ];
 
     if (distribuicao != null) {

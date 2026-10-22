@@ -8,10 +8,10 @@ ResultadoConfiguracao configurar(
   bool? alternador,
   Tecnologia tecnologia = Tecnologia.titaniumEletric,
   TipoPlantadeira tipo = TipoPlantadeira.autotransportavel,
-  ComposicaoChicotes composicao = ComposicaoChicotes.quatroEUm,
   int? isobus,
   int? painel,
   int? mangueiras,
+  int? qtdPainel,
 }) => RegrasConfigurador.configurar(
   EntradaConfiguracao(
     tecnologia: tecnologia,
@@ -19,7 +19,7 @@ ResultadoConfiguracao configurar(
     totalLinhas: linhas,
     linhasPorSecao: secoes,
     temAlternador: alternador,
-    composicaoChicotes: composicao,
+    quantidadeChicotePainel: qtdPainel,
     comprimentoIsobus: isobus,
     comprimentoChicotePainel: painel,
     comprimentoMangueiras: mangueiras,
@@ -71,15 +71,23 @@ void main() {
     expect(qtd(s, 'Conjunto Selenium Elétric'), 8);
   });
 
-  test('chicotes de um trecho: 10 linhas = 2 de 4 + 2 de 1, ou 10 de 1', () {
-    expect(
-      RegrasConfigurador.chicotesDoTrecho(10, ComposicaoChicotes.quatroEUm),
-      (quatro: 2, um: 2),
-    );
-    expect(
-      RegrasConfigurador.chicotesDoTrecho(10, ComposicaoChicotes.soUmaLinha),
-      (quatro: 0, um: 10),
-    );
+  test('chicotes de uma seção: 17 = 4 de 4 + 1 de 1; 11 = 2 de 4 + 3 de 1', () {
+    expect(RegrasConfigurador.chicotesDaSecao(17), (quatro: 4, um: 1));
+    expect(RegrasConfigurador.chicotesDaSecao(11), (quatro: 2, um: 3));
+  });
+
+  test('45 linhas (17 + 17 + 11): 10 chicotes de 4 e 5 de 1', () {
+    final r = configurar(45, [17, 17, 11]);
+    expect(qtd(r, Componentes.chicote4), 10);
+    expect(qtd(r, Componentes.chicote1), 5);
+  });
+
+  test('chicotes são calculados por seção, não pelo total da máquina', () {
+    // Pelo total seriam 11 de 4 + 1 de 1: errado para uma máquina que fecha.
+    final r = configurar(45, [17, 17, 11]);
+    final total = RegrasConfigurador.chicotesDaSecao(45);
+    expect(total, (quatro: 11, um: 1));
+    expect(qtd(r, Componentes.chicote4), isNot(total.quatro));
   });
 
   test('os chicotes cobrem todas as linhas', () {
@@ -104,30 +112,43 @@ void main() {
     expect(qtd(r, Componentes.chicote1), 6);
   });
 
+  test('45 linhas (17 + 17 + 11): chicote painel recomendado = 6 saídas', () {
+    final p = configurar(45, [17, 17, 11]).item(Componentes.chicotePainel)!;
+    expect(p.quantidadeRecomendada, 6);
+    expect(p.quantidade, 6);
+  });
+
   test('55 linhas: chicote painel por saída e a cada troca de seção', () {
     final r = configurar(55, [21, 21, 13]);
     expect(r.distribuicao!.trechos, [10, 9, 2, 7, 9, 5, 4, 9]);
-    expect(qtd(r, Componentes.chicotePainel), 8);
-    expect(qtd(r, Componentes.chicote4), 11);
-    expect(qtd(r, Componentes.chicote1), 11);
+    final p = r.item(Componentes.chicotePainel)!;
+    expect(p.quantidadeRecomendada, 8);
+    expect(p.motivo, contains('6 saídas usadas + 2 trocas de seção'));
+    expect(qtd(r, Componentes.chicote4), 13);
+    expect(qtd(r, Componentes.chicote1), 3);
   });
 
-  test('55 linhas só com chicotes de 1 linha', () {
-    final r = configurar(55, [
+  test('o vendedor pode ajustar a quantidade de chicotes painel', () {
+    final p = configurar(55, [
       21,
       21,
       13,
-    ], composicao: ComposicaoChicotes.soUmaLinha);
-    expect(qtd(r, Componentes.chicote1), 55);
-    expect(r.item(Componentes.chicote4), isNull);
+    ], qtdPainel: 7).item(Componentes.chicotePainel)!;
+    expect(p.quantidade, 7);
+    expect(p.quantidadeRecomendada, 8);
+    expect(configurar(55, [21, 21, 13], qtdPainel: 0).bloqueada, isTrue);
   });
 
-  test('sem alternador: chicotes por seção e chicote painel pendente', () {
+  test('sem alternador: cabo da bateria obrigatório, chicotes por seção', () {
     final r = configurar(8, [8], alternador: false);
+    expect(r.item(Componentes.caboBateria)!.motivo, contains('Obrigatório'));
     expect(qtd(r, Componentes.chicote4), 2);
     expect(r.item(Componentes.chicote1), isNull);
-    expect(r.item(Componentes.chicotePainel)!.status, StatusItem.pendente);
     expect(r.item(Componentes.mangueiras), isNull);
+    final p = r.item(Componentes.chicotePainel)!;
+    expect(p.quantidadeRecomendada, 1);
+    expect(p.status, StatusItem.pendente);
+    expect(p.pendencia, contains('confirmar com a engenharia'));
   });
 
   test('comprimentos ficam pendentes até o vendedor escolher', () {
