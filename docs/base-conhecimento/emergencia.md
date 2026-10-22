@@ -83,11 +83,34 @@ Serve para soja, milho, algodão, girassol e outras culturas.
 
 ## 5. Solução: controle de downforce linha a linha
 
-### O conceito
+### O que é downforce (conceito J.Assy)
 
-- **Downforce** é a força que mantém a linha de plantio encostada no solo, para o limitador de profundidade trabalhar sempre apoiado.
-- **Margem** é a força extra acima do mínimo necessário para o limitador ficar apoiado. Pouca margem: a linha flutua e a profundidade varia. Muita margem: compactação lateral do sulco. ✅ (Precision Planting)
-- Molas e bolsas de ar aplicam **a mesma força** em todas as linhas e não reagem à mudança do solo. O controle **automático por linha** mede e corrige continuamente, linha por linha. ✅
+**Downforce** é a força resultante na linha de plantio, considerando o peso da linha, a força aplicada sobre ela e a resistência do solo à penetração:
+
+```
+Downforce = força aplicada + peso da linha − resistência do solo
+```
+
+- Essa resultante chega ao solo pelas **rodas limitadoras de profundidade**. Por isso é ali que se instala o sensor para medi-la.
+- É a força necessária para a linha depositar a semente **sempre na profundidade desejada**, **sem compactar** o sulco ao redor da semente.
+- Funciona como um indicador da **densidade do solo ao redor da semente**.
+
+| Downforce | O que acontece no sulco | Efeito |
+|---|---|---|
+| **Acima do adequado** | Compactação do sulco (**espelhamento**) | Prejudica o desenvolvimento inicial das raízes |
+| **Abaixo do ideal** | Sulco mal estruturado, que **desmorona antes das rodas cobridoras (rodas em V)** e leva solo seco da superfície para perto da semente | Germinação irregular |
+| **Muito abaixo** | A semente **não alcança a linha de umidade** e fica superficial | Emergência atrasada ou falha |
+
+**Por que isso define a emergência:** quanto melhor o ambiente do sulco ao redor da semente, mais **rápida e uniforme** é a emergência, e mais parecidas entre si ficam as plantas.
+
+**Margem** é o nome usado pela Precision Planting para a parte da downforce acima do mínimo necessário para manter as rodas limitadoras apoiadas. Pouca margem: a linha flutua e a profundidade varia. Muita margem: compactação lateral do sulco. ✅ (Precision Planting)
+
+Fonte desta seção: material técnico da J.Assy.
+
+### Medir e corrigir: os dois passos
+
+1. **Medir em tempo real.** O sensor **LoadPin** (J.Assy), instalado no ponto de apoio das rodas limitadoras, lê a downforce **metro a metro** no talhão, mostrando onde e em que linha a força está errada.
+2. **Corrigir em tempo real.** Saber a força é só o primeiro passo: é preciso ajustá-la enquanto planta. Molas e bolsas de ar aplicam **a mesma força** em todas as linhas e não reagem à mudança do solo. Um **pistão hidráulico** com controle automático por linha (como o DeltaForce ou o Level) aplica a força com precisão e mantém o plantio uniforme. ✅
 
 **Resultado medido pelo fabricante** ⚠️ (Precision Planting, PTI Farm, milho, 2018–2025, comparado com o controle automático)
 
@@ -136,6 +159,6 @@ Serve para soja, milho, algodão, girassol e outras culturas.
 - Masino, A. et al. Spatial and temporal plant-to-plant variability effects on soybean yield. 2018. [INTA](https://repositoriosdigitales.mincyt.gob.ar/vufind/Record/INTADig_fbd71454fa17db9a0410be27ee3e2f45)
 - Kansas State University. [MF3331](https://bookstore.ksre.ksu.edu/pubs/MF3331.pdf) (variação de solo entre linhas e downforce).
 - Farm Progress. [Achieving correct downforce pays with soybeans too](https://www.farmprogress.com/planting/achieving-correct-downforce-pays-with-soybeans-too).
-- J.Assy. [Level](https://jassy.ag/en/level/). Campo & Negócios. [J.Assy redefine eficiência](https://campoenegocios.com/j-assy-redefine-eficiencia-discos-sensores-e-dosadores-inovadores/).
+- J.Assy. Material técnico interno sobre downforce e LoadPin. [Level](https://jassy.ag/en/level/). Campo & Negócios. [J.Assy redefine eficiência](https://campoenegocios.com/j-assy-redefine-eficiencia-discos-sensores-e-dosadores-inovadores/).
 - IFRS Ibirubá. [Atraso na emergência em milho](https://eventos.ifrs.edu.br/index.php/MoEPExIbiruba/8moepex/paper/download/6853/3024) (resumo de evento).
 - Rupp Seeds. [Uneven corn stands](https://ruppseeds.com/Files/Images/News/3013_S2_Uneven-Corn-Stands_RU.pdf) (regra de folhas atrás; origem não identificada).
