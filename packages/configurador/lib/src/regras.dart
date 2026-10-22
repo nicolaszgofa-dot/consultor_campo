@@ -46,6 +46,10 @@ class EntradaConfiguracao {
   /// Só é perguntado em máquinas de até 12 linhas. Nulo = não respondido.
   final bool? temAlternador;
 
+  /// Se a máquina permite instalar o alternador no cabeçalho
+  /// (autotransportável) ou no tandem (tandem). Nulo = não respondido.
+  final bool? alternadorNaFrente;
+
   /// Comprimentos escolhidos pelo vendedor, em metros. Nulo = não escolhido.
   final int? comprimentoIsobus;
   final int? comprimentoChicotePainel;
@@ -61,6 +65,7 @@ class EntradaConfiguracao {
     required this.totalLinhas,
     this.linhasPorSecao = const [],
     this.temAlternador,
+    this.alternadorNaFrente,
     this.quantidadeChicotePainel,
     this.comprimentoIsobus,
     this.comprimentoChicotePainel,
@@ -93,6 +98,12 @@ class ItemConfiguracao {
   /// Quantidade sugerida pelas regras, quando o vendedor pode ajustar.
   final int? quantidadeRecomendada;
 
+  /// Comprimento sugerido pelo tipo de máquina, em metros.
+  final int? comprimentoSugerido;
+
+  /// Aviso que acompanha o item sempre, mesmo depois de definido.
+  final String? observacao;
+
   const ItemConfiguracao({
     required this.componente,
     required this.quantidade,
@@ -102,6 +113,8 @@ class ItemConfiguracao {
     this.comprimento,
     this.opcoesComprimento = const [],
     this.quantidadeRecomendada,
+    this.comprimentoSugerido,
+    this.observacao,
   });
 }
 
@@ -230,6 +243,41 @@ class RegrasConfigurador {
   /// fosse uma máquina separada, porque fecha sozinha.
   static ({int quatro, int um}) chicotesDaSecao(int linhas) =>
       (quatro: linhas ~/ 4, um: linhas % 4);
+
+  static const observacaoComprimento =
+      'O comprimento segue o tamanho da máquina: confirmar as '
+      'características da máquina para ter certeza.';
+
+  /// Pergunta sobre a posição do alternador, que define a sugestão de
+  /// comprimento no autotransportável e no tandem. Nula se não se aplica.
+  static String? perguntaAlternadorNaFrente(EntradaConfiguracao e) {
+    if (!usaAlternador(e)) return null;
+    return switch (e.tipo) {
+      TipoPlantadeira.autotransportavel =>
+        'A máquina permite instalar o alternador no cabeçalho?',
+      TipoPlantadeira.tandem =>
+        'A máquina permite instalar o alternador no tandem?',
+      _ => null,
+    };
+  }
+
+  /// Comprimentos sugeridos de cabo ISOBUS e mangueiras, em metros. Os dois
+  /// saem de pontos próximos, por isso andam em dupla. Nula se depende de
+  /// uma resposta que ainda não foi dada.
+  static ({int isobus, int mangueiras})? sugestaoComprimentos(
+    EntradaConfiguracao e,
+  ) => switch (e.tipo) {
+    TipoPlantadeira.solteira => (isobus: 5, mangueiras: 6),
+    TipoPlantadeira.caixaCentral => (isobus: 17, mangueiras: 15),
+    TipoPlantadeira.autotransportavel ||
+    TipoPlantadeira.tandem => switch (perguntaAlternadorNaFrente(e) == null
+        ? null
+        : e.alternadorNaFrente) {
+      true => (isobus: 5, mangueiras: 6),
+      false => (isobus: 11, mangueiras: 12),
+      null => null,
+    },
+  };
 
   static List<Validacao> validar(EntradaConfiguracao e) {
     final v = <Validacao>[];
@@ -405,8 +453,15 @@ class RegrasConfigurador {
     required List<int> opcoes,
     required int? escolhido,
     int? quantidadeRecomendada,
+    int? sugerido,
+    String? origemSugestao,
+    String? perguntaPendente,
+    String? observacao,
   }) {
     final valido = escolhido != null && opcoes.contains(escolhido);
+    final escolher =
+        'Escolher o comprimento conforme o tamanho da máquina '
+        '(${_metros(opcoes)}).';
     return ItemConfiguracao(
       componente: componente,
       quantidade: quantidade,
@@ -414,13 +469,34 @@ class RegrasConfigurador {
       status: valido ? StatusItem.definido : StatusItem.pendente,
       pendencia: valido
           ? null
-          : 'Escolher o comprimento conforme o tamanho da máquina '
-                '(${_metros(opcoes)}).',
+          : [
+              if (sugerido != null)
+                'Sugerido: $sugerido m ($origemSugestao).'
+              else if (perguntaPendente != null)
+                'Responda "$perguntaPendente" para ver a sugestão.',
+              escolher,
+            ].join(' '),
       comprimento: valido ? escolhido : null,
       opcoesComprimento: opcoes,
       quantidadeRecomendada: quantidadeRecomendada,
+      comprimentoSugerido: sugerido,
+      observacao: observacao,
     );
   }
+
+  /// Texto curto de onde vem a sugestão de comprimento.
+  static String _origemSugestao(EntradaConfiguracao e) => switch (e.tipo) {
+    TipoPlantadeira.autotransportavel =>
+      e.alternadorNaFrente!
+          ? 'autotransportável com alternador no cabeçalho'
+          : 'autotransportável sem alternador no cabeçalho',
+    TipoPlantadeira.tandem =>
+      e.alternadorNaFrente!
+          ? 'tandem com alternador no tandem'
+          : 'tandem sem alternador no tandem',
+    TipoPlantadeira.caixaCentral => 'caixa central',
+    TipoPlantadeira.solteira => 'solteira',
+  };
 
   /// Chicote painel: quantidade recomendada pelas seções e saídas usadas,
   /// ajustável pelo vendedor; comprimento escolhido pelo vendedor.
@@ -482,6 +558,10 @@ class RegrasConfigurador {
           return '$s linhas: ${c.quatro} de 4 + ${c.um} de 1';
         }).join('; ')}).';
 
+    final sugestao = sugestaoComprimentos(e);
+    final origem = sugestao == null ? null : _origemSugestao(e);
+    final pergunta = perguntaAlternadorNaFrente(e);
+
     final itens = <ItemConfiguracao>[
       if (linhas > 0)
         ItemConfiguracao(
@@ -511,6 +591,10 @@ class RegrasConfigurador {
         motivo: 'Obrigatório em toda configuração.',
         opcoes: Comprimentos.isobus,
         escolhido: e.comprimentoIsobus,
+        sugerido: sugestao?.isobus,
+        origemSugestao: origem,
+        perguntaPendente: pergunta,
+        observacao: observacaoComprimento,
       ),
       if (alternador) ...[
         ItemConfiguracao(
@@ -528,6 +612,10 @@ class RegrasConfigurador {
               'o dreno.',
           opcoes: Comprimentos.mangueiras,
           escolhido: e.comprimentoMangueiras,
+          sugerido: sugestao?.mangueiras,
+          origemSugestao: origem,
+          perguntaPendente: pergunta,
+          observacao: observacaoComprimento,
         ),
       ] else if (e.temAlternador == false)
         const ItemConfiguracao(

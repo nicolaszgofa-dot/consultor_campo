@@ -12,6 +12,7 @@ ResultadoConfiguracao configurar(
   int? painel,
   int? mangueiras,
   int? qtdPainel,
+  bool? naFrente,
 }) => RegrasConfigurador.configurar(
   EntradaConfiguracao(
     tecnologia: tecnologia,
@@ -19,6 +20,7 @@ ResultadoConfiguracao configurar(
     totalLinhas: linhas,
     linhasPorSecao: secoes,
     temAlternador: alternador,
+    alternadorNaFrente: naFrente,
     quantidadeChicotePainel: qtdPainel,
     comprimentoIsobus: isobus,
     comprimentoChicotePainel: painel,
@@ -157,6 +159,69 @@ void main() {
     expect(qtd(r, Componentes.chicotePainel), 2);
     final ajustado = configurar(12, [6, 6], alternador: false, painel: 9);
     expect(ajustado.item(Componentes.chicotePainel)!.comprimento, 9);
+  });
+
+  (int?, int?) sugestao(ResultadoConfiguracao r) => (
+    r.item(Componentes.caboIsobus)!.comprimentoSugerido,
+    r.item(Componentes.mangueiras)?.comprimentoSugerido,
+  );
+
+  test('sugestão de ISOBUS e mangueiras por tipo de máquina', () {
+    expect(sugestao(configurar(30, const [], tipo: TipoPlantadeira.solteira)), (
+      5,
+      6,
+    ));
+    expect(
+      sugestao(
+        configurar(30, [10, 10, 10], tipo: TipoPlantadeira.caixaCentral),
+      ),
+      (17, 15),
+    );
+    for (final tipo in [
+      TipoPlantadeira.autotransportavel,
+      TipoPlantadeira.tandem,
+    ]) {
+      expect(
+        sugestao(configurar(30, [10, 10, 10], tipo: tipo, naFrente: true)),
+        (5, 6),
+        reason: tipo.nome,
+      );
+      expect(
+        sugestao(configurar(30, [10, 10, 10], tipo: tipo, naFrente: false)),
+        (11, 12),
+        reason: tipo.nome,
+      );
+    }
+  });
+
+  test('autotransportável e tandem perguntam onde fica o alternador', () {
+    final a = configurar(30, [10, 10, 10]);
+    expect(
+      RegrasConfigurador.perguntaAlternadorNaFrente(a.entrada),
+      'A máquina permite instalar o alternador no cabeçalho?',
+    );
+    expect(sugestao(a), (null, null));
+    expect(a.item(Componentes.caboIsobus)!.pendencia, contains('cabeçalho'));
+    final t = configurar(30, [10, 10, 10], tipo: TipoPlantadeira.tandem);
+    expect(
+      RegrasConfigurador.perguntaAlternadorNaFrente(t.entrada),
+      'A máquina permite instalar o alternador no tandem?',
+    );
+    final c = configurar(30, [10, 10, 10], tipo: TipoPlantadeira.caixaCentral);
+    expect(RegrasConfigurador.perguntaAlternadorNaFrente(c.entrada), isNull);
+  });
+
+  test('sugestão não define o item e sempre pede para confirmar a máquina', () {
+    final r = configurar(30, [10, 10, 10], naFrente: true);
+    final isobus = r.item(Componentes.caboIsobus)!;
+    expect(isobus.status, StatusItem.pendente);
+    expect(isobus.comprimento, isNull);
+    expect(isobus.pendencia, contains('Sugerido: 5 m'));
+    expect(isobus.observacao, contains('confirmar as características'));
+    final escolhido = configurar(30, [10, 10, 10], naFrente: true, isobus: 5);
+    final definido = escolhido.item(Componentes.caboIsobus)!;
+    expect(definido.status, StatusItem.definido);
+    expect(definido.observacao, contains('confirmar as características'));
   });
 
   test('comprimentos ficam pendentes até o vendedor escolher', () {

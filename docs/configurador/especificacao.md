@@ -36,7 +36,7 @@ Experiência: o vendedor informa as características → o sistema interpreta �
 2. Tipo da plantadeira: autotransportável, caixa central, tandem ou solteira.
 3. Número de linhas.
 4. Número de seções que fecham separadas e linhas de cada seção: só para autotransportável, caixa central e tandem. Na solteira a etapa é pulada.
-5. Alimentação.
+5. Alimentação (no autotransportável e no tandem com alternador, também se o alternador pode ir no cabeçalho ou no tandem).
 6. Resultado.
 
 ## Arquitetura da lógica
@@ -66,7 +66,7 @@ O motor de regras é Dart puro, sem tela, com testes. Cada regra pendente aparec
 | Sem alternador | cabo de alimentação direto da bateria **obrigatório** |
 | Chicotes de linha | de 4 linhas e de 1 linha, calculados **por seção**; ver "Chicotes" abaixo |
 | Chicote painel | leva a alimentação da saída do alternador até os chicotes de linha; quantidade **recomendada** (ajustável pelo vendedor); comprimento de 4, 9 ou 14 m |
-| Comprimentos | o vendedor escolhe conforme o tamanho da máquina; enquanto não escolhe, o item fica pendente |
+| Comprimentos | o vendedor escolhe conforme o tamanho da máquina; enquanto não escolhe, o item fica pendente. ISOBUS e mangueiras têm sugestão por tipo de máquina (ver "Sugestão de comprimentos") |
 | Saídas do alternador | 6 saídas, no máximo 10 linhas por saída |
 | Capacidade | acima de 60 linhas (6 × 10) a configuração é **bloqueada** e precisa de validação técnica |
 | Tipos de plantadeira | autotransportável, caixa central, tandem e solteira |
@@ -110,9 +110,27 @@ A quantidade é **recomendada** pelas seções e saídas usadas, e o vendedor po
 - **Com alternador:** 1 por saída usada + 1 a cada troca de seção dentro de uma saída. Ex.: 45 linhas (17 + 17 + 11) usam 6 saídas sem troca de seção → 6. 55 linhas (21 + 21 + 13) usam 6 saídas, duas delas trocam de seção → 8.
 - **Sem alternador:** obrigatório e padrão: **2 chicotes painel de 4 m** (o vendedor pode ajustar).
 
+## Sugestão de comprimentos (cabo ISOBUS e mangueiras)
+
+O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o sistema sugere os dois **em dupla**, conforme o tipo de máquina:
+
+| Tipo de máquina | ISOBUS / mangueiras |
+|---|---|
+| Autotransportável que permite o alternador no **cabeçalho** | 5 m / 6 m |
+| Autotransportável que não permite o alternador no cabeçalho | 11 m / 12 m |
+| Tandem que permite o alternador no **tandem** | 5 m / 6 m |
+| Tandem que não permite o alternador no tandem | 11 m / 12 m |
+| Caixa central | 17 m / 15 m |
+| Solteira | 5 m / 6 m |
+
+- No autotransportável e no tandem com alternador, o configurador pergunta se a máquina permite instalar o alternador no cabeçalho (ou no tandem). Sem a resposta, não há sugestão.
+- A sugestão **não fecha o item**: ele continua pendente até o vendedor escolher o comprimento.
+- O item sempre mostra a observação: **o comprimento segue o tamanho da máquina; confirmar as características da máquina para ter certeza.**
+
 ## Pendências técnicas (não tratar como resolvidas)
 
-- **Sugestão de comprimento** de cabo ISOBUS, chicote painel e mangueiras para cada tipo de plantadeira.
+- **Sugestão de ISOBUS** no autotransportável e no tandem **sem alternador** (hoje sem sugestão).
+- **Sugestão de comprimento do chicote painel** com alternador.
 - Se cada chicote painel da máquina pode ter um **comprimento diferente** (hoje é um comprimento para todos).
 - Demais regras de **cabeamento**.
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
@@ -132,6 +150,9 @@ A quantidade é **recomendada** pelas seções e saídas usadas, e o vendedor po
 | 55 linhas, seções 21 + 21 + 13 | 6 saídas (10, 9, 9, 9, 9, 9); aviso nas que atendem duas seções; 13 chicotes de 4 linhas, 3 de 1 linha; chicote painel recomendado 8 |
 | Vendedor ajusta chicote painel para 7 | quantidade 7, recomendação 8 mantida; 0 é erro |
 | Comprimentos não escolhidos | ISOBUS, chicote painel e mangueiras pendentes, com as opções |
+| Solteira / caixa central | sugestão ISOBUS / mangueiras: 5 / 6 m e 17 / 15 m |
+| Autotransportável ou tandem, alternador na frente: sim / não | sugestão 5 / 6 m ou 11 / 12 m; sem resposta, sem sugestão |
+| Sugestão aceita pelo vendedor | item definido, com a observação de confirmar a máquina |
 | ISOBUS de 10 m | erro: comprimento não existe |
 | 61 linhas | bloqueado: acima de 60 linhas |
 | Seções 20 + 20 com total 45 | erro: soma das seções (40) diferente do total (45) |
