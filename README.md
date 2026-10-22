@@ -1,0 +1,47 @@
+# Consultor de Campo
+
+Aplicativo para agrônomos e consultores usarem no campo. Modelo de teste: começa com a **avaliação de plantio** (plantabilidade e dose de fertilizante) e cresce por módulos.
+
+## Rodar no computador (modo web)
+
+Requisitos: [Flutter](https://docs.flutter.dev/get-started/install) 3.47 ou mais novo e o Chrome ou o Edge.
+
+```bash
+cd app
+flutter pub get
+flutter run -d chrome
+```
+
+Para usar o Edge: `flutter run -d edge`.
+
+## Testes
+
+```bash
+cd packages/avaliacao_plantio
+flutter test
+```
+
+```bash
+cd app
+flutter test
+```
+
+## Organização
+
+| Pasta | Conteúdo |
+|---|---|
+| `app/` | Aplicativo: tela inicial e navegação entre módulos |
+| `packages/avaliacao_plantio/` | Módulo de plantabilidade e fertilizante (cálculo separado da tela, com testes) |
+| `docs/especificacao-calculos.md` | Regras de cálculo e casos de validação |
+| `docs/prototipo-web/` | Protótipo HTML das calculadoras (sem Flutter) |
+
+## Revisão por pares
+
+Toda mudança entra por Pull Request com pelo menos uma aprovação. O CI roda análise, testes e gera um build web para o revisor baixar. Veja [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Próximos módulos (ideias)
+
+- Cadastro de clientes, fazendas e talhões
+- Salvar avaliações no aparelho e sincronizar quando houver internet
+- Relatório em PDF para o cliente
+- Versão Android para uso no campo

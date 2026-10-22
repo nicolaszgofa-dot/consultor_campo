@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  FLUTTER_VERSION: "3.47.7"
+
+jobs:
+  verificar:
+    name: Análise e testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Pacote avaliacao_plantio
+        working-directory: packages/avaliacao_plantio
+        run: |
+          flutter pub get
+          dart format --output=none --set-exit-if-changed .
+          flutter analyze
+          flutter test
+
+      - name: App
+        working-directory: app
+        run: |
+          flutter pub get
+          dart format --output=none --set-exit-if-changed .
+          flutter analyze
+          flutter test
+
+      - name: Build web
+        working-directory: app
+        run: flutter build web --release --base-href /
+
+      - name: Publicar build web para revisão
+        uses: actions/upload-artifact@v4
+        with:
+          name: consultor-campo-web
+          path: app/build/web
+          retention-days: 14
