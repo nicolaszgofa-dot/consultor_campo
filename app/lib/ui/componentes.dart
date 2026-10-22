@@ -143,7 +143,7 @@ class TelaFluxo extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 640),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                    child: rodape,
+                    child: SizedBox(width: double.infinity, child: rodape),
                   ),
                 ),
               ),

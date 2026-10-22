@@ -134,6 +134,27 @@ Sobreposição ainda não entra no desperdício de sementes.
 |---|---|
 | Soja, 700 esperadas, 57 faltando, 28 a mais, 65 sc/ha, saca R$ 125, semente R$ 380 / 200 mil, 280.000 sementes/ha, 500 ha | 11.200 sementes/ha a mais = R$ 21,28/ha; médio: 4,46 sc/ha = R$ 557,84 + R$ 21,28 = R$ 579,12/ha → **R$ 289.560**; faixa R$ 195.484 a R$ 363.787 |
 
+## Emergência (marcação dia após dia)
+
+Código: `packages/avaliacao_plantio/lib/src/emergencia/emergencia_calc.dart`. Método e fontes: `docs/base-conhecimento/emergencia.md`.
+
+**Entradas:** cultura, data do plantio, linhas marcadas, metros por linha, sementes/m e, a cada visita, as plantas **novas** de cada linha.
+
+| Grandeza | Regra |
+|---|---|
+| DAP | dias entre a data do plantio e a da marcação (só as datas, sem horas) |
+| Dia 1 | primeira data com planta emergida; as outras contam a partir dela (dia 2, 3, 4+) |
+| Mesma data marcada duas vezes | o app grava a última marcação daquele dia |
+| % no 1º dia | plantas do dia 1 ÷ plantas emergidas |
+| Emergência | plantas emergidas ÷ (linhas × metros × sementes/m) |
+| Linha em destaque | a de menor % no 1º dia, quando fica 10 pontos ou mais abaixo da média |
+| Perda (milho) | média, por planta, da redução de potencial: 35% com 1 dia de atraso, 60% com 2 (interpolado), 85% com 3 ou mais |
+| Perda (soja, feijão) | sem coeficiente; mostra só a distribuição por dia |
+
+| Caso (milho, plantio 01/10, 5 linhas × 10 m × 2,2 sementes/m) | Resultado esperado |
+|---|---|
+| 80 plantas no 5º DAP, 15 no 6º, nenhuma no 7º, 5 no 8º | dias 1, 2 e 4; 80% no 1º dia; 100 de 110 = 90,9% de emergência; perda (15 × 35 + 5 × 85) ÷ 100 = **9,5%**; linha 5 em destaque (66,7% contra 84,2% das outras) |
+
 ## Diferenças intencionais em relação ao app de referência
 
 - Com todas as amostras iguais (CV 0%) mostramos o resultado; o app de referência o escondia.

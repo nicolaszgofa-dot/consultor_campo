@@ -1,7 +1,6 @@
-import 'package:avaliacao_plantio/avaliacao_plantio.dart';
 import 'package:flutter/material.dart';
 
-import 'avaliacao/identificacao_page.dart';
+import 'avaliacao/avaliacao_hub_page.dart';
 import 'em_breve_page.dart';
 import 'funcionalidades.dart';
 import 'tema.dart';
@@ -26,26 +25,9 @@ class HomePage extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   children: [
                     _CartaoAvaliacao(
-                      aoAbrir: () => _abrir(context, const IdentificacaoPage()),
+                      aoAbrir: () => _abrir(context, const AvaliacaoHubPage()),
                     ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: () =>
-                            _abrir(context, const FertilizantePage()),
-                        icon: const Icon(Icons.scale_outlined),
-                        label: const Text('Calculadora de fertilizante'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Cores.verdeTexto,
-                          textStyle: const TextStyle(
-                            fontFamily: 'Barlow',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 16),
                     for (final f in emBreve) ...[
                       _CartaoEmBreve(
                         funcionalidade: f,
@@ -180,7 +162,7 @@ class _CartaoAvaliacao extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'Plantabilidade com trena, perda e prejuízo em R\$',
+                          'Plantio, fertilizante e emergência',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -203,7 +185,7 @@ class _CartaoAvaliacao extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Nova avaliação',
+                      'Abrir avaliações',
                       style: TextStyle(
                         color: Cores.branco,
                         fontSize: 17,

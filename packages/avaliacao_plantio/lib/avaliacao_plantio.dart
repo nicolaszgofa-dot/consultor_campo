@@ -2,6 +2,7 @@
 library;
 
 export 'src/avaliacao/avaliacao_calc.dart';
+export 'src/emergencia/emergencia_calc.dart';
 export 'src/estatistica.dart';
 export 'src/fertilizante/fertilizante_calc.dart';
 export 'src/fertilizante/fertilizante_page.dart';

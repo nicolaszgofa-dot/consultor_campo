@@ -46,7 +46,7 @@ void main() {
     await tester.pumpWidget(const ConsultorCampoApp());
 
     expect(find.text('Avaliação de plantio'), findsOneWidget);
-    expect(find.text('Nova avaliação'), findsOneWidget);
+    expect(find.text('Abrir avaliações'), findsOneWidget);
     for (final t in ['Configurador', 'ROI', 'Material técnico', 'Relatórios']) {
       expect(find.text(t), findsOneWidget);
     }
@@ -64,7 +64,9 @@ void main() {
   testWidgets('identificação leva às leituras da trena', (tester) async {
     telaAlta(tester);
     await tester.pumpWidget(const ConsultorCampoApp());
-    await tester.tap(find.text('Nova avaliação'));
+    await tester.tap(find.text('Abrir avaliações'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nova avaliação de plantio'));
     await tester.pumpAndSettle();
 
     Future<void> preencher(String rotulo, String valor) =>
@@ -99,7 +101,9 @@ void main() {
   testWidgets('identificação pede os valores obrigatórios', (tester) async {
     telaAlta(tester);
     await tester.pumpWidget(const ConsultorCampoApp());
-    await tester.tap(find.text('Nova avaliação'));
+    await tester.tap(find.text('Abrir avaliações'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nova avaliação de plantio'));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Entre linhas (m)'),
