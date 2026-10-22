@@ -1,21 +1,51 @@
 import 'package:avaliacao_plantio/avaliacao_plantio.dart';
+import 'package:consultor_campo/em_breve_page.dart';
+import 'package:consultor_campo/home_page.dart';
 import 'package:consultor_campo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+Future<void> abrir(WidgetTester tester, String texto) async {
+  await tester.ensureVisible(find.text(texto));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(texto));
+  await tester.pumpAndSettle();
+}
+
 void main() {
-  testWidgets('tela inicial lista os módulos', (tester) async {
+  testWidgets('tela inicial lista as cinco funcionalidades', (tester) async {
     await tester.pumpWidget(const ConsultorCampoApp());
 
-    expect(find.text('Consultor de Campo'), findsOneWidget);
-    expect(find.text('Plantabilidade'), findsOneWidget);
-    expect(find.text('Fertilizante'), findsOneWidget);
+    for (final titulo in [
+      'Configurador',
+      'Avaliação de plantio',
+      'ROI',
+      'Material técnico',
+      'Relatórios',
+    ]) {
+      await tester.ensureVisible(find.text(titulo));
+      expect(find.text(titulo), findsOneWidget);
+    }
+    expect(find.text('Em breve'), findsNWidgets(4));
+  });
+
+  testWidgets('funcionalidade em breve abre a tela provisória', (tester) async {
+    await tester.pumpWidget(const ConsultorCampoApp());
+    await abrir(tester, 'Relatórios');
+
+    expect(find.byType(EmBrevePage), findsOneWidget);
+    expect(find.text('Em desenvolvimento'), findsOneWidget);
+
+    await tester.tap(find.text('Voltar ao início'));
+    await tester.pumpAndSettle();
+    expect(find.byType(EmBrevePage), findsNothing);
+    expect(find.byType(HomePage), findsOneWidget);
   });
 
   testWidgets('plantabilidade calcula a partir das leituras', (tester) async {
     await tester.pumpWidget(const ConsultorCampoApp());
-    await tester.tap(find.text('Plantabilidade'));
-    await tester.pumpAndSettle();
+    await abrir(tester, 'Avaliação de plantio');
+    await abrir(tester, 'Plantabilidade');
     expect(find.byType(PlantabilidadePage), findsOneWidget);
 
     final campos = find.byType(TextFormField);
@@ -36,8 +66,8 @@ void main() {
 
   testWidgets('fertilizante mostra o ideal por amostra', (tester) async {
     await tester.pumpWidget(const ConsultorCampoApp());
-    await tester.tap(find.text('Fertilizante'));
-    await tester.pumpAndSettle();
+    await abrir(tester, 'Avaliação de plantio');
+    await abrir(tester, 'Fertilizante');
 
     final campos = find.byType(TextFormField);
     await tester.enterText(campos.at(0), '300');
