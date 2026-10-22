@@ -159,6 +159,6 @@ Fonte desta seção: material técnico da J.Assy.
 - Masino, A. et al. Spatial and temporal plant-to-plant variability effects on soybean yield. 2018. [INTA](https://repositoriosdigitales.mincyt.gob.ar/vufind/Record/INTADig_fbd71454fa17db9a0410be27ee3e2f45)
 - Kansas State University. [MF3331](https://bookstore.ksre.ksu.edu/pubs/MF3331.pdf) (variação de solo entre linhas e downforce).
 - Farm Progress. [Achieving correct downforce pays with soybeans too](https://www.farmprogress.com/planting/achieving-correct-downforce-pays-with-soybeans-too).
-- J.Assy. Material técnico interno sobre downforce e LoadPin. [Level](https://jassy.ag/en/level/). Campo & Negócios. [J.Assy redefine eficiência](https://campoenegocios.com/j-assy-redefine-eficiencia-discos-sensores-e-dosadores-inovadores/).
+- J.Assy. Material técnico sobre downforce e LoadPin. [Level](https://jassy.ag/en/level/). Campo & Negócios. [J.Assy redefine eficiência](https://campoenegocios.com/j-assy-redefine-eficiencia-discos-sensores-e-dosadores-inovadores/).
 - IFRS Ibirubá. [Atraso na emergência em milho](https://eventos.ifrs.edu.br/index.php/MoEPExIbiruba/8moepex/paper/download/6853/3024) (resumo de evento).
 - Rupp Seeds. [Uneven corn stands](https://ruppseeds.com/Files/Images/News/3013_S2_Uneven-Corn-Stands_RU.pdf) (regra de folhas atrás; origem não identificada).
