@@ -200,6 +200,28 @@ class PerdaCalc {
     required ResultadoPlantabilidade plantabilidade,
     required double produtividadeEsperadaKgHa,
     CoeficientesPerda coeficientes = const CoeficientesPerda(),
+  }) =>
+      calcularDeContagem(
+        cultura: cultura,
+        contagem: contarPlantas(
+          plantabilidade.espacamentos,
+          parametros.espacamentoIdealCm,
+        ),
+        desvioPadraoCm: plantabilidade.desvioPadraoCm,
+        cvPercentual: plantabilidade.cvPercentual,
+        produtividadeEsperadaKgHa: produtividadeEsperadaKgHa,
+        coeficientes: coeficientes,
+      );
+
+  /// Mesma estimativa a partir de valores já agregados (por exemplo, várias
+  /// linhas avaliadas somadas).
+  static ResultadoPerda calcularDeContagem({
+    required Cultura cultura,
+    required ContagemPlantas contagem,
+    required double desvioPadraoCm,
+    required double cvPercentual,
+    required double produtividadeEsperadaKgHa,
+    CoeficientesPerda coeficientes = const CoeficientesPerda(),
   }) {
     if (produtividadeEsperadaKgHa <= 0) {
       throw ArgumentError.value(
@@ -208,12 +230,8 @@ class PerdaCalc {
         'deve ser maior que zero',
       );
     }
-    final contagem = contarPlantas(
-      plantabilidade.espacamentos,
-      parametros.espacamentoIdealCm,
-    );
-    final dp = plantabilidade.desvioPadraoCm;
-    final cv = plantabilidade.cvPercentual;
+    final dp = desvioPadraoCm;
+    final cv = cvPercentual;
 
     PerdaCenario cenario(Cenario c) {
       final double percentual;

@@ -96,6 +96,44 @@ Os coeficientes podem ser substituídos por valores de ensaios próprios (`Coefi
 | Feijão | CV 10% / 20% | 4,4% / 8,8% |
 | Feijão, leituras | 20 · 50 (CV 28,3%), 2.000 kg/ha | médio 12,45% = 248,9 kg/ha |
 
+## Avaliação por linhas (trena)
+
+Código: `packages/avaliacao_plantio/lib/src/avaliacao/avaliacao_calc.dart`.
+
+| Regra | Valor |
+|---|---|
+| Linha completa | última leitura da trena ≥ 1.000 cm (10 m) |
+| Resultado liberado | pelo menos **5 linhas completas** |
+| Total | soma das plantas esperadas, faltando e a mais de todas as linhas |
+| No lugar certo (%) | `100 − (faltando + a mais) ÷ esperadas × 100` |
+| CV e DV da avaliação | sobre todos os espaçamentos das linhas juntos |
+| Linha em destaque | a de mais falhas, quando passa da média das linhas em 30% ou mais |
+
+| Caso (4 sementes/m) | Resultado esperado |
+|---|---|
+| 5 linhas perfeitas de 10 m | 200 esperadas, 100% no lugar certo, CV 0% |
+| 4 linhas de 10 m + 1 de 9,75 m | 4 completas, resultado bloqueado |
+| 4 linhas com 1 falha + 1 com 5 | 9 faltando, 95,5% no lugar certo, linha 5 com 178% mais falhas que a média |
+
+## Prejuízo em R$
+
+Código: `packages/avaliacao_plantio/lib/src/perda/prejuizo_calc.dart`.
+
+| Grandeza | Regra |
+|---|---|
+| Produtividade perdida (R$/ha) | perda (sc/ha) × preço da saca |
+| Sementes a mais (por ha) | população alvo × % de plantas a mais nas duplas |
+| Sementes desperdiçadas (R$/ha) | sementes a mais × preço do saco ÷ sementes por saco |
+| Prejuízo por hectare | produtividade perdida + sementes desperdiçadas |
+| Valor que deixa de faturar | prejuízo por hectare × área (ha) |
+| Alqueire | paulista = 2,42 ha; mineiro = 4,84 ha |
+
+Sobreposição ainda não entra no desperdício de sementes.
+
+| Caso | Resultado esperado |
+|---|---|
+| Soja, 700 esperadas, 57 faltando, 28 a mais, 65 sc/ha, saca R$ 125, semente R$ 380 / 200 mil, 280.000 sementes/ha, 500 ha | 11.200 sementes/ha a mais = R$ 21,28/ha; médio: 4,46 sc/ha = R$ 557,84 + R$ 21,28 = R$ 579,12/ha → **R$ 289.560**; faixa R$ 195.484 a R$ 363.787 |
+
 ## Diferenças intencionais em relação ao app de referência
 
 - Com todas as amostras iguais (CV 0%) mostramos o resultado; o app de referência o escondia.
