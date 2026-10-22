@@ -13,15 +13,27 @@ enum Tecnologia {
   const Tecnologia(this.nome);
 }
 
+enum TipoPlantadeira {
+  autotransportavel('Autotransportável'),
+  caixaCentral('Caixa central'),
+  tandem('Tandem'),
+  solteira('Solteira', secoesSeparadas: false);
+
+  final String nome;
+
+  /// Se as seções fecham separadas. Na solteira a máquina inteira é uma seção.
+  final bool secoesSeparadas;
+
+  const TipoPlantadeira(this.nome, {this.secoesSeparadas = true});
+}
+
 /// Dados levantados na máquina.
 class EntradaConfiguracao {
   final Tecnologia tecnologia;
+  final TipoPlantadeira tipo;
   final int totalLinhas;
 
-  /// Ex.: "Autotransportável". Lista oficial ainda pendente.
-  final String arquitetura;
-
-  /// Linhas de cada seção, na ordem da máquina.
+  /// Linhas de cada seção, na ordem da máquina. Ignorado na solteira.
   final List<int> linhasPorSecao;
 
   /// Só é perguntado em máquinas de até 12 linhas. Nulo = não respondido.
@@ -29,11 +41,14 @@ class EntradaConfiguracao {
 
   const EntradaConfiguracao({
     required this.tecnologia,
+    required this.tipo,
     required this.totalLinhas,
-    required this.arquitetura,
-    required this.linhasPorSecao,
+    this.linhasPorSecao = const [],
     this.temAlternador,
   });
+
+  /// Seções usadas nas regras: na solteira, uma seção com todas as linhas.
+  List<int> get secoes => tipo.secoesSeparadas ? linhasPorSecao : [totalLinhas];
 }
 
 enum StatusItem { definido, pendente }
@@ -180,12 +195,12 @@ class RegrasConfigurador {
         ),
       );
     }
-    if (e.linhasPorSecao.isEmpty) {
+    if (e.secoes.isEmpty) {
       v.add(
         const Validacao(NivelValidacao.erro, 'Informe as seções da máquina.'),
       );
     } else {
-      if (e.linhasPorSecao.any((s) => s < 1)) {
+      if (e.secoes.any((s) => s < 1)) {
         v.add(
           const Validacao(
             NivelValidacao.erro,
@@ -193,7 +208,7 @@ class RegrasConfigurador {
           ),
         );
       }
-      final soma = e.linhasPorSecao.fold(0, (s, n) => s + n);
+      final soma = e.secoes.fold(0, (s, n) => s + n);
       if (soma != e.totalLinhas) {
         v.add(
           Validacao(
@@ -342,7 +357,7 @@ class RegrasConfigurador {
 
     final bloqueada = validacoes.any((v) => v.bloqueia);
     final distribuicao = usaAlternador && !bloqueada
-        ? distribuirSaidas(e.linhasPorSecao)
+        ? distribuirSaidas(e.secoes)
         : null;
     if (distribuicao != null) {
       for (final s in distribuicao.saidasQueMisturamSecoes) {

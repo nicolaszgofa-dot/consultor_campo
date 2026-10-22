@@ -7,11 +7,12 @@ ResultadoConfiguracao configurar(
   List<int> secoes, {
   bool? alternador,
   Tecnologia tecnologia = Tecnologia.titaniumEletric,
+  TipoPlantadeira tipo = TipoPlantadeira.autotransportavel,
 }) => RegrasConfigurador.configurar(
   EntradaConfiguracao(
     tecnologia: tecnologia,
+    tipo: tipo,
     totalLinhas: linhas,
-    arquitetura: 'Autotransportável',
     linhasPorSecao: secoes,
     temAlternador: alternador,
   ),
@@ -137,6 +138,49 @@ void main() {
       r.validacoes.map((v) => v.mensagem),
       contains('Toda seção precisa ter pelo menos 1 linha.'),
     );
+  });
+
+  test('só a solteira tem seção única', () {
+    expect(TipoPlantadeira.values.where((t) => !t.secoesSeparadas), [
+      TipoPlantadeira.solteira,
+    ]);
+  });
+
+  test('solteira: a máquina inteira é uma seção', () {
+    final r = configurar(
+      8,
+      const [],
+      alternador: false,
+      tipo: TipoPlantadeira.solteira,
+    );
+    expect(r.bloqueada, isFalse);
+    expect(r.entrada.secoes, [8]);
+    expect(r.item(Componentes.sensorSemente)!.quantidade, 8);
+  });
+
+  test('solteira ignora seções informadas', () {
+    final r = configurar(20, [5, 5], tipo: TipoPlantadeira.solteira);
+    expect(r.bloqueada, isFalse);
+    expect(faixas(r.distribuicao!), [(1, 10), (11, 20)]);
+  });
+
+  test('solteira de 55 linhas: 6 saídas sem aviso de mistura', () {
+    final r = configurar(55, const [], tipo: TipoPlantadeira.solteira);
+    final d = r.distribuicao!;
+    expect(d.modo, ModoDistribuicao.porSecao);
+    expect(d.saidas.map((s) => s.linhas), [10, 9, 9, 9, 9, 9]);
+    expect(r.validacoes, isEmpty);
+  });
+
+  test('caixa central e tandem exigem as seções', () {
+    for (final tipo in [TipoPlantadeira.caixaCentral, TipoPlantadeira.tandem]) {
+      final r = configurar(30, const [], tipo: tipo);
+      expect(
+        r.validacoes.map((v) => v.mensagem),
+        contains('Informe as seções da máquina.'),
+        reason: tipo.nome,
+      );
+    }
   });
 
   test('Selenium Elétric segue as mesmas regras nesta versão', () {
