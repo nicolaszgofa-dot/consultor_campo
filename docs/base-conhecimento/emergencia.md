@@ -38,6 +38,18 @@ Base técnica para a futura aba de **emergência** da calculadora. Complementa [
 
 - A página de artigos do mesmo fabricante traz números diferentes para o mesmo teste (−9% com 24 h, −83% com 48 h, −90% com 3 dias ou mais). Usar com cuidado e citar sempre a versão.
 - Exemplo do fabricante: se 2 em cada 10 plantas emergem no 3º dia ou depois, a perda estimada é de **32 bu/ac (≈ 33 sc/ha)**. ⚠️
+
+**Referência usada pela equipe J.Assy, em dias após o plantio (DAP)** ⚠️ (fonte do estudo a informar)
+
+| Emergência da planta | Redução do potencial produtivo da planta |
+|---|---|
+| 5 DAP (primeiras plantas) | referência |
+| 6 DAP (1 dia depois) | **35%** |
+| 8 DAP (3 dias depois) | **85%** |
+
+- Regra de campo: **a cada 2 dias de atraso, a planta fica 1 estádio fenológico atrás** (por exemplo, V3 em vez de V4). Isso permite estimar o atraso numa visita só, contando as folhas.
+- Os números vão na mesma direção dos estudos da Precision Planting (perda grande já no 1º e 2º dia de atraso); um dado de campo da Precision Planting citado na imprensa também fala em 35% para plantas emergidas no 6º dia após o plantio.
+- Atenção à base de comparação: a tabela de DAP conta **dias após o plantio**; a da Precision Planting conta **horas depois das primeiras plantas emergidas**.
 - Regra de campo divulgada por empresa de sementes: planta **uma folha atrás** produz ~20% menos; **duas folhas atrás**, ~50% menos. ⚠️ (Rupp Seeds; estudo de origem não identificado)
 - Pesquisa do IFRS (Ibirubá-RS) com atrasos de emergência em milho: perda crescente com o atraso, chegando a **20%**. ⚠️ (resumo de evento, visto em busca)
 
