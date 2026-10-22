@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   avaliacao_plantio:
     path: ../packages/avaliacao_plantio
+  configurador:
+    path: ../packages/configurador
   shared_preferences: ^2.5.6
 
 dev_dependencies:
@@ -21,6 +23,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/configurador/
   # Barlow (SIL Open Font License, assets/fonts/OFL.txt), embutida para
   # funcionar sem internet no campo.
   fonts:

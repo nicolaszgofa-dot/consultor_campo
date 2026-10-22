@@ -50,7 +50,7 @@ void main() {
     for (final t in ['Configurador', 'ROI', 'Material técnico', 'Relatórios']) {
       expect(find.text(t), findsOneWidget);
     }
-    expect(find.text('EM BREVE'), findsNWidgets(4));
+    expect(find.text('EM BREVE'), findsNWidgets(3));
   });
 
   testWidgets('funcionalidade em breve abre a tela provisória', (tester) async {

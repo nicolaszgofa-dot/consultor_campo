@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'avaliacao/avaliacao_hub_page.dart';
+import 'configurador/configurador_page.dart';
 import 'em_breve_page.dart';
 import 'funcionalidades.dart';
 import 'tema.dart';
@@ -28,9 +29,16 @@ class HomePage extends StatelessWidget {
                       aoAbrir: () => _abrir(context, const AvaliacaoHubPage()),
                     ),
                     const SizedBox(height: 16),
+                    _CartaoFuncionalidade(
+                      funcionalidade: configurador,
+                      emBreve: false,
+                      aoAbrir: () => _abrir(context, const ConfiguradorPage()),
+                    ),
+                    const SizedBox(height: 10),
                     for (final f in emBreve) ...[
-                      _CartaoEmBreve(
+                      _CartaoFuncionalidade(
                         funcionalidade: f,
+                        emBreve: true,
                         aoAbrir: () => _abrir(
                           context,
                           EmBrevePage(
@@ -205,11 +213,16 @@ class _CartaoAvaliacao extends StatelessWidget {
   }
 }
 
-class _CartaoEmBreve extends StatelessWidget {
+class _CartaoFuncionalidade extends StatelessWidget {
   final Funcionalidade funcionalidade;
+  final bool emBreve;
   final VoidCallback aoAbrir;
 
-  const _CartaoEmBreve({required this.funcionalidade, required this.aoAbrir});
+  const _CartaoFuncionalidade({
+    required this.funcionalidade,
+    required this.emBreve,
+    required this.aoAbrir,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -230,10 +243,13 @@ class _CartaoEmBreve extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: Cores.neutro,
+                  color: emBreve ? Cores.neutro : Cores.verdeClaro,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(funcionalidade.icone, color: Cores.cinzaEscuro),
+                child: Icon(
+                  funcionalidade.icone,
+                  color: emBreve ? Cores.cinzaEscuro : Cores.verdeTexto,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -251,25 +267,26 @@ class _CartaoEmBreve extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Cores.neutro,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            'EM BREVE',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.4,
-                              color: Cores.textoSecundario,
+                        if (emBreve)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Cores.neutro,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text(
+                              'EM BREVE',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.4,
+                                color: Cores.textoSecundario,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                     Text(

@@ -12,14 +12,16 @@ class Funcionalidade {
   });
 }
 
+const configurador = Funcionalidade(
+  titulo: 'Configurador',
+  descricao: 'Configuração do equipamento para cada cliente',
+  icone: Icons.tune,
+);
+
 /// Funcionalidades ainda em desenvolvimento, na ordem da tela inicial.
-/// A avaliação de plantio fica em destaque, fora desta lista.
+/// A avaliação de plantio fica em destaque e o Configurador logo abaixo,
+/// fora desta lista.
 const emBreve = <Funcionalidade>[
-  Funcionalidade(
-    titulo: 'Configurador',
-    descricao: 'Configuração do equipamento para cada cliente',
-    icone: Icons.tune,
-  ),
   Funcionalidade(
     titulo: 'ROI',
     descricao: 'Retorno do investimento para o produtor',
