@@ -151,7 +151,8 @@ Singularização (%) = 100 − % de falhas − % de múltiplas
 ### Soja
 
 - ✅ Masino et al. (2018): a irregularidade no **espaçamento** afetou uma cultivar precoce (grupo de maturação III), mas não uma tardia (grupo IV). A **emergência desigual no tempo** reduziu a produtividade em todas as cultivares, ou seja, pesou mais que o espaçamento.
-- A ideia antiga de que "a soja compensa qualquer falha" é contestada. Plantas vizinhas a uma falha produzem mais, mas não o suficiente para cobrir a perda. ⚠️ (estudo da UFRA citado em buscas; texto original não acessado)
+- ✅ Fiss et al. (2018), UFPel: a ideia de que "a soja compensa qualquer falha" não se confirmou. As plantas vizinhas a uma falha produzem mais, mas recuperaram em média só cerca de 25% da perda. Uma falha de 1 planta a cada metro (14 sementes/m) custou 6% da produtividade; duplas e triplas também reduziram a produtividade (−1,4 a −2,8%). Detalhes e fórmula em [parametros-perda.md](parametros-perda.md).
+- ✅ Santi et al. (2022): em 23 lavouras de soja do Planalto Médio do RS, o CV médio dos espaçamentos foi de 58%, com 16 a 18% de falhas e 19 a 22% de duplas. Nenhuma área ficou na classe "ótimo".
 - Excesso de plantas também prejudica: favorece acamamento e pode reduzir a produtividade. ⚠️ (Embrapa Soja e estudo em talhão comercial, vistos em resumo de busca)
 
 ### Resumo para o consultor
@@ -182,11 +183,12 @@ Singularização (%) = 100 − % de falhas − % de múltiplas
 - Bisognin, M. B. et al. *Seed spacing variability reduces common bean yield.* Pesquisa Agropecuária Tropical, v. 49, e55134, 2019. [SciELO](https://www.scielo.br/j/pat/a/sLxT4LdZV4kyC6wfTtXjmsG/abstract/?lang=en)
 - Masino, A. et al. *Spatial and temporal plant-to-plant variability effects on soybean yield.* 2018. [INTA](https://repositoriosdigitales.mincyt.gob.ar/vufind/Record/INTADig_fbd71454fa17db9a0410be27ee3e2f45)
 - Kurachi, S. A. H. et al. *Avaliação tecnológica de semeadoras e/ou adubadoras: tratamento de dados de ensaios e regularidade de distribuição longitudinal de sementes.* Bragantia, v. 48, n. 2, p. 249-262, 1989. (citado; original não consultado)
-- Tourino, M. C. C.; Klingensteiner, P. 1983. (citado; original não consultado) — classificação ótimo/bom/regular/insatisfatório, reproduzida em [UTFPR](https://eventos.utfpr.edu.br//sei/sei2019/paper/download/5029/1190) e [UFPel](https://periodicos.ufpel.edu.br/index.php/CAST/article/view/1388/1374).
+- Tourino, M. C. C.; Klingensteiner, P. *Ensaio e avaliação de semeadoras-adubadoras.* In: Congresso Brasileiro de Engenharia Agrícola (SBEA), 13., 1983, Rio de Janeiro. Anais, p. 103-107. (citado; original não consultado) — classificação ótimo/bom/regular/insatisfatório, reproduzida em Santi et al. (2022), [UTFPR](https://eventos.utfpr.edu.br//sei/sei2019/paper/download/5029/1190) e [UFPel](https://periodicos.ufpel.edu.br/index.php/CAST/article/view/1388/1374).
 
 ## A pesquisar em seguida
 
 - Original de Tourino & Klingensteiner (1983) e de Coelho (1996).
 - Norma ABNT vigente para ensaio de semeadoras (texto e definição exata de Xref).
-- Dados brasileiros de perda por falha em **soja** (Embrapa Soja, Pesquisa Agropecuária Brasileira).
+- Mais dados brasileiros de perda em **soja** com outras cultivares e populações (Fiss et al. é um único local), e a tese de Pinto (2010, UFPel), base do método de Fiss.
+- Dados brasileiros de perda por desvio padrão em **milho** (os coeficientes atuais são dos EUA).
 - Recomendação técnica de CV/tolerância para distribuição de **fertilizante** na linha.
