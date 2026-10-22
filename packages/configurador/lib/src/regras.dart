@@ -5,8 +5,8 @@
 library;
 
 enum Tecnologia {
-  titaniumElectric('Titanium Electric'),
-  seleniumElectric('Selenium Electric');
+  titaniumEletric('Titanium Elétric'),
+  seleniumEletric('Selenium Elétric');
 
   final String nome;
 

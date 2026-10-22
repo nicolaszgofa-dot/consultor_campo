@@ -2,7 +2,7 @@
 
 Aplicação para a equipe comercial e técnica configurar, de forma guiada, as tecnologias de plantio da J.Assy a partir das características da plantadeira. Uso principal: **tablet**, em visitas a produtores, concessionárias e revendas, ao lado da máquina.
 
-Primeira versão: **Titanium Electric** e **Selenium Electric**.
+Primeira versão: **Titanium Elétric** e **Selenium Elétric**.
 
 ## Problema que resolve
 
@@ -20,7 +20,7 @@ O configurador centraliza as regras para o processo ficar **simples, repetível 
 ## Princípios de interface
 
 - **Fluxo guiado:** uma etapa por vez.
-- **Produtos reais:** logo J.Assy e imagens do Titanium Electric e do Selenium Electric.
+- **Produtos reais:** logo J.Assy e imagens do Titanium Elétric e do Selenium Elétric.
 - **Linguagem direta,** com os termos técnicos que o público já usa.
 - **Campos dinâmicos:** só aparecem quando necessários.
 - **Validação imediata:** erros apontados antes de avançar.
@@ -45,7 +45,7 @@ O motor de regras é Dart puro, sem tela, com testes. Cada regra pendente aparec
 
 | Elemento | Regra |
 |---|---|
-| Tecnologias | Titanium Electric e Selenium Electric (mesmas regras nesta versão) |
+| Tecnologias | Titanium Elétric e Selenium Elétric (mesmas regras nesta versão) |
 | ECU | 1 conjunto, obrigatório |
 | Sensor de levante | 1 unidade, obrigatório |
 | Sensor de semente | 1 por linha (quantidade = total de linhas) |
@@ -79,7 +79,7 @@ Cada saída alimenta um **conjunto** de no máximo 10 linhas vizinhas.
 - Demais regras de **cabeamento**.
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
 - Lista de **arquiteturas** de plantadeira e o que muda em cada uma.
-- Diferenças de regra entre **Titanium Electric e Selenium Electric**, se houver.
+- Diferenças de regra entre **Titanium Elétric e Selenium Elétric**, se houver.
 
 ## Casos de teste do motor de regras
 

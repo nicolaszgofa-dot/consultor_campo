@@ -34,7 +34,7 @@ flutter test
 |---|---|
 | `app/` | Aplicativo: tela inicial e navegação entre módulos |
 | `packages/avaliacao_plantio/` | Módulo de plantabilidade e fertilizante (cálculo separado da tela, com testes) |
-| `packages/configurador/` | Motor de regras do Configurador Técnico J.Assy (Titanium e Selenium Electric) |
+| `packages/configurador/` | Motor de regras do Configurador Técnico J.Assy (Titanium e Selenium Elétric) |
 | `docs/configurador/` | Especificação do Configurador e pendências técnicas |
 | `docs/especificacao-calculos.md` | Regras de cálculo e casos de validação |
 | `docs/base-conhecimento/` | Base técnica com fontes: plantabilidade, estande, CV, singularização, perdas e emergência |

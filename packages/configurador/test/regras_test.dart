@@ -6,7 +6,7 @@ ResultadoConfiguracao configurar(
   int linhas,
   List<int> secoes, {
   bool? alternador,
-  Tecnologia tecnologia = Tecnologia.titaniumElectric,
+  Tecnologia tecnologia = Tecnologia.titaniumEletric,
 }) => RegrasConfigurador.configurar(
   EntradaConfiguracao(
     tecnologia: tecnologia,
@@ -139,13 +139,13 @@ void main() {
     );
   });
 
-  test('Selenium Electric segue as mesmas regras nesta versão', () {
+  test('Selenium Elétric segue as mesmas regras nesta versão', () {
     final t = configurar(55, [21, 21, 13]);
     final s = configurar(55, [
       21,
       21,
       13,
-    ], tecnologia: Tecnologia.seleniumElectric);
+    ], tecnologia: Tecnologia.seleniumEletric);
     expect(
       s.itens.map((i) => (i.componente, i.quantidade)),
       t.itens.map((i) => (i.componente, i.quantidade)),
