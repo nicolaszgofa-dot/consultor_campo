@@ -228,16 +228,19 @@ class RegrasConfigurador {
 
   static int get capacidadeMaxima => saidasPorAlternador * linhasPorSaida;
 
-  /// Alternador é obrigatório a partir de 13 linhas.
-  static bool alternadorObrigatorio(int linhas) =>
-      linhas > linhasSemAlternadorObrigatorio;
+  /// Alternador é obrigatório a partir de 13 linhas e em toda máquina com
+  /// seções separadas: máquina sem alternador é, na prática, solteira.
+  static bool alternadorObrigatorio(int linhas, TipoPlantadeira tipo) =>
+      tipo.secoesSeparadas || linhas > linhasSemAlternadorObrigatorio;
 
-  /// Até 12 linhas o vendedor precisa responder se haverá alternador.
-  static bool perguntarAlternador(int linhas) =>
-      linhas > 0 && !alternadorObrigatorio(linhas);
+  /// Só na solteira de até 12 linhas o vendedor responde se haverá
+  /// alternador.
+  static bool perguntarAlternador(int linhas, TipoPlantadeira tipo) =>
+      linhas > 0 && !alternadorObrigatorio(linhas, tipo);
 
   static bool usaAlternador(EntradaConfiguracao e) =>
-      alternadorObrigatorio(e.totalLinhas) || (e.temAlternador ?? false);
+      alternadorObrigatorio(e.totalLinhas, e.tipo) ||
+      (e.temAlternador ?? false);
 
   /// Chicotes de 4 e de 1 linha de uma seção. Cada seção é montada como se
   /// fosse uma máquina separada, porque fecha sozinha.
@@ -321,7 +324,7 @@ class RegrasConfigurador {
         );
       }
     }
-    if (perguntarAlternador(e.totalLinhas) && e.temAlternador == null) {
+    if (perguntarAlternador(e.totalLinhas, e.tipo) && e.temAlternador == null) {
       v.add(
         const Validacao(
           NivelValidacao.erro,
@@ -600,7 +603,9 @@ class RegrasConfigurador {
         ItemConfiguracao(
           componente: Componentes.alternador,
           quantidade: 1,
-          motivo: alternadorObrigatorio(linhas)
+          motivo: e.tipo.secoesSeparadas
+              ? 'Obrigatório em ${e.tipo.nome.toLowerCase()}.'
+              : alternadorObrigatorio(linhas, e.tipo)
               ? 'Obrigatório a partir de 13 linhas.'
               : 'Escolhido para a máquina de $linhas linhas.',
         ),

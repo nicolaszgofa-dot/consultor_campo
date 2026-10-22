@@ -36,7 +36,7 @@ Experiência: o vendedor informa as características → o sistema interpreta �
 2. Tipo da plantadeira: autotransportável, caixa central, tandem ou solteira.
 3. Número de linhas.
 4. Número de seções que fecham separadas e linhas de cada seção: só para autotransportável, caixa central e tandem. Na solteira a etapa é pulada.
-5. Alimentação (no autotransportável e no tandem com alternador, também se o alternador pode ir no cabeçalho ou no tandem).
+5. Alimentação: na solteira de até 12 linhas, se terá alternador; no autotransportável e no tandem, se o alternador pode ir no cabeçalho ou no tandem.
 6. Resultado.
 
 ## Arquitetura da lógica
@@ -60,9 +60,9 @@ O motor de regras é Dart puro, sem tela, com testes. Cada regra pendente aparec
 | Sensor de levante | 1 unidade, obrigatório |
 | Sensor de semente | 1 por linha (quantidade = total de linhas) |
 | Cabo ISOBUS | 1, obrigatório; comprimento de 5, 11, 14 ou 17 m |
-| Alternador hidráulico | obrigatório a partir de 13 linhas |
+| Alternador hidráulico | obrigatório em autotransportável, caixa central e tandem (qualquer número de linhas) e na solteira a partir de 13 linhas. Máquina sem alternador é, na prática, sempre solteira |
 | Kit de mangueiras do alternador | 1 quando há alternador: 3 mangueiras, uma mais fina para o dreno; comprimento de 6, 9, 12 ou 15 m |
-| Até 12 linhas | perguntar se a máquina terá alternador hidráulico |
+| Solteira de até 12 linhas | perguntar se a máquina terá alternador hidráulico |
 | Sem alternador | cabo de alimentação direto da bateria **obrigatório** |
 | Chicotes de linha | de 4 linhas e de 1 linha, calculados **por seção**; ver "Chicotes" abaixo |
 | Chicote painel | leva a alimentação da saída do alternador até os chicotes de linha; quantidade **recomendada** (ajustável pelo vendedor); comprimento de 4, 9 ou 14 m |
@@ -129,7 +129,6 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 
 ## Pendências técnicas (não tratar como resolvidas)
 
-- **Sugestão de ISOBUS** no autotransportável e no tandem **sem alternador** (hoje sem sugestão).
 - **Sugestão de comprimento do chicote painel** com alternador.
 - Se cada chicote painel da máquina pode ter um **comprimento diferente** (hoje é um comprimento para todos).
 - Demais regras de **cabeamento**.
@@ -141,10 +140,11 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 
 | Caso | Resultado esperado |
 |---|---|
-| 8 linhas, 1 seção, sem alternador | conjuntos 8, ECU 1, levante 1, sensores 8, ISOBUS 1 (comprimento pendente), cabo da bateria 1 (obrigatório), 2 chicotes de 4 linhas, 2 chicotes painel de 4 m (obrigatório); sem alternador |
-| 12 linhas sem responder sobre o alternador | erro: responder se terá alternador |
-| 12 linhas com alternador, seções 6 + 6 | alternador 1; 2 saídas (6 e 6), sem mistura |
-| 13 linhas | alternador obrigatório, sem perguntar |
+| Solteira, 8 linhas, sem alternador | conjuntos 8, ECU 1, levante 1, sensores 8, ISOBUS 1 (comprimento pendente), cabo da bateria 1 (obrigatório), 2 chicotes de 4 linhas, 2 chicotes painel de 4 m (obrigatório); sem alternador |
+| Solteira de 12 linhas sem responder sobre o alternador | erro: responder se terá alternador |
+| Solteira de 12 linhas com alternador | alternador 1; 2 saídas (6 e 6) |
+| Solteira de 13 linhas | alternador obrigatório, sem perguntar |
+| Autotransportável, caixa central ou tandem de 8 linhas | alternador obrigatório, sem perguntar; sem cabo da bateria |
 | 30 linhas, seções 10 + 10 + 10 | 3 saídas, uma por seção; 3 chicotes painel, 6 de 4 linhas, 6 de 1 linha |
 | 45 linhas, seções 17 + 17 + 11 | 10 chicotes de 4 linhas, 5 de 1 linha; chicote painel recomendado 6 |
 | 55 linhas, seções 21 + 21 + 13 | 6 saídas (10, 9, 9, 9, 9, 9); aviso nas que atendem duas seções; 13 chicotes de 4 linhas, 3 de 1 linha; chicote painel recomendado 8 |
@@ -156,6 +156,6 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 | ISOBUS de 10 m | erro: comprimento não existe |
 | 61 linhas | bloqueado: acima de 60 linhas |
 | Seções 20 + 20 com total 45 | erro: soma das seções (40) diferente do total (45) |
-| Solteira, 8 linhas, sem alternador | seção única de 8 linhas; sem perguntar seções |
+| Solteira, 8 linhas, sem alternador (seções) | seção única de 8 linhas; sem perguntar seções |
 | Solteira, 55 linhas | 6 saídas (10, 9, 9, 9, 9, 9), sem aviso de mistura |
 | Caixa central ou tandem sem seções | erro: informar as seções |

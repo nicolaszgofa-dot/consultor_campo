@@ -37,7 +37,12 @@ List<(int, int)> faixas(DistribuicaoSaidas d) => [
 
 void main() {
   test('8 linhas sem alternador: itens obrigatórios e cabo da bateria', () {
-    final r = configurar(8, [8], alternador: false);
+    final r = configurar(
+      8,
+      const [],
+      alternador: false,
+      tipo: TipoPlantadeira.solteira,
+    );
     expect(r.bloqueada, isFalse);
     expect(r.item(Componentes.ecu)!.quantidade, 1);
     expect(r.item(Componentes.sensorLevante)!.quantidade, 1);
@@ -49,7 +54,12 @@ void main() {
   });
 
   test('regras pendentes nunca aparecem como definidas', () {
-    final r = configurar(8, [8], alternador: false);
+    final r = configurar(
+      8,
+      const [],
+      alternador: false,
+      tipo: TipoPlantadeira.solteira,
+    );
     expect(
       r.pendentes.map((i) => i.componente),
       contains(Componentes.caboIsobus),
@@ -61,13 +71,22 @@ void main() {
 
   test('um conjunto da tecnologia por linha', () {
     expect(
-      qtd(configurar(8, [8], alternador: false), 'Conjunto Titanium Elétric'),
+      qtd(
+        configurar(
+          8,
+          const [],
+          alternador: false,
+          tipo: TipoPlantadeira.solteira,
+        ),
+        'Conjunto Titanium Elétric',
+      ),
       8,
     );
     final s = configurar(
       8,
-      [8],
+      const [],
       alternador: false,
+      tipo: TipoPlantadeira.solteira,
       tecnologia: Tecnologia.seleniumEletric,
     );
     expect(qtd(s, 'Conjunto Selenium Elétric'), 8);
@@ -142,7 +161,12 @@ void main() {
   });
 
   test('sem alternador: cabo da bateria obrigatório, chicotes por seção', () {
-    final r = configurar(8, [8], alternador: false);
+    final r = configurar(
+      8,
+      const [],
+      alternador: false,
+      tipo: TipoPlantadeira.solteira,
+    );
     expect(r.item(Componentes.caboBateria)!.motivo, contains('Obrigatório'));
     expect(qtd(r, Componentes.chicote4), 2);
     expect(r.item(Componentes.chicote1), isNull);
@@ -154,10 +178,21 @@ void main() {
     expect(p.motivo, contains('Obrigatório'));
   });
 
-  test('sem alternador: 2 chicotes painel de 4 m mesmo com várias seções', () {
-    final r = configurar(12, [6, 6], alternador: false);
+  test('sem alternador: 2 chicotes painel de 4 m, ajustáveis', () {
+    final r = configurar(
+      12,
+      const [],
+      alternador: false,
+      tipo: TipoPlantadeira.solteira,
+    );
     expect(qtd(r, Componentes.chicotePainel), 2);
-    final ajustado = configurar(12, [6, 6], alternador: false, painel: 9);
+    final ajustado = configurar(
+      12,
+      const [],
+      alternador: false,
+      tipo: TipoPlantadeira.solteira,
+      painel: 9,
+    );
     expect(ajustado.item(Componentes.chicotePainel)!.comprimento, 9);
   });
 
@@ -265,27 +300,54 @@ void main() {
     );
   });
 
-  test('até 12 linhas é preciso responder sobre o alternador', () {
-    final r = configurar(12, [6, 6]);
+  test('solteira de até 12 linhas: é preciso responder sobre o alternador', () {
+    final r = configurar(12, const [], tipo: TipoPlantadeira.solteira);
     expect(r.bloqueada, isTrue);
     expect(
       r.validacoes.single.mensagem,
       'Responda se a máquina terá alternador hidráulico.',
     );
-    expect(RegrasConfigurador.perguntarAlternador(12), isTrue);
-    expect(RegrasConfigurador.perguntarAlternador(13), isFalse);
+    const solteira = TipoPlantadeira.solteira;
+    expect(RegrasConfigurador.perguntarAlternador(12, solteira), isTrue);
+    expect(RegrasConfigurador.perguntarAlternador(13, solteira), isFalse);
   });
 
-  test('12 linhas com alternador: duas saídas, uma por seção', () {
-    final r = configurar(12, [6, 6], alternador: true);
+  test('máquinas com seções separadas sempre têm alternador', () {
+    for (final tipo in [
+      TipoPlantadeira.autotransportavel,
+      TipoPlantadeira.caixaCentral,
+      TipoPlantadeira.tandem,
+    ]) {
+      expect(
+        RegrasConfigurador.perguntarAlternador(8, tipo),
+        isFalse,
+        reason: tipo.nome,
+      );
+      final r = configurar(8, [4, 4], tipo: tipo);
+      expect(r.bloqueada, isFalse, reason: tipo.nome);
+      expect(
+        r.item(Componentes.alternador)!.motivo,
+        'Obrigatório em ${tipo.nome.toLowerCase()}.',
+      );
+      expect(r.item(Componentes.caboBateria), isNull, reason: tipo.nome);
+    }
+  });
+
+  test('solteira de 12 linhas com alternador: duas saídas', () {
+    final r = configurar(
+      12,
+      const [],
+      alternador: true,
+      tipo: TipoPlantadeira.solteira,
+    );
     expect(r.item(Componentes.alternador)!.motivo, contains('Escolhido'));
     expect(r.item(Componentes.caboBateria), isNull);
     expect(r.distribuicao!.modo, ModoDistribuicao.porSecao);
     expect(faixas(r.distribuicao!), [(1, 6), (7, 12)]);
   });
 
-  test('a partir de 13 linhas o alternador é obrigatório', () {
-    final r = configurar(13, [13]);
+  test('solteira a partir de 13 linhas: alternador obrigatório', () {
+    final r = configurar(13, const [], tipo: TipoPlantadeira.solteira);
     expect(r.bloqueada, isFalse);
     expect(r.item(Componentes.alternador)!.motivo, contains('13 linhas'));
     expect(faixas(r.distribuicao!), [(1, 7), (8, 13)]);
