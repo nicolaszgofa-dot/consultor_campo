@@ -27,6 +27,26 @@ enum TipoPlantadeira {
   const TipoPlantadeira(this.nome, {this.secoesSeparadas = true});
 }
 
+/// Como o vendedor monta os chicotes de linha de cada conjunto.
+enum ComposicaoChicotes {
+  /// O máximo de chicotes de 4 linhas, o resto com chicotes de 1 linha.
+  quatroEUm('Chicotes de 4 linhas, completando com de 1 linha'),
+
+  /// Um chicote de 1 linha por linha.
+  soUmaLinha('Só chicotes de 1 linha');
+
+  final String nome;
+
+  const ComposicaoChicotes(this.nome);
+}
+
+/// Comprimentos disponíveis, em metros.
+abstract final class Comprimentos {
+  static const isobus = [5, 11, 14, 17];
+  static const chicotePainel = [4, 9, 14];
+  static const mangueiras = [6, 9, 12, 15];
+}
+
 /// Dados levantados na máquina.
 class EntradaConfiguracao {
   final Tecnologia tecnologia;
@@ -39,12 +59,23 @@ class EntradaConfiguracao {
   /// Só é perguntado em máquinas de até 12 linhas. Nulo = não respondido.
   final bool? temAlternador;
 
+  final ComposicaoChicotes composicaoChicotes;
+
+  /// Comprimentos escolhidos pelo vendedor, em metros. Nulo = não escolhido.
+  final int? comprimentoIsobus;
+  final int? comprimentoChicotePainel;
+  final int? comprimentoMangueiras;
+
   const EntradaConfiguracao({
     required this.tecnologia,
     required this.tipo,
     required this.totalLinhas,
     this.linhasPorSecao = const [],
     this.temAlternador,
+    this.composicaoChicotes = ComposicaoChicotes.quatroEUm,
+    this.comprimentoIsobus,
+    this.comprimentoChicotePainel,
+    this.comprimentoMangueiras,
   });
 
   /// Seções usadas nas regras: na solteira, uma seção com todas as linhas.
@@ -64,12 +95,20 @@ class ItemConfiguracao {
   /// O que falta definir, quando pendente.
   final String? pendencia;
 
+  /// Comprimento escolhido, em metros, para itens vendidos por tamanho.
+  final int? comprimento;
+
+  /// Comprimentos disponíveis; vazia quando o item não tem tamanho.
+  final List<int> opcoesComprimento;
+
   const ItemConfiguracao({
     required this.componente,
     required this.quantidade,
     required this.motivo,
     this.status = StatusItem.definido,
     this.pendencia,
+    this.comprimento,
+    this.opcoesComprimento = const [],
   });
 }
 
@@ -93,11 +132,15 @@ class SaidaAlternador {
   /// Seções (1, 2, 3…) com linhas nesta saída.
   final List<int> secoes;
 
+  /// Linhas desta saída em cada uma das [secoes], na mesma ordem.
+  final List<int> trechos;
+
   const SaidaAlternador({
     required this.numero,
     required this.primeiraLinha,
     required this.ultimaLinha,
     required this.secoes,
+    required this.trechos,
   });
 
   int get linhas => ultimaLinha - primeiraLinha + 1;
@@ -121,6 +164,9 @@ class DistribuicaoSaidas {
 
   List<SaidaAlternador> get saidasQueMisturamSecoes =>
       saidas.where((s) => s.misturaSecoes).toList();
+
+  /// Trechos de linhas ligados em sequência: um por saída e seção atendida.
+  List<int> get trechos => [for (final s in saidas) ...s.trechos];
 }
 
 class ResultadoConfiguracao {
@@ -152,14 +198,17 @@ class ResultadoConfiguracao {
 }
 
 abstract final class Componentes {
-  static const ecu = 'ECU';
+  static String conjunto(Tecnologia t) => 'Conjunto ${t.nome}';
+  static const ecu = 'Conjunto ECU';
   static const sensorLevante = 'Sensor de levante';
   static const sensorSemente = 'Sensor de semente';
   static const caboIsobus = 'Cabo ISOBUS';
   static const alternador = 'Alternador hidráulico';
+  static const mangueiras = 'Kit de mangueiras do alternador';
   static const caboBateria = 'Cabo de alimentação direto da bateria';
-  static const chicotes = 'Chicotes de 1 e 4 linhas';
-  static const caboPainel = 'Cabo de painel';
+  static const chicote4 = 'Chicote de 4 linhas';
+  static const chicote1 = 'Chicote de 1 linha';
+  static const chicotePainel = 'Chicote painel';
 }
 
 class RegrasConfigurador {
@@ -176,6 +225,18 @@ class RegrasConfigurador {
   /// Até 12 linhas o vendedor precisa responder se haverá alternador.
   static bool perguntarAlternador(int linhas) =>
       linhas > 0 && !alternadorObrigatorio(linhas);
+
+  static bool usaAlternador(EntradaConfiguracao e) =>
+      alternadorObrigatorio(e.totalLinhas) || (e.temAlternador ?? false);
+
+  /// Chicotes de 4 e de 1 linha para um trecho de [linhas] em sequência.
+  static ({int quatro, int um}) chicotesDoTrecho(
+    int linhas,
+    ComposicaoChicotes composicao,
+  ) => switch (composicao) {
+    ComposicaoChicotes.quatroEUm => (quatro: linhas ~/ 4, um: linhas % 4),
+    ComposicaoChicotes.soUmaLinha => (quatro: 0, um: linhas),
+  };
 
   static List<Validacao> validar(EntradaConfiguracao e) {
     final v = <Validacao>[];
@@ -227,6 +288,32 @@ class RegrasConfigurador {
         ),
       );
     }
+    void comprimento(String componente, int? escolhido, List<int> opcoes) {
+      if (escolhido != null && !opcoes.contains(escolhido)) {
+        v.add(
+          Validacao(
+            NivelValidacao.erro,
+            '$componente não tem $escolhido m. Opções: ${_metros(opcoes)}.',
+          ),
+        );
+      }
+    }
+
+    comprimento(
+      Componentes.caboIsobus,
+      e.comprimentoIsobus,
+      Comprimentos.isobus,
+    );
+    comprimento(
+      Componentes.chicotePainel,
+      e.comprimentoChicotePainel,
+      Comprimentos.chicotePainel,
+    );
+    comprimento(
+      Componentes.mangueiras,
+      e.comprimentoMangueiras,
+      Comprimentos.mangueiras,
+    );
     return v;
   }
 
@@ -246,6 +333,7 @@ class RegrasConfigurador {
             primeiraLinha: inicio,
             ultimaLinha: inicio + tamanho - 1,
             secoes: [s + 1],
+            trechos: [tamanho],
           ),
         );
         inicio += tamanho;
@@ -272,13 +360,20 @@ class RegrasConfigurador {
     inicio = 1;
     for (final tamanho in _dividir(total)) {
       final fim = inicio + tamanho - 1;
+      final secoes = [
+        for (var s = secaoDaLinha(inicio); s <= secaoDaLinha(fim); s++) s,
+      ];
       global.add(
         SaidaAlternador(
           numero: global.length + 1,
           primeiraLinha: inicio,
           ultimaLinha: fim,
-          secoes: [
-            for (var s = secaoDaLinha(inicio); s <= secaoDaLinha(fim); s++) s,
+          secoes: secoes,
+          trechos: [
+            for (final s in secoes)
+              _min(fim, fimDaSecao[s - 1]) -
+                  _max(inicio, s == 1 ? 1 : fimDaSecao[s - 2] + 1) +
+                  1,
           ],
         ),
       );
@@ -295,13 +390,64 @@ class RegrasConfigurador {
     return [for (var i = 0; i < conjuntos; i++) base + (i < sobra ? 1 : 0)];
   }
 
+  static int _min(int a, int b) => a < b ? a : b;
+  static int _max(int a, int b) => a > b ? a : b;
+
+  static String _metros(List<int> opcoes) =>
+      '${opcoes.take(opcoes.length - 1).join(', ')} ou ${opcoes.last} m';
+
+  /// Item vendido por comprimento: pendente até o vendedor escolher.
+  static ItemConfiguracao _porComprimento({
+    required String componente,
+    required int quantidade,
+    required String motivo,
+    required List<int> opcoes,
+    required int? escolhido,
+  }) {
+    final valido = escolhido != null && opcoes.contains(escolhido);
+    return ItemConfiguracao(
+      componente: componente,
+      quantidade: quantidade,
+      motivo: motivo,
+      status: valido ? StatusItem.definido : StatusItem.pendente,
+      pendencia: valido
+          ? null
+          : 'Escolher o comprimento conforme o tamanho da máquina '
+                '(${_metros(opcoes)}).',
+      comprimento: valido ? escolhido : null,
+      opcoesComprimento: opcoes,
+    );
+  }
+
   static ResultadoConfiguracao configurar(EntradaConfiguracao e) {
     final validacoes = validar(e);
     final linhas = e.totalLinhas;
-    final usaAlternador =
-        alternadorObrigatorio(linhas) || (e.temAlternador ?? false);
+    final alternador = usaAlternador(e);
+    final bloqueada = validacoes.any((v) => v.bloqueia);
+    final distribuicao = alternador && !bloqueada
+        ? distribuirSaidas(e.secoes)
+        : null;
+
+    // Trechos ligados em sequência pelos chicotes de linha.
+    final trechos = distribuicao?.trechos ?? (bloqueada ? <int>[] : e.secoes);
+    var quatro = 0, um = 0;
+    for (final t in trechos) {
+      final c = chicotesDoTrecho(t, e.composicaoChicotes);
+      quatro += c.quatro;
+      um += c.um;
+    }
+    final composicao = switch (e.composicaoChicotes) {
+      ComposicaoChicotes.quatroEUm => 'até 4 linhas por chicote',
+      ComposicaoChicotes.soUmaLinha => 'um por linha',
+    };
 
     final itens = <ItemConfiguracao>[
+      if (linhas > 0)
+        ItemConfiguracao(
+          componente: Componentes.conjunto(e.tecnologia),
+          quantidade: linhas,
+          motivo: 'Um por linha ($linhas linhas).',
+        ),
       const ItemConfiguracao(
         componente: Componentes.ecu,
         quantidade: 1,
@@ -318,47 +464,69 @@ class RegrasConfigurador {
           quantidade: linhas,
           motivo: 'Um por linha ($linhas linhas).',
         ),
-      const ItemConfiguracao(
+      _porComprimento(
         componente: Componentes.caboIsobus,
         quantidade: 1,
         motivo: 'Obrigatório em toda configuração.',
-        status: StatusItem.pendente,
-        pendencia: 'Modelo e comprimento a definir.',
+        opcoes: Comprimentos.isobus,
+        escolhido: e.comprimentoIsobus,
       ),
-      if (usaAlternador)
+      if (alternador) ...[
         ItemConfiguracao(
           componente: Componentes.alternador,
           quantidade: 1,
           motivo: alternadorObrigatorio(linhas)
               ? 'Obrigatório a partir de 13 linhas.'
               : 'Escolhido para a máquina de $linhas linhas.',
-        )
-      else if (e.temAlternador == false)
+        ),
+        _porComprimento(
+          componente: Componentes.mangueiras,
+          quantidade: 1,
+          motivo:
+              'Acompanha o alternador: 3 mangueiras, uma mais fina para '
+              'o dreno.',
+          opcoes: Comprimentos.mangueiras,
+          escolhido: e.comprimentoMangueiras,
+        ),
+      ] else if (e.temAlternador == false)
         const ItemConfiguracao(
           componente: Componentes.caboBateria,
           quantidade: 1,
           motivo: 'Máquina sem alternador: alimentação direto da bateria.',
         ),
-      const ItemConfiguracao(
-        componente: Componentes.chicotes,
-        quantidade: 0,
-        motivo: 'Ligação dos sensores às linhas.',
-        status: StatusItem.pendente,
-        pendencia: 'Composição dos chicotes a definir.',
-      ),
-      const ItemConfiguracao(
-        componente: Componentes.caboPainel,
-        quantidade: 1,
-        motivo: 'Ligação ao painel.',
-        status: StatusItem.pendente,
-        pendencia: 'Comprimento a definir.',
-      ),
+      if (quatro > 0)
+        ItemConfiguracao(
+          componente: Componentes.chicote4,
+          quantidade: quatro,
+          motivo: 'Chicotes de linha, $composicao.',
+        ),
+      if (um > 0)
+        ItemConfiguracao(
+          componente: Componentes.chicote1,
+          quantidade: um,
+          motivo: 'Chicotes de linha, $composicao.',
+        ),
+      if (distribuicao != null)
+        _porComprimento(
+          componente: Componentes.chicotePainel,
+          quantidade: trechos.length,
+          motivo:
+              'Um por saída do alternador até os chicotes de linha, mais '
+              'um a cada passagem de uma seção para outra.',
+          opcoes: Comprimentos.chicotePainel,
+          escolhido: e.comprimentoChicotePainel,
+        )
+      else if (e.temAlternador == false)
+        const ItemConfiguracao(
+          componente: Componentes.chicotePainel,
+          quantidade: 0,
+          motivo: 'Ligação da alimentação até os chicotes de linha.',
+          status: StatusItem.pendente,
+          pendencia: 'Quantidade sem alternador a definir.',
+          opcoesComprimento: Comprimentos.chicotePainel,
+        ),
     ];
 
-    final bloqueada = validacoes.any((v) => v.bloqueia);
-    final distribuicao = usaAlternador && !bloqueada
-        ? distribuirSaidas(e.secoes)
-        : null;
     if (distribuicao != null) {
       for (final s in distribuicao.saidasQueMisturamSecoes) {
         validacoes.add(

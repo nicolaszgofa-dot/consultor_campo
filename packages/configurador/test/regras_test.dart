@@ -8,6 +8,10 @@ ResultadoConfiguracao configurar(
   bool? alternador,
   Tecnologia tecnologia = Tecnologia.titaniumEletric,
   TipoPlantadeira tipo = TipoPlantadeira.autotransportavel,
+  ComposicaoChicotes composicao = ComposicaoChicotes.quatroEUm,
+  int? isobus,
+  int? painel,
+  int? mangueiras,
 }) => RegrasConfigurador.configurar(
   EntradaConfiguracao(
     tecnologia: tecnologia,
@@ -15,8 +19,15 @@ ResultadoConfiguracao configurar(
     totalLinhas: linhas,
     linhasPorSecao: secoes,
     temAlternador: alternador,
+    composicaoChicotes: composicao,
+    comprimentoIsobus: isobus,
+    comprimentoChicotePainel: painel,
+    comprimentoMangueiras: mangueiras,
   ),
 );
+
+int? qtd(ResultadoConfiguracao r, String componente) =>
+    r.item(componente)?.quantidade;
 
 List<(int, int)> faixas(DistribuicaoSaidas d) => [
   for (final s in d.saidas) (s.primeiraLinha, s.ultimaLinha),
@@ -39,15 +50,125 @@ void main() {
     final r = configurar(8, [8], alternador: false);
     expect(
       r.pendentes.map((i) => i.componente),
-      containsAll([
-        Componentes.caboIsobus,
-        Componentes.chicotes,
-        Componentes.caboPainel,
-      ]),
+      containsAll([Componentes.caboIsobus, Componentes.chicotePainel]),
     );
     for (final p in r.pendentes) {
       expect(p.pendencia, isNotNull);
     }
+  });
+
+  test('um conjunto da tecnologia por linha', () {
+    expect(
+      qtd(configurar(8, [8], alternador: false), 'Conjunto Titanium Elétric'),
+      8,
+    );
+    final s = configurar(
+      8,
+      [8],
+      alternador: false,
+      tecnologia: Tecnologia.seleniumEletric,
+    );
+    expect(qtd(s, 'Conjunto Selenium Elétric'), 8);
+  });
+
+  test('chicotes de um trecho: 10 linhas = 2 de 4 + 2 de 1, ou 10 de 1', () {
+    expect(
+      RegrasConfigurador.chicotesDoTrecho(10, ComposicaoChicotes.quatroEUm),
+      (quatro: 2, um: 2),
+    );
+    expect(
+      RegrasConfigurador.chicotesDoTrecho(10, ComposicaoChicotes.soUmaLinha),
+      (quatro: 0, um: 10),
+    );
+  });
+
+  test('os chicotes cobrem todas as linhas', () {
+    for (var n = 1; n <= 60; n++) {
+      final r = configurar(
+        n,
+        const [],
+        alternador: true,
+        tipo: TipoPlantadeira.solteira,
+      );
+      final linhas =
+          4 * (qtd(r, Componentes.chicote4) ?? 0) +
+          (qtd(r, Componentes.chicote1) ?? 0);
+      expect(linhas, n, reason: '$n');
+    }
+  });
+
+  test('30 linhas (10 + 10 + 10): 3 chicotes painel, 6 de 4 e 6 de 1', () {
+    final r = configurar(30, [10, 10, 10]);
+    expect(qtd(r, Componentes.chicotePainel), 3);
+    expect(qtd(r, Componentes.chicote4), 6);
+    expect(qtd(r, Componentes.chicote1), 6);
+  });
+
+  test('55 linhas: chicote painel por saída e a cada troca de seção', () {
+    final r = configurar(55, [21, 21, 13]);
+    expect(r.distribuicao!.trechos, [10, 9, 2, 7, 9, 5, 4, 9]);
+    expect(qtd(r, Componentes.chicotePainel), 8);
+    expect(qtd(r, Componentes.chicote4), 11);
+    expect(qtd(r, Componentes.chicote1), 11);
+  });
+
+  test('55 linhas só com chicotes de 1 linha', () {
+    final r = configurar(55, [
+      21,
+      21,
+      13,
+    ], composicao: ComposicaoChicotes.soUmaLinha);
+    expect(qtd(r, Componentes.chicote1), 55);
+    expect(r.item(Componentes.chicote4), isNull);
+  });
+
+  test('sem alternador: chicotes por seção e chicote painel pendente', () {
+    final r = configurar(8, [8], alternador: false);
+    expect(qtd(r, Componentes.chicote4), 2);
+    expect(r.item(Componentes.chicote1), isNull);
+    expect(r.item(Componentes.chicotePainel)!.status, StatusItem.pendente);
+    expect(r.item(Componentes.mangueiras), isNull);
+  });
+
+  test('comprimentos ficam pendentes até o vendedor escolher', () {
+    final r = configurar(30, [10, 10, 10]);
+    for (final c in [
+      Componentes.caboIsobus,
+      Componentes.chicotePainel,
+      Componentes.mangueiras,
+    ]) {
+      final i = r.item(c)!;
+      expect(i.status, StatusItem.pendente, reason: c);
+      expect(i.comprimento, isNull, reason: c);
+      expect(i.opcoesComprimento, isNotEmpty, reason: c);
+    }
+    expect(
+      r.item(Componentes.caboIsobus)!.pendencia,
+      contains('5, 11, 14 ou 17 m'),
+    );
+  });
+
+  test('comprimentos escolhidos ficam definidos', () {
+    final r = configurar(
+      30,
+      [10, 10, 10],
+      isobus: 11,
+      painel: 9,
+      mangueiras: 12,
+    );
+    expect(r.pendentes, isEmpty);
+    expect(r.item(Componentes.caboIsobus)!.comprimento, 11);
+    expect(r.item(Componentes.chicotePainel)!.comprimento, 9);
+    expect(r.item(Componentes.mangueiras)!.comprimento, 12);
+  });
+
+  test('comprimento que não existe bloqueia', () {
+    final r = configurar(30, [10, 10, 10], isobus: 10);
+    expect(r.bloqueada, isTrue);
+    expect(
+      r.validacoes.single.mensagem,
+      'Cabo ISOBUS não tem 10 m. Opções: 5, 11, 14 ou 17 m.',
+    );
   });
 
   test('até 12 linhas é preciso responder sobre o alternador', () {
@@ -183,16 +304,17 @@ void main() {
     }
   });
 
-  test('Selenium Elétric segue as mesmas regras nesta versão', () {
+  test('Titanium e Selenium usam os mesmos componentes de instalação', () {
     final t = configurar(55, [21, 21, 13]);
     final s = configurar(55, [
       21,
       21,
       13,
     ], tecnologia: Tecnologia.seleniumEletric);
+    // O primeiro item é o conjunto da própria tecnologia.
     expect(
-      s.itens.map((i) => (i.componente, i.quantidade)),
-      t.itens.map((i) => (i.componente, i.quantidade)),
+      s.itens.skip(1).map((i) => (i.componente, i.quantidade)),
+      t.itens.skip(1).map((i) => (i.componente, i.quantidade)),
     );
   });
 }
