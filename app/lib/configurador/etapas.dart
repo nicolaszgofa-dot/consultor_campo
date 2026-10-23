@@ -1027,3 +1027,94 @@ class _ListaOpcoes<T> extends StatelessWidget {
     );
   }
 }
+
+class EtapaAdaptacao extends StatelessWidget {
+  final ConfiguradorEstado estado;
+
+  const EtapaAdaptacao({super.key, required this.estado});
+
+  @override
+  Widget build(BuildContext context) {
+    final marca = estado.marcaAdaptacao;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _CartaoPergunta(
+          pergunta: 'Qual é a marca da plantadeira?',
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final m in estado.marcasAdaptacao)
+                _BotaoMarca(
+                  texto: m,
+                  ativo: m == marca,
+                  aoTocar: () => estado.escolherMarcaAdaptacao(m),
+                ),
+            ],
+          ),
+        ),
+        if (marca != null) ...[
+          const SizedBox(height: 12),
+          _CartaoPergunta(
+            pergunta: 'Modelo $marca',
+            child: _ListaOpcoes<String>(
+              opcoes: estado.modelosAdaptacao,
+              escolhida: estado.modeloAdaptacao,
+              rotulo: (m) => m,
+              aoEscolher: estado.escolherModeloAdaptacao,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _BotaoMarca extends StatelessWidget {
+  final String texto;
+  final bool ativo;
+  final VoidCallback aoTocar;
+
+  const _BotaoMarca({
+    required this.texto,
+    required this.ativo,
+    required this.aoTocar,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      selected: ativo,
+      button: true,
+      child: Material(
+        color: ativo ? Cores.verdeEscuro : Cores.branco,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: ativo ? Cores.verdeEscuro : Cores.cinza),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: aoTocar,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 120, minHeight: 52),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                widthFactor: 1,
+                child: Text(
+                  texto,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: ativo ? Cores.branco : Cores.tinta,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

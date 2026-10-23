@@ -4,6 +4,8 @@
 /// definição técnica entram no resultado como [StatusItem.pendente].
 library;
 
+import 'adaptacoes.dart';
+
 enum Tecnologia {
   titaniumEletric('Titanium Elétric'),
   seleniumEletric('Selenium Elétric');
@@ -93,6 +95,10 @@ class EntradaConfiguracao {
   /// leva discos, reservatório pipoqueira nem bocais.
   final bool kitConversao;
 
+  /// Marca e modelo da plantadeira para a adaptação. Não se aplica ao kit
+  /// conversão. Nulo = não escolhida.
+  final Adaptacao? adaptacao;
+
   const EntradaConfiguracao({
     required this.tecnologia,
     required this.tipo,
@@ -107,6 +113,7 @@ class EntradaConfiguracao {
     this.bocalTitanium,
     this.bocalSelenium,
     this.kitConversao = false,
+    this.adaptacao,
   });
 
   /// Seções usadas nas regras: na solteira, uma seção com todas as linhas.
@@ -435,6 +442,15 @@ class RegrasConfigurador {
           ),
         );
       }
+    }
+    final adaptacao = e.adaptacao;
+    if (adaptacao != null && !adaptacaoValida(e.tecnologia, adaptacao)) {
+      v.add(
+        Validacao(
+          NivelValidacao.erro,
+          'Adaptação $adaptacao não existe para ${e.tecnologia.nome}.',
+        ),
+      );
     }
     return v;
   }

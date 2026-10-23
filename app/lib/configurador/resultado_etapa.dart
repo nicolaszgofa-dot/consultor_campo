@@ -34,6 +34,39 @@ class EtapaResultado extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
+        if (resultado.entrada.adaptacao case final a?) ...[
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Cores.verdeClaro,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.agriculture_outlined, color: Cores.verdeTexto),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        const TextSpan(text: 'Adaptação: '),
+                        TextSpan(
+                          text: '${a.marca} · ${a.modelo}',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Cores.verdeTexto,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         for (final item in resultado.itens) ...[
           _ItemResultado(item: item, estado: estado),
           const SizedBox(height: 8),

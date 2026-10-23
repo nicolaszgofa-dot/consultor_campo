@@ -52,6 +52,7 @@ List<(int, int)> faixas(DistribuicaoSaidas d) => [
 
 void main() {
   testesKitConversao();
+  testesAdaptacao();
   test('8 linhas sem alternador: itens obrigatórios e cabo da bateria', () {
     final r = configurar(
       8,
@@ -612,6 +613,59 @@ void testesKitConversao() {
       for (final c in itensDaTecnologia) {
         expect(r.item(c), isNull, reason: c);
       }
+    });
+  });
+}
+
+void testesAdaptacao() {
+  group('adaptação', () {
+    test('catálogo: 15 marcas e 32 modelos no Titanium', () {
+      final t = adaptacoes[Tecnologia.titaniumEletric]!;
+      expect(t, hasLength(15));
+      expect(t.values.fold(0, (s, m) => s + m.length), 32);
+    });
+
+    test('catálogo: 11 marcas e 36 modelos no Selenium, sem eixo flexível', () {
+      final s = adaptacoes[Tecnologia.seleniumEletric]!;
+      expect(s, hasLength(11));
+      expect(s.values.fold(0, (n, m) => n + m.length), 36);
+      for (final modelos in s.values) {
+        for (final m in modelos) {
+          expect(m, isNot(contains('flexível')));
+        }
+      }
+    });
+
+    test('marcas em ordem alfabética, Tatu Marchesan e CNH', () {
+      for (final t in Tecnologia.values) {
+        final marcas = adaptacoes[t]!.keys.toList();
+        expect(
+          marcas,
+          [...marcas]
+            ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase())),
+        );
+        expect(marcas, isNot(contains('Tatu')));
+      }
+      expect(adaptacoes[Tecnologia.seleniumEletric]!.keys, contains('CNH'));
+    });
+
+    test('adaptação de outra tecnologia bloqueia', () {
+      EntradaConfiguracao entrada(Adaptacao a) => EntradaConfiguracao(
+        tecnologia: Tecnologia.seleniumEletric,
+        tipo: TipoPlantadeira.solteira,
+        totalLinhas: 20,
+        adaptacao: a,
+      );
+      expect(
+        RegrasConfigurador.validar(
+          entrada(const Adaptacao('CNH', 'S-2200 Easy Riser')),
+        ),
+        isEmpty,
+      );
+      final erros = RegrasConfigurador.validar(
+        entrada(const Adaptacao('Stara', 'ST2')),
+      );
+      expect(erros.single.mensagem, contains('não existe para Selenium'));
     });
   });
 }

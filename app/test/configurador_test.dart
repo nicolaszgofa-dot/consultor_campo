@@ -35,6 +35,9 @@ ConfiguradorEstado autotransportavel55() {
     ..responderAlternadorNaFrente(true)
     ..avancar()
     ..responderPipoqueira(false)
+    ..avancar()
+    ..escolherMarcaAdaptacao('Stara')
+    ..escolherModeloAdaptacao('ST2')
     ..avancar();
   return e;
 }
@@ -43,10 +46,10 @@ void main() {
   group('estado', () {
     test('a solteira pula a etapa de seções', () {
       final e = ConfiguradorEstado();
-      expect(e.etapas, hasLength(7));
+      expect(e.etapas, hasLength(8));
       e.escolherTipo(TipoPlantadeira.solteira);
       expect(e.etapas, isNot(contains(EtapaConfigurador.secoes)));
-      expect(e.etapas, hasLength(6));
+      expect(e.etapas, hasLength(7));
     });
 
     test('kit conversão pede a tecnologia do kit', () {
@@ -82,6 +85,35 @@ void main() {
       expect(r.item('Conjunto Selenium Elétric'), isNull);
       expect(r.item(Componentes.discoSojaSelenium), isNull);
       expect(r.item(Componentes.bocalSelenium), isNull);
+    });
+
+    test('adaptação: marca, depois modelo; trocar tecnologia limpa', () {
+      final e = ConfiguradorEstado()
+        ..escolherTecnologia(Tecnologia.seleniumEletric)
+        ..etapa = EtapaConfigurador.adaptacao;
+      expect(e.marcasAdaptacao, contains('CNH'));
+      expect(e.marcasAdaptacao, isNot(contains('Baldan')));
+      expect(e.bloqueio, 'Escolha a marca da plantadeira.');
+      e.escolherMarcaAdaptacao('CNH');
+      expect(e.modelosAdaptacao, ['S-2200 Easy Riser', 'S-3200 Easy Riser']);
+      expect(e.bloqueio, 'Escolha o modelo da plantadeira.');
+      e.escolherModeloAdaptacao('S-3200 Easy Riser');
+      expect(e.bloqueio, isNull);
+      expect(
+        e.resultado.entrada.adaptacao.toString(),
+        'CNH · S-3200 Easy Riser',
+      );
+      e.escolherMarcaAdaptacao('Jacto');
+      expect(e.modeloAdaptacao, isNull);
+      e.escolherTecnologia(Tecnologia.titaniumEletric);
+      expect(e.marcaAdaptacao, isNull);
+    });
+
+    test('kit conversão não tem adaptação', () {
+      final e = ConfiguradorEstado()
+        ..escolherKitConversao()
+        ..escolherTecnologiaDoKit(Tecnologia.titaniumEletric);
+      expect(e.etapas, isNot(contains(EtapaConfigurador.adaptacao)));
     });
 
     test('acessórios: Titanium pede pipoqueira e bocal', () {
@@ -204,7 +236,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();
-    expect(find.text('PASSO 3 DE 6'), findsOneWidget);
+    expect(find.text('PASSO 3 DE 7'), findsOneWidget);
 
     await tester.tap(find.text('8'));
     await tester.pump();
@@ -227,17 +259,32 @@ void main() {
       find.text('Terá reservatório de sementes pipoqueira?'),
       findsOneWidget,
     );
+    expect(tester.widget<FilledButton>(continuar).onPressed, isNull);
+    await tester.tap(find.text('Sim'));
+    await tester.pump();
+    await tester.tap(find.text(BocalTitanium.pol30.nome));
+    await tester.pump();
+    await tester.tap(continuar);
+    await tester.pumpAndSettle();
+
+    // Adaptação: marca e depois modelo.
+    expect(find.text('Qual é a marca da plantadeira?'), findsOneWidget);
     final verConfiguracao = find.widgetWithText(
       FilledButton,
       'Ver configuração',
     );
     expect(tester.widget<FilledButton>(verConfiguracao).onPressed, isNull);
-    await tester.tap(find.text('Sim'));
+    await tester.tap(find.text('Stara'));
     await tester.pump();
-    await tester.tap(find.text(BocalTitanium.pol30.nome));
+    expect(find.text('Modelo Stara'), findsOneWidget);
+    await tester.tap(find.text('ST2'));
     await tester.pump();
     await tester.tap(verConfiguracao);
     await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Stara · ST2', findRichText: true),
+      findsOneWidget,
+    );
 
     expect(find.text('Configuração gerada'), findsOneWidget);
     expect(find.text(Componentes.caboBateria), findsOneWidget);
@@ -249,6 +296,8 @@ void main() {
     expect(find.text('1 pendentes'), findsOneWidget);
 
     // Escolher o comprimento do ISOBUS fecha a última pendência.
+    await tester.ensureVisible(find.bySemanticsLabel('5 m, sugerido'));
+    await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('5 m, sugerido'));
     await tester.pump();
     expect(find.text('Gerar relatório'), findsOneWidget);
@@ -376,6 +425,7 @@ void main() {
   ) async {
     tela(tester, const Size(1194, 834));
     final estado = autotransportavel55()
+      ..voltar()
       ..voltar()
       ..voltar();
     estado.alternadorNaFrente = null;

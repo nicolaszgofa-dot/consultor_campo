@@ -39,7 +39,8 @@ Experiência: o vendedor informa as características → o sistema interpreta �
 4. Número de seções que fecham separadas e linhas de cada seção: só para autotransportável, caixa central e tandem. Na solteira a etapa é pulada.
 5. Alimentação: na solteira de até 12 linhas, se terá alternador; no autotransportável e no tandem, se o alternador pode ir no cabeçalho ou no tandem.
 6. Acessórios do dosador (não aparece no kit conversão): no Titanium, se terá reservatório de sementes pipoqueira e, se sim, o bocal; no Selenium, o kit bocal de sementes.
-7. Resultado.
+7. Adaptação (não aparece no kit conversão): marca da plantadeira e, em seguida, o modelo.
+8. Resultado.
 
 ## Arquitetura da lógica
 
@@ -124,6 +125,17 @@ Enquanto a pergunta da pipoqueira, o bocal do Titanium ou o kit bocal do Seleniu
 - Selenium: não pergunta o kit bocal de sementes.
 - Os demais itens (ECU, sensores, cabos, alternador, chicotes) seguem as mesmas regras.
 
+## Adaptação
+
+Depois das etapas da máquina, o vendedor escolhe a **marca** da plantadeira e, em seguida, o **modelo**, entre as adaptações da tecnologia escolhida. Só vale para Titanium Elétric e Selenium Elétric; o kit conversão não tem essa etapa.
+
+- O catálogo completo está em `packages/configurador/lib/src/adaptacoes.dart`, com as marcas em ordem alfabética.
+- **Titanium Elétric:** 15 marcas e 32 modelos. Fonte: sumário do guia de montagem Titanium. Quando o guia não traz modelo, o nome da marca é o modelo.
+- **Selenium Elétric:** 11 marcas e 36 modelos. Fonte: sumário do guia de montagem Selenium, só as opções de acionamento elétrico (as de eixo flexível ficam de fora).
+- Nomes de marca padronizados nas duas listas: **Tatu Marchesan** e **CNH**.
+- Trocar a tecnologia ou a marca descarta o modelo escolhido. Uma adaptação que não existe no catálogo da tecnologia bloqueia.
+- No resultado, a adaptação aparece como "Adaptação: marca · modelo".
+
 ## Chicotes
 
 A montagem segue a sequência: alternador → de cada saída sai um **chicote painel** → conexão com os **chicotes de linha** que alimentam o conjunto daquela saída. Quando o conjunto passa de uma seção para outra, outro chicote painel liga os chicotes de linha de uma seção aos da seguinte.
@@ -171,6 +183,8 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
 - Se algum **tipo de plantadeira** muda outras regras além das seções (cabeamento, chicotes).
 - **Commander:** fora desta versão.
+- **Adaptação:** se a marca e o modelo escolhidos geram itens no resultado (código, quantidade). Hoje só aparecem como informação.
+- **Plantadeira fora do catálogo de adaptações:** o que fazer quando a marca ou o modelo não estão na lista.
 
 ## Casos de teste do motor de regras
 
@@ -204,3 +218,5 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 | Selenium sem kit bocal escolhido | kit bocal pendente |
 | Kit conversão Titanium, 30 linhas | 30 kits conversão Titanium Elétric; sem conjunto, discos, reservatório ou bocal |
 | Kit conversão Selenium, 30 linhas | 30 kits conversão Selenium G3 p/ Selenium Elétric; sem conjunto, discos ou kit bocal |
+| Selenium, adaptação CNH · S-2200 Easy Riser | válida |
+| Selenium, adaptação Stara · ST2 (só existe no Titanium) | erro: adaptação não existe para Selenium Elétric |

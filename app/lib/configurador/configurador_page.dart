@@ -33,6 +33,7 @@ class _ConfiguradorPageState extends State<ConfiguradorPage> {
     EtapaConfigurador.secoes => EtapaSecoes(estado: _estado),
     EtapaConfigurador.alimentacao => EtapaAlimentacao(estado: _estado),
     EtapaConfigurador.acessorios => EtapaAcessorios(estado: _estado),
+    EtapaConfigurador.adaptacao => EtapaAdaptacao(estado: _estado),
     EtapaConfigurador.resultado => EtapaResultado(estado: _estado),
   };
 

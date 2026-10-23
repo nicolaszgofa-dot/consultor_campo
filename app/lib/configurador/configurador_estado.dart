@@ -8,6 +8,7 @@ enum EtapaConfigurador {
   secoes('Seções', 'Quantas seções fecham separadas?'),
   alimentacao('Alimentação', 'Alimentação elétrica'),
   acessorios('Acessórios do dosador', 'Acessórios do dosador'),
+  adaptacao('Adaptação', 'Adaptação na plantadeira'),
   resultado('Resultado', 'Configuração gerada');
 
   final String nome;
@@ -41,13 +42,22 @@ class ConfiguradorEstado extends ChangeNotifier {
   BocalTitanium? bocalTitanium;
   BocalSelenium? bocalSelenium;
 
+  /// Adaptação: primeiro a marca, depois o modelo.
+  String? marcaAdaptacao;
+  String? modeloAdaptacao;
+
+  Adaptacao? get adaptacao => marcaAdaptacao == null || modeloAdaptacao == null
+      ? null
+      : Adaptacao(marcaAdaptacao!, modeloAdaptacao!);
+
   /// Etapas do fluxo: a solteira pula a de seções e o kit conversão pula a
   /// de acessórios do dosador.
   List<EtapaConfigurador> get etapas => [
     for (final e in EtapaConfigurador.values)
       if (switch (e) {
         EtapaConfigurador.secoes => tipo?.secoesSeparadas ?? true,
-        EtapaConfigurador.acessorios => !kitConversao,
+        EtapaConfigurador.acessorios ||
+        EtapaConfigurador.adaptacao => !kitConversao,
         _ => true,
       })
         e,
@@ -69,6 +79,7 @@ class ConfiguradorEstado extends ChangeNotifier {
     bocalTitanium: bocalTitanium,
     bocalSelenium: bocalSelenium,
     kitConversao: kitConversao,
+    adaptacao: kitConversao ? null : adaptacao,
   );
 
   ResultadoConfiguracao get resultado => RegrasConfigurador.configurar(entrada);
@@ -110,6 +121,12 @@ class ConfiguradorEstado extends ChangeNotifier {
           ? 'Responda se a máquina terá alternador hidráulico.'
           : null,
     EtapaConfigurador.acessorios => _bloqueioAcessorios,
+    EtapaConfigurador.adaptacao =>
+      marcaAdaptacao == null
+          ? 'Escolha a marca da plantadeira.'
+          : modeloAdaptacao == null
+          ? 'Escolha o modelo da plantadeira.'
+          : null,
     EtapaConfigurador.resultado => null,
   };
 
@@ -163,21 +180,48 @@ class ConfiguradorEstado extends ChangeNotifier {
 
   void escolherTecnologia(Tecnologia t) {
     kitConversao = false;
-    tecnologia = t;
-    notifyListeners();
+    _mudarTecnologia(t);
   }
 
   /// Escolhe o kit conversão; a tecnologia do kit vem em seguida.
   void escolherKitConversao() {
     if (kitConversao) return;
     kitConversao = true;
-    tecnologia = null;
-    notifyListeners();
+    _mudarTecnologia(null);
   }
 
   void escolherTecnologiaDoKit(Tecnologia t) {
     kitConversao = true;
+    _mudarTecnologia(t);
+  }
+
+  /// O catálogo de adaptações é de cada tecnologia: trocar descarta a escolha.
+  void _mudarTecnologia(Tecnologia? t) {
+    if (t != tecnologia) {
+      marcaAdaptacao = null;
+      modeloAdaptacao = null;
+    }
     tecnologia = t;
+    notifyListeners();
+  }
+
+  /// Marcas com adaptação para a tecnologia escolhida.
+  List<String> get marcasAdaptacao =>
+      adaptacoes[tecnologia]?.keys.toList() ?? const [];
+
+  /// Modelos da marca escolhida.
+  List<String> get modelosAdaptacao =>
+      adaptacoes[tecnologia]?[marcaAdaptacao] ?? const [];
+
+  void escolherMarcaAdaptacao(String marca) {
+    if (marca == marcaAdaptacao) return;
+    marcaAdaptacao = marca;
+    modeloAdaptacao = null;
+    notifyListeners();
+  }
+
+  void escolherModeloAdaptacao(String modelo) {
+    modeloAdaptacao = modelo;
     notifyListeners();
   }
 
