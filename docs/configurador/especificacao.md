@@ -65,7 +65,7 @@ O motor de regras é Dart puro, sem tela, com testes. Cada regra pendente aparec
 | Solteira de até 12 linhas | perguntar se a máquina terá alternador hidráulico |
 | Sem alternador | cabo de alimentação direto da bateria **obrigatório** |
 | Chicotes de linha | de 4 linhas e de 1 linha, calculados **por seção**; ver "Chicotes" abaixo |
-| Chicote painel | leva a alimentação da saída do alternador até os chicotes de linha; quantidade **recomendada** (ajustável pelo vendedor); comprimento de 4, 9 ou 14 m |
+| Chicote painel | leva a alimentação da saída do alternador até os chicotes de linha; quantidade **recomendada**; o vendedor escolhe quantos de cada comprimento (4, 9 e 14 m) |
 | Comprimentos | o vendedor escolhe conforme o tamanho da máquina; enquanto não escolhe, o item fica pendente. ISOBUS e mangueiras têm sugestão por tipo de máquina (ver "Sugestão de comprimentos") |
 | Saídas do alternador | 6 saídas, no máximo 10 linhas por saída |
 | Capacidade | acima de 60 linhas (6 × 10) a configuração é **bloqueada** e precisa de validação técnica |
@@ -105,10 +105,12 @@ Os chicotes de linha **nunca** são calculados pelo total de linhas da máquina.
 
 ### Chicote painel: quantidade recomendada
 
-A quantidade é **recomendada** pelas seções e saídas usadas, e o vendedor pode ajustar. O comprimento é escolhido pelo vendedor.
+O configurador mostra a quantidade **recomendada** pelas seções e saídas usadas, e o vendedor escolhe **quantos de cada comprimento** (4, 9 e 14 m), podendo misturar tamanhos.
 
-- **Com alternador:** 1 por saída usada + 1 a cada troca de seção dentro de uma saída. Ex.: 45 linhas (17 + 17 + 11) usam 6 saídas sem troca de seção → 6. 55 linhas (21 + 21 + 13) usam 6 saídas, duas delas trocam de seção → 8.
-- **Sem alternador:** obrigatório e padrão: **2 chicotes painel de 4 m** (o vendedor pode ajustar).
+- **Com alternador:** recomendado 1 por saída usada + 1 a cada troca de seção dentro de uma saída. Ex.: 45 linhas (17 + 17 + 11) usam 6 saídas sem troca de seção → 6. 55 linhas (21 + 21 + 13) usam 6 saídas, duas delas trocam de seção → 8. Nada vem escolhido: o item fica pendente até o vendedor escolher pelo menos 1.
+- **Sem alternador:** obrigatório e padrão: **2 chicotes painel de 4 m**, já escolhidos (o vendedor pode ajustar).
+- **Total diferente da recomendação:** não bloqueia, mas gera um aviso (ex.: "Chicote painel: 7 escolhidos, recomendado 8").
+- Se a máquina muda (linhas, seções, tipo ou alternador), a escolha é descartada, porque a recomendação muda.
 
 ## Sugestão de comprimentos (cabo ISOBUS e mangueiras)
 
@@ -130,7 +132,6 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 ## Pendências técnicas (não tratar como resolvidas)
 
 - **Sugestão de comprimento do chicote painel** com alternador.
-- Se cada chicote painel da máquina pode ter um **comprimento diferente** (hoje é um comprimento para todos).
 - Demais regras de **cabeamento**.
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
 - Se algum **tipo de plantadeira** muda outras regras além das seções (cabeamento, chicotes).
@@ -148,7 +149,9 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 | 30 linhas, seções 10 + 10 + 10 | 3 saídas, uma por seção; 3 chicotes painel, 6 de 4 linhas, 6 de 1 linha |
 | 45 linhas, seções 17 + 17 + 11 | 10 chicotes de 4 linhas, 5 de 1 linha; chicote painel recomendado 6 |
 | 55 linhas, seções 21 + 21 + 13 | 6 saídas (10, 9, 9, 9, 9, 9); aviso nas que atendem duas seções; 13 chicotes de 4 linhas, 3 de 1 linha; chicote painel recomendado 8 |
-| Vendedor ajusta chicote painel para 7 | quantidade 7, recomendação 8 mantida; 0 é erro |
+| 55 linhas, chicote painel 3 de 4 m + 4 de 9 m + 1 de 14 m | 8 chicotes painel, definido, sem aviso |
+| 55 linhas, chicote painel 7 de 9 m | 7 chicotes painel, aviso: recomendado 8 |
+| Chicote painel de 5 m ou quantidade negativa | erro |
 | Comprimentos não escolhidos | ISOBUS, chicote painel e mangueiras pendentes, com as opções |
 | Solteira / caixa central | sugestão ISOBUS / mangueiras: 5 / 6 m e 17 / 15 m |
 | Autotransportável ou tandem, alternador na frente: sim / não | sugestão 5 / 6 m ou 11 / 12 m; sem resposta, sem sugestão |

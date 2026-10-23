@@ -27,9 +27,10 @@ class ConfiguradorEstado extends ChangeNotifier {
   bool? temAlternador;
   bool? alternadorNaFrente;
   int? comprimentoIsobus;
-  int? comprimentoChicotePainel;
   int? comprimentoMangueiras;
-  int? quantidadeChicotePainel;
+
+  /// Chicotes painel escolhidos: comprimento em metros → quantidade.
+  Map<int, int>? chicotesPainel;
 
   /// Etapas do fluxo: a solteira pula a de seções.
   List<EtapaConfigurador> get etapas => [
@@ -46,10 +47,9 @@ class ConfiguradorEstado extends ChangeNotifier {
     linhasPorSecao: secoes,
     temAlternador: temAlternador,
     alternadorNaFrente: alternadorNaFrente,
-    quantidadeChicotePainel: quantidadeChicotePainel,
     comprimentoIsobus: comprimentoIsobus,
-    comprimentoChicotePainel: comprimentoChicotePainel,
     comprimentoMangueiras: comprimentoMangueiras,
+    chicotesPainel: chicotesPainel,
   );
 
   ResultadoConfiguracao get resultado => RegrasConfigurador.configurar(entrada);
@@ -176,8 +176,6 @@ class ConfiguradorEstado extends ChangeNotifier {
         comprimentoIsobus = alterna(comprimentoIsobus);
       case Componentes.mangueiras:
         comprimentoMangueiras = alterna(comprimentoMangueiras);
-      case Componentes.chicotePainel:
-        comprimentoChicotePainel = alterna(comprimentoChicotePainel);
     }
     notifyListeners();
   }
@@ -185,19 +183,26 @@ class ConfiguradorEstado extends ChangeNotifier {
   int? comprimentoEscolhido(String componente) => switch (componente) {
     Componentes.caboIsobus => comprimentoIsobus,
     Componentes.mangueiras => comprimentoMangueiras,
-    Componentes.chicotePainel => comprimentoChicotePainel,
     _ => null,
   };
 
-  void ajustarChicotePainel(int quantidade) {
-    if (quantidade < 1) return;
-    quantidadeChicotePainel = quantidade;
+  /// Soma [delta] aos chicotes painel de [metros], partindo do que o
+  /// resultado mostra (inclusive o padrão sem alternador).
+  void ajustarChicotePainel(int metros, int delta) {
+    final atual = Map<int, int>.of(
+      resultado.item(Componentes.chicotePainel)?.quantidadesPorComprimento ??
+          const {},
+    );
+    final novo = (atual[metros] ?? 0) + delta;
+    if (novo < 0) return;
+    atual[metros] = novo;
+    chicotesPainel = atual;
     notifyListeners();
   }
 
-  /// A recomendação de chicote painel muda com a máquina: descarta o ajuste.
+  /// A recomendação de chicote painel muda com a máquina: descarta a escolha.
   void _mudouMaquina() {
-    quantidadeChicotePainel = null;
+    chicotesPainel = null;
     notifyListeners();
   }
 }

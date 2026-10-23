@@ -9,9 +9,8 @@ ResultadoConfiguracao configurar(
   Tecnologia tecnologia = Tecnologia.titaniumEletric,
   TipoPlantadeira tipo = TipoPlantadeira.autotransportavel,
   int? isobus,
-  int? painel,
   int? mangueiras,
-  int? qtdPainel,
+  Map<int, int>? painel,
   bool? naFrente,
 }) => RegrasConfigurador.configurar(
   EntradaConfiguracao(
@@ -21,10 +20,9 @@ ResultadoConfiguracao configurar(
     linhasPorSecao: secoes,
     temAlternador: alternador,
     alternadorNaFrente: naFrente,
-    quantidadeChicotePainel: qtdPainel,
     comprimentoIsobus: isobus,
-    comprimentoChicotePainel: painel,
     comprimentoMangueiras: mangueiras,
+    chicotesPainel: painel,
   ),
 );
 
@@ -128,7 +126,7 @@ void main() {
 
   test('30 linhas (10 + 10 + 10): 3 chicotes painel, 6 de 4 e 6 de 1', () {
     final r = configurar(30, [10, 10, 10]);
-    expect(qtd(r, Componentes.chicotePainel), 3);
+    expect(r.item(Componentes.chicotePainel)!.quantidadeRecomendada, 3);
     expect(qtd(r, Componentes.chicote4), 6);
     expect(qtd(r, Componentes.chicote1), 6);
   });
@@ -136,7 +134,10 @@ void main() {
   test('45 linhas (17 + 17 + 11): chicote painel recomendado = 6 saídas', () {
     final p = configurar(45, [17, 17, 11]).item(Componentes.chicotePainel)!;
     expect(p.quantidadeRecomendada, 6);
-    expect(p.quantidade, 6);
+    // Nada é escolhido sozinho: o vendedor decide os tamanhos.
+    expect(p.quantidade, 0);
+    expect(p.status, StatusItem.pendente);
+    expect(p.pendencia, contains('Recomendado: 6'));
   });
 
   test('55 linhas: chicote painel por saída e a cada troca de seção', () {
@@ -149,15 +150,30 @@ void main() {
     expect(qtd(r, Componentes.chicote1), 3);
   });
 
-  test('o vendedor pode ajustar a quantidade de chicotes painel', () {
-    final p = configurar(55, [
-      21,
-      21,
-      13,
-    ], qtdPainel: 7).item(Componentes.chicotePainel)!;
+  test('chicote painel: quantidade de cada comprimento', () {
+    final r = configurar(55, [21, 21, 13], painel: {4: 3, 9: 4, 14: 1});
+    final p = r.item(Componentes.chicotePainel)!;
+    expect(p.quantidadesPorComprimento, {4: 3, 9: 4, 14: 1});
+    expect(p.quantidade, 8);
+    expect(p.status, StatusItem.definido);
+    expect(r.validacoes.where((v) => v.mensagem.contains('Chicote')), isEmpty);
+  });
+
+  test('chicote painel diferente da recomendação gera aviso', () {
+    final r = configurar(55, [21, 21, 13], painel: {9: 7, 14: 0});
+    final p = r.item(Componentes.chicotePainel)!;
+    expect(p.quantidadesPorComprimento, {9: 7});
     expect(p.quantidade, 7);
-    expect(p.quantidadeRecomendada, 8);
-    expect(configurar(55, [21, 21, 13], qtdPainel: 0).bloqueada, isTrue);
+    expect(r.bloqueada, isFalse);
+    expect(
+      r.validacoes.map((v) => v.mensagem),
+      contains('Chicote painel: 7 escolhidos, recomendado 8.'),
+    );
+  });
+
+  test('chicote painel com tamanho inexistente ou negativo bloqueia', () {
+    expect(configurar(30, [10, 10, 10], painel: {5: 1}).bloqueada, isTrue);
+    expect(configurar(30, [10, 10, 10], painel: {4: -1}).bloqueada, isTrue);
   });
 
   test('sem alternador: cabo da bateria obrigatório, chicotes por seção', () {
@@ -173,7 +189,7 @@ void main() {
     expect(r.item(Componentes.mangueiras), isNull);
     final p = r.item(Componentes.chicotePainel)!;
     expect(p.quantidade, 2);
-    expect(p.comprimento, 4);
+    expect(p.quantidadesPorComprimento, {4: 2});
     expect(p.status, StatusItem.definido);
     expect(p.motivo, contains('Obrigatório'));
   });
@@ -191,9 +207,12 @@ void main() {
       const [],
       alternador: false,
       tipo: TipoPlantadeira.solteira,
-      painel: 9,
+      painel: {4: 1, 9: 1},
     );
-    expect(ajustado.item(Componentes.chicotePainel)!.comprimento, 9);
+    expect(
+      ajustado.item(Componentes.chicotePainel)!.quantidadesPorComprimento,
+      {4: 1, 9: 1},
+    );
   });
 
   (int?, int?) sugestao(ResultadoConfiguracao r) => (
@@ -269,6 +288,7 @@ void main() {
       final i = r.item(c)!;
       expect(i.status, StatusItem.pendente, reason: c);
       expect(i.comprimento, isNull, reason: c);
+      expect(i.quantidadesPorComprimento, isEmpty, reason: c);
       expect(i.opcoesComprimento, isNotEmpty, reason: c);
     }
     expect(
@@ -282,12 +302,11 @@ void main() {
       30,
       [10, 10, 10],
       isobus: 11,
-      painel: 9,
+      painel: {9: 3},
       mangueiras: 12,
     );
     expect(r.pendentes, isEmpty);
     expect(r.item(Componentes.caboIsobus)!.comprimento, 11);
-    expect(r.item(Componentes.chicotePainel)!.comprimento, 9);
     expect(r.item(Componentes.mangueiras)!.comprimento, 12);
   });
 

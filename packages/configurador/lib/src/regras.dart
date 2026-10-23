@@ -52,12 +52,11 @@ class EntradaConfiguracao {
 
   /// Comprimentos escolhidos pelo vendedor, em metros. Nulo = não escolhido.
   final int? comprimentoIsobus;
-  final int? comprimentoChicotePainel;
   final int? comprimentoMangueiras;
 
-  /// Quantidade de chicotes painel ajustada pelo vendedor. Nulo = usar a
-  /// recomendação.
-  final int? quantidadeChicotePainel;
+  /// Chicotes painel escolhidos pelo vendedor: comprimento em metros →
+  /// quantidade. Nulo = ainda não escolhidos.
+  final Map<int, int>? chicotesPainel;
 
   const EntradaConfiguracao({
     required this.tecnologia,
@@ -66,10 +65,9 @@ class EntradaConfiguracao {
     this.linhasPorSecao = const [],
     this.temAlternador,
     this.alternadorNaFrente,
-    this.quantidadeChicotePainel,
     this.comprimentoIsobus,
-    this.comprimentoChicotePainel,
     this.comprimentoMangueiras,
+    this.chicotesPainel,
   });
 
   /// Seções usadas nas regras: na solteira, uma seção com todas as linhas.
@@ -104,6 +102,10 @@ class ItemConfiguracao {
   /// Aviso que acompanha o item sempre, mesmo depois de definido.
   final String? observacao;
 
+  /// Quantidade de cada comprimento (metros → quantidade), para itens em que
+  /// o vendedor mistura tamanhos. Vazio nos demais.
+  final Map<int, int> quantidadesPorComprimento;
+
   const ItemConfiguracao({
     required this.componente,
     required this.quantidade,
@@ -115,6 +117,7 @@ class ItemConfiguracao {
     this.quantidadeRecomendada,
     this.comprimentoSugerido,
     this.observacao,
+    this.quantidadesPorComprimento = const {},
   });
 }
 
@@ -349,22 +352,26 @@ class RegrasConfigurador {
       Comprimentos.isobus,
     );
     comprimento(
-      Componentes.chicotePainel,
-      e.comprimentoChicotePainel,
-      Comprimentos.chicotePainel,
-    );
-    comprimento(
       Componentes.mangueiras,
       e.comprimentoMangueiras,
       Comprimentos.mangueiras,
     );
-    if (e.quantidadeChicotePainel != null && e.quantidadeChicotePainel! < 1) {
-      v.add(
-        const Validacao(
-          NivelValidacao.erro,
-          'A quantidade de chicotes painel precisa ser pelo menos 1.',
-        ),
+    for (final MapEntry(key: metros, value: qtd)
+        in e.chicotesPainel?.entries ?? const <MapEntry<int, int>>[]) {
+      comprimento(
+        Componentes.chicotePainel,
+        metros,
+        Comprimentos.chicotePainel,
       );
+      if (qtd < 0) {
+        v.add(
+          Validacao(
+            NivelValidacao.erro,
+            'A quantidade de chicotes painel de $metros m não pode ser '
+            'negativa.',
+          ),
+        );
+      }
     }
     return v;
   }
@@ -501,15 +508,16 @@ class RegrasConfigurador {
     TipoPlantadeira.solteira => 'solteira',
   };
 
-  /// Chicote painel: quantidade recomendada pelas seções e saídas usadas,
-  /// ajustável pelo vendedor; comprimento escolhido pelo vendedor.
+  /// Chicote painel: quantidade recomendada pelas seções e saídas usadas; o
+  /// vendedor escolhe quantos de cada comprimento. Sem alternador o padrão é
+  /// 2 de 4 m.
   static ItemConfiguracao? _chicotePainel(
     EntradaConfiguracao e,
     DistribuicaoSaidas? distribuicao,
   ) {
     final int recomendado;
     final String motivo;
-    var comprimento = e.comprimentoChicotePainel;
+    var escolhidos = e.chicotesPainel;
     if (distribuicao != null) {
       final saidas = distribuicao.saidas.length;
       final trocas = distribuicao.trechos.length - saidas;
@@ -520,20 +528,31 @@ class RegrasConfigurador {
           '${trocas > 0 ? ' + $trocas trocas de seção dentro de uma saída' : ''}).';
     } else if (e.temAlternador == false) {
       recomendado = chicotesPainelSemAlternador;
-      comprimento ??= comprimentoPainelSemAlternador;
+      escolhidos ??= {comprimentoPainelSemAlternador: recomendado};
       motivo =
           'Obrigatório em máquina sem alternador: padrão de '
           '$chicotesPainelSemAlternador de $comprimentoPainelSemAlternador m.';
     } else {
       return null;
     }
-    return _porComprimento(
+    final quantidades = {
+      for (final m in Comprimentos.chicotePainel)
+        if ((escolhidos?[m] ?? 0) > 0) m: escolhidos![m]!,
+    };
+    final total = quantidades.values.fold(0, (s, n) => s + n);
+    return ItemConfiguracao(
       componente: Componentes.chicotePainel,
-      quantidade: e.quantidadeChicotePainel ?? recomendado,
+      quantidade: total,
       motivo: motivo,
-      opcoes: Comprimentos.chicotePainel,
-      escolhido: comprimento,
+      status: total > 0 ? StatusItem.definido : StatusItem.pendente,
+      pendencia: total > 0
+          ? null
+          : 'Escolher quantos chicotes painel de cada comprimento '
+                '(${_metros(Comprimentos.chicotePainel)}). '
+                'Recomendado: $recomendado.',
+      opcoesComprimento: Comprimentos.chicotePainel,
       quantidadeRecomendada: recomendado,
+      quantidadesPorComprimento: quantidades,
     );
   }
 
@@ -642,6 +661,20 @@ class RegrasConfigurador {
         ),
       ?_chicotePainel(e, distribuicao),
     ];
+
+    final painel = itens.lastOrNull;
+    if (painel != null &&
+        painel.componente == Componentes.chicotePainel &&
+        painel.quantidade > 0 &&
+        painel.quantidade != painel.quantidadeRecomendada) {
+      validacoes.add(
+        Validacao(
+          NivelValidacao.aviso,
+          'Chicote painel: ${painel.quantidade} escolhidos, recomendado '
+          '${painel.quantidadeRecomendada}.',
+        ),
+      );
+    }
 
     if (distribuicao != null) {
       for (final s in distribuicao.saidasQueMisturamSecoes) {

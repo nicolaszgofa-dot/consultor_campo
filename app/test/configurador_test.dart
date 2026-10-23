@@ -91,11 +91,30 @@ void main() {
       expect(r.item(Componentes.chicote1)!.quantidade, 5);
     });
 
-    test('ajuste do chicote painel volta à recomendação se a máquina muda', () {
-      final e = autotransportavel55()..ajustarChicotePainel(7);
-      expect(e.resultado.item(Componentes.chicotePainel)!.quantidade, 7);
+    test('chicote painel por comprimento; some se a máquina muda', () {
+      final e = autotransportavel55()
+        ..ajustarChicotePainel(4, 1)
+        ..ajustarChicotePainel(9, 1)
+        ..ajustarChicotePainel(9, 1)
+        ..ajustarChicotePainel(14, -1);
+      final p = e.resultado.item(Componentes.chicotePainel)!;
+      expect(p.quantidadesPorComprimento, {4: 1, 9: 2});
+      expect(p.quantidade, 3);
       e.mudarSecao(0, 1);
-      expect(e.quantidadeChicotePainel, isNull);
+      expect(e.chicotesPainel, isNull);
+    });
+
+    test('sem alternador o ajuste parte dos 2 de 4 m', () {
+      final e = ConfiguradorEstado()
+        ..tecnologia = Tecnologia.titaniumEletric
+        ..tipo = TipoPlantadeira.solteira
+        ..totalLinhas = 8
+        ..temAlternador = false
+        ..ajustarChicotePainel(9, 1);
+      expect(
+        e.resultado.item(Componentes.chicotePainel)!.quantidadesPorComprimento,
+        {4: 2, 9: 1},
+      );
     });
   });
 
@@ -218,11 +237,21 @@ void main() {
     expect(find.text('3 pendentes'), findsOneWidget);
     expect(find.text('Recomendado: 8'), findsOneWidget);
 
-    await tester.ensureVisible(find.byTooltip('Mais um chicote painel'));
+    final mais9 = find.byTooltip('Mais um chicote painel de 9 m');
+    await tester.ensureVisible(mais9);
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Mais um chicote painel'));
+    for (var i = 0; i < 8; i++) {
+      await tester.tap(mais9);
+      await tester.pump();
+    }
+    expect(estado.chicotesPainel, {9: 8});
+    expect(find.text('2 pendentes'), findsOneWidget);
+    await tester.tap(find.byTooltip('Mais um chicote painel de 14 m'));
     await tester.pump();
-    expect(estado.quantidadeChicotePainel, 9);
+    expect(
+      find.text('Chicote painel: 9 escolhidos, recomendado 8.'),
+      findsOneWidget,
+    );
 
     await tester.scrollUntilVisible(
       find.textContaining('Saída 3 (linhas 20 a 28)'),

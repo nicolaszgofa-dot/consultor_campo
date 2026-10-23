@@ -89,52 +89,86 @@ class _ItemResultado extends StatelessWidget {
       ],
     );
 
+    final numero = Text(
+      '${item.quantidade}',
+      style: const TextStyle(
+        fontFamily: fonteTitulo,
+        fontSize: 26,
+        fontWeight: FontWeight.w700,
+      ),
+    );
     final quantidade = item.quantidadeRecomendada == null
-        ? Text(
-            '${item.quantidade}',
-            style: const TextStyle(
-              fontFamily: fonteTitulo,
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
-            ),
-          )
+        ? numero
         : Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Contador(
-                valor: item.quantidade,
-                rotulo: 'um ${item.componente.toLowerCase()}',
-                tamanho: 36,
-                aoMenos: item.quantidade > 1
-                    ? () => estado.ajustarChicotePainel(item.quantidade - 1)
-                    : null,
-                aoMais: () => estado.ajustarChicotePainel(item.quantidade + 1),
-              ),
+              numero,
               Text(
                 'Recomendado: ${item.quantidadeRecomendada}',
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                   color: Cores.textoSecundario,
                 ),
               ),
             ],
           );
 
-    final comprimentos = item.opcoesComprimento.isEmpty
+    // Chicote painel: quantos de cada comprimento.
+    final porComprimento = item.quantidadeRecomendada == null
         ? null
-        : Wrap(
-            spacing: 6,
-            runSpacing: 6,
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               for (final m in item.opcoesComprimento)
-                _BotaoComprimento(
-                  metros: m,
-                  escolhido: estado.comprimentoEscolhido(item.componente) == m,
-                  sugerido: item.comprimentoSugerido == m,
-                  aoTocar: () => estado.escolherComprimento(item.componente, m),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 48,
+                        child: Text(
+                          '$m m',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Contador(
+                        valor: item.quantidadesPorComprimento[m] ?? 0,
+                        rotulo: 'um chicote painel de $m m',
+                        tamanho: 34,
+                        aoMenos: (item.quantidadesPorComprimento[m] ?? 0) > 0
+                            ? () => estado.ajustarChicotePainel(m, -1)
+                            : null,
+                        aoMais: () => estado.ajustarChicotePainel(m, 1),
+                      ),
+                    ],
+                  ),
                 ),
             ],
           );
+
+    final comprimentos = item.opcoesComprimento.isEmpty
+        ? null
+        : porComprimento ??
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final m in item.opcoesComprimento)
+                    _BotaoComprimento(
+                      metros: m,
+                      escolhido:
+                          estado.comprimentoEscolhido(item.componente) == m,
+                      sugerido: item.comprimentoSugerido == m,
+                      aoTocar: () =>
+                          estado.escolherComprimento(item.componente, m),
+                    ),
+                ],
+              );
 
     final situacao = _pendente
         ? Etiqueta(
