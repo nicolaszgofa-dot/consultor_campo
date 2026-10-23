@@ -27,6 +27,29 @@ enum TipoPlantadeira {
   const TipoPlantadeira(this.nome, {this.secoesSeparadas = true});
 }
 
+/// Bocal do reservatório de sementes pipoqueira (Titanium Elétric).
+enum BocalTitanium {
+  pol25('Bocal 2,5 pol'),
+  pol30('Bocal 3,0 pol'),
+  pol25e30('Bocal 2,5 + 3,0 pol');
+
+  final String nome;
+
+  const BocalTitanium(this.nome);
+}
+
+/// Kit bocal de sementes (Selenium Elétric).
+enum BocalSelenium {
+  gravidade('Kit bocal de sementes Selenium gravidade'),
+  giratorio25('Kit bocal de sementes Selenium gravidade bocal girat. 2,5 pol'),
+  giratorio30('Kit bocal de sementes Selenium gravidade bocal girat. 3,0 pol'),
+  engateRapido('Kit bocal de sementes Selenium engate rápido com tela dupla');
+
+  final String nome;
+
+  const BocalSelenium(this.nome);
+}
+
 /// Comprimentos disponíveis, em metros.
 abstract final class Comprimentos {
   static const isobus = [5, 11, 14, 17];
@@ -58,6 +81,14 @@ class EntradaConfiguracao {
   /// quantidade. Nulo = ainda não escolhidos.
   final Map<int, int>? chicotesPainel;
 
+  /// Titanium Elétric: se terá reservatório de sementes pipoqueira e, se
+  /// sim, qual bocal. Nulo = não respondido. Ignorado no Selenium.
+  final bool? reservatorioPipoqueira;
+  final BocalTitanium? bocalTitanium;
+
+  /// Selenium Elétric: kit bocal de sementes. Ignorado no Titanium.
+  final BocalSelenium? bocalSelenium;
+
   const EntradaConfiguracao({
     required this.tecnologia,
     required this.tipo,
@@ -68,6 +99,9 @@ class EntradaConfiguracao {
     this.comprimentoIsobus,
     this.comprimentoMangueiras,
     this.chicotesPainel,
+    this.reservatorioPipoqueira,
+    this.bocalTitanium,
+    this.bocalSelenium,
   });
 
   /// Seções usadas nas regras: na solteira, uma seção com todas as linhas.
@@ -218,6 +252,24 @@ abstract final class Componentes {
   static const chicote4 = 'Chicote de 4 linhas';
   static const chicote1 = 'Chicote de 1 linha';
   static const chicotePainel = 'Chicote painel';
+
+  // Titanium Elétric.
+  static const discoMilhoTitanium =
+      'Conjunto disco/anéis Titanium milho 28 furos';
+  static const discoSojaTitanium =
+      'Conjunto disco/anéis Titanium soja 90 furos';
+  static const reservatorioPipoqueira = 'Reservatório de sementes pipoqueira';
+
+  /// Bocal do reservatório pipoqueira antes de o vendedor escolher.
+  static const bocalPipoqueira = 'Bocal do reservatório pipoqueira';
+
+  // Selenium Elétric.
+  static const discoSojaSelenium =
+      'Subconjunto disco/anel soja 40 furos Selenium V23';
+  static const discoMilhoSelenium = 'Subconjunto disco/anel milho Selenium V23';
+
+  /// Kit bocal do Selenium antes de o vendedor escolher.
+  static const bocalSelenium = 'Kit bocal de sementes Selenium';
 }
 
 class RegrasConfigurador {
@@ -508,6 +560,58 @@ class RegrasConfigurador {
     TipoPlantadeira.solteira => 'solteira',
   };
 
+  /// Discos, reservatório e bocais de cada tecnologia, um por linha.
+  static List<ItemConfiguracao> _itensDaTecnologia(EntradaConfiguracao e) {
+    final linhas = e.totalLinhas;
+    final porLinha = 'Um por linha ($linhas linhas).';
+    ItemConfiguracao item(String componente) => ItemConfiguracao(
+      componente: componente,
+      quantidade: linhas,
+      motivo: porLinha,
+    );
+    ItemConfiguracao pendente(String componente, String pendencia) =>
+        ItemConfiguracao(
+          componente: componente,
+          quantidade: linhas,
+          motivo: porLinha,
+          status: StatusItem.pendente,
+          pendencia: pendencia,
+        );
+
+    switch (e.tecnologia) {
+      case Tecnologia.titaniumEletric:
+        return [
+          item(Componentes.discoMilhoTitanium),
+          item(Componentes.discoSojaTitanium),
+          if (e.reservatorioPipoqueira == null)
+            pendente(
+              Componentes.reservatorioPipoqueira,
+              'Responder se terá reservatório de sementes pipoqueira.',
+            )
+          else if (e.reservatorioPipoqueira!) ...[
+            item(Componentes.reservatorioPipoqueira),
+            if (e.bocalTitanium == null)
+              pendente(
+                Componentes.bocalPipoqueira,
+                'Escolher o bocal: '
+                '${BocalTitanium.values.map((b) => b.nome).join(', ')}.',
+              )
+            else
+              item(e.bocalTitanium!.nome),
+          ],
+        ];
+      case Tecnologia.seleniumEletric:
+        return [
+          item(Componentes.discoSojaSelenium),
+          item(Componentes.discoMilhoSelenium),
+          if (e.bocalSelenium == null)
+            pendente(Componentes.bocalSelenium, 'Escolher o kit bocal.')
+          else
+            item(e.bocalSelenium!.nome),
+        ];
+    }
+  }
+
   /// Chicote painel: quantidade recomendada pelas seções e saídas usadas; o
   /// vendedor escolhe quantos de cada comprimento. Sem alternador o padrão é
   /// 2 de 4 m.
@@ -591,6 +695,7 @@ class RegrasConfigurador {
           quantidade: linhas,
           motivo: 'Um por linha ($linhas linhas).',
         ),
+      if (linhas > 0) ..._itensDaTecnologia(e),
       const ItemConfiguracao(
         componente: Componentes.ecu,
         quantidade: 1,

@@ -33,6 +33,8 @@ ConfiguradorEstado autotransportavel55() {
   e
     ..avancar()
     ..responderAlternadorNaFrente(true)
+    ..avancar()
+    ..responderPipoqueira(false)
     ..avancar();
   return e;
 }
@@ -41,10 +43,33 @@ void main() {
   group('estado', () {
     test('a solteira pula a etapa de seções', () {
       final e = ConfiguradorEstado();
-      expect(e.etapas, hasLength(6));
+      expect(e.etapas, hasLength(7));
       e.escolherTipo(TipoPlantadeira.solteira);
       expect(e.etapas, isNot(contains(EtapaConfigurador.secoes)));
-      expect(e.etapas, hasLength(5));
+      expect(e.etapas, hasLength(6));
+    });
+
+    test('acessórios: Titanium pede pipoqueira e bocal', () {
+      final e = ConfiguradorEstado()
+        ..tecnologia = Tecnologia.titaniumEletric
+        ..etapa = EtapaConfigurador.acessorios;
+      expect(e.bloqueio, contains('pipoqueira'));
+      e.responderPipoqueira(true);
+      expect(e.bloqueio, 'Escolha o bocal do reservatório.');
+      e.escolherBocalTitanium(BocalTitanium.pol25e30);
+      expect(e.bloqueio, isNull);
+      e.responderPipoqueira(false);
+      expect(e.bocalTitanium, isNull);
+      expect(e.bloqueio, isNull);
+    });
+
+    test('acessórios: Selenium pede o kit bocal', () {
+      final e = ConfiguradorEstado()
+        ..tecnologia = Tecnologia.seleniumEletric
+        ..etapa = EtapaConfigurador.acessorios;
+      expect(e.bloqueio, 'Escolha o kit bocal de sementes.');
+      e.escolherBocalSelenium(BocalSelenium.giratorio30);
+      expect(e.bloqueio, isNull);
     });
 
     test('não avança sem resposta', () {
@@ -144,7 +169,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();
-    expect(find.text('PASSO 3 DE 5'), findsOneWidget);
+    expect(find.text('PASSO 3 DE 6'), findsOneWidget);
 
     await tester.tap(find.text('8'));
     await tester.pump();
@@ -154,14 +179,28 @@ void main() {
 
     // A solteira pula as seções e vai direto para a alimentação.
     expect(find.text('Alimentação elétrica'), findsOneWidget);
+    final continuar = find.widgetWithText(FilledButton, 'Continuar');
+    expect(tester.widget<FilledButton>(continuar).onPressed, isNull);
+    await tester.tap(find.text('Não'));
+    await tester.pump();
+    expect(find.textContaining('chicotes painel'), findsNothing);
+    await tester.tap(continuar);
+    await tester.pumpAndSettle();
+
+    // Acessórios do Titanium: pipoqueira com bocal.
+    expect(
+      find.text('Terá reservatório de sementes pipoqueira?'),
+      findsOneWidget,
+    );
     final verConfiguracao = find.widgetWithText(
       FilledButton,
       'Ver configuração',
     );
     expect(tester.widget<FilledButton>(verConfiguracao).onPressed, isNull);
-    await tester.tap(find.text('Não'));
+    await tester.tap(find.text('Sim'));
     await tester.pump();
-    expect(find.textContaining('chicotes painel'), findsNothing);
+    await tester.tap(find.text(BocalTitanium.pol30.nome));
+    await tester.pump();
     await tester.tap(verConfiguracao);
     await tester.pumpAndSettle();
 
@@ -169,6 +208,9 @@ void main() {
     expect(find.text(Componentes.caboBateria), findsOneWidget);
     expect(find.text(Componentes.chicotePainel), findsOneWidget);
     expect(find.text(Componentes.alternador), findsNothing);
+    expect(find.text(Componentes.discoMilhoTitanium), findsOneWidget);
+    expect(find.text(Componentes.reservatorioPipoqueira), findsOneWidget);
+    expect(find.text(BocalTitanium.pol30.nome), findsOneWidget);
     expect(find.text('1 pendentes'), findsOneWidget);
 
     // Escolher o comprimento do ISOBUS fecha a última pendência.
@@ -271,7 +313,9 @@ void main() {
     tester,
   ) async {
     tela(tester, const Size(1194, 834));
-    final estado = autotransportavel55()..voltar();
+    final estado = autotransportavel55()
+      ..voltar()
+      ..voltar();
     estado.alternadorNaFrente = null;
     await abrir(tester, estado);
     await tester.pumpAndSettle();

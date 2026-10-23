@@ -32,6 +32,7 @@ class _ConfiguradorPageState extends State<ConfiguradorPage> {
     EtapaConfigurador.linhas => EtapaLinhas(estado: _estado),
     EtapaConfigurador.secoes => EtapaSecoes(estado: _estado),
     EtapaConfigurador.alimentacao => EtapaAlimentacao(estado: _estado),
+    EtapaConfigurador.acessorios => EtapaAcessorios(estado: _estado),
     EtapaConfigurador.resultado => EtapaResultado(estado: _estado),
   };
 
@@ -240,7 +241,7 @@ class _Rodape extends StatelessWidget {
       principal = FilledButton(
         onPressed: estado.bloqueio == null ? estado.avancar : null,
         child: Text(
-          estado.etapa == EtapaConfigurador.alimentacao
+          estado.etapa == EtapaConfigurador.acessorios
               ? 'Ver configuração'
               : 'Continuar',
           maxLines: 1,

@@ -37,7 +37,8 @@ Experiência: o vendedor informa as características → o sistema interpreta �
 3. Número de linhas.
 4. Número de seções que fecham separadas e linhas de cada seção: só para autotransportável, caixa central e tandem. Na solteira a etapa é pulada.
 5. Alimentação: na solteira de até 12 linhas, se terá alternador; no autotransportável e no tandem, se o alternador pode ir no cabeçalho ou no tandem.
-6. Resultado.
+6. Acessórios do dosador: no Titanium, se terá reservatório de sementes pipoqueira e, se sim, o bocal; no Selenium, o kit bocal de sementes.
+7. Resultado.
 
 ## Arquitetura da lógica
 
@@ -56,6 +57,7 @@ O motor de regras é Dart puro, sem tela, com testes. Cada regra pendente aparec
 |---|---|
 | Tecnologias | Titanium Elétric e Selenium Elétric usam os mesmos componentes de instalação |
 | Conjunto da tecnologia | 1 por linha (Conjunto Titanium Elétric ou Conjunto Selenium Elétric) |
+| Discos e acessórios do dosador | dependem da tecnologia, 1 por linha; ver "Itens de cada tecnologia" abaixo |
 | Conjunto ECU | 1, obrigatório; é um conjunto único com diversos componentes |
 | Sensor de levante | 1 unidade, obrigatório |
 | Sensor de semente | 1 por linha (quantidade = total de linhas) |
@@ -88,6 +90,29 @@ Cada saída alimenta um **conjunto** de no máximo 10 linhas vizinhas.
 - Saídas que cruzam a divisão entre seções ficam marcadas para validação.
 
 A distribuição é **indicativa**. O limitante é sempre a saída do alternador (no máximo 10 linhas); na montagem, o técnico ajusta as saídas conforme a máquina e as seções reais.
+
+## Itens de cada tecnologia
+
+Todos com quantidade igual ao número de linhas da configuração.
+
+**Titanium Elétric**
+- Conjunto disco/anéis Titanium milho 28 furos (obrigatório).
+- Conjunto disco/anéis Titanium soja 90 furos (obrigatório).
+- Reservatório de sementes pipoqueira: o vendedor responde se terá. Se sim, escolhe o bocal:
+  - Bocal 2,5 pol;
+  - Bocal 3,0 pol;
+  - Bocal 2,5 + 3,0 pol.
+
+**Selenium Elétric**
+- Subconjunto disco/anel soja 40 furos Selenium V23 (obrigatório).
+- Subconjunto disco/anel milho Selenium V23 (obrigatório).
+- Kit bocal de sementes, escolhido pelo vendedor:
+  - Kit bocal de sementes Selenium gravidade;
+  - Kit bocal de sementes Selenium gravidade bocal girat. 2,5 pol;
+  - Kit bocal de sementes Selenium gravidade bocal girat. 3,0 pol;
+  - Kit bocal de sementes Selenium engate rápido com tela dupla.
+
+Enquanto a pergunta da pipoqueira, o bocal do Titanium ou o kit bocal do Selenium não forem respondidos, o item fica pendente.
 
 ## Chicotes
 
@@ -162,3 +187,8 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 | Solteira, 8 linhas, sem alternador (seções) | seção única de 8 linhas; sem perguntar seções |
 | Solteira, 55 linhas | 6 saídas (10, 9, 9, 9, 9, 9), sem aviso de mistura |
 | Caixa central ou tandem sem seções | erro: informar as seções |
+| Titanium, 45 linhas, sem pipoqueira | 45 discos de milho 28 furos e 45 de soja 90 furos; sem reservatório |
+| Titanium com pipoqueira e bocal 2,5 + 3,0 pol | reservatório e bocal, 1 por linha |
+| Titanium sem responder a pipoqueira | reservatório pendente |
+| Selenium, 30 linhas, kit engate rápido | 30 discos de soja 40 furos, 30 de milho e 30 kits bocal engate rápido |
+| Selenium sem kit bocal escolhido | kit bocal pendente |

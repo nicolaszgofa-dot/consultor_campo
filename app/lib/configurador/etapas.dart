@@ -840,3 +840,148 @@ class _MapaSaidas extends StatelessWidget {
     );
   }
 }
+
+class EtapaAcessorios extends StatelessWidget {
+  final ConfiguradorEstado estado;
+
+  const EtapaAcessorios({super.key, required this.estado});
+
+  @override
+  Widget build(BuildContext context) {
+    if (estado.tecnologia == Tecnologia.seleniumEletric) {
+      return _CartaoPergunta(
+        pergunta: 'Qual kit bocal de sementes?',
+        child: _ListaOpcoes<BocalSelenium>(
+          opcoes: BocalSelenium.values,
+          escolhida: estado.bocalSelenium,
+          rotulo: (b) => b.nome,
+          aoEscolher: estado.escolherBocalSelenium,
+        ),
+      );
+    }
+    final pipoqueira = estado.reservatorioPipoqueira;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _CartaoPergunta(
+          pergunta: 'Terá reservatório de sementes pipoqueira?',
+          child: SimNao(
+            valor: pipoqueira,
+            aoEscolher: estado.responderPipoqueira,
+          ),
+        ),
+        if (pipoqueira == true) ...[
+          const SizedBox(height: 12),
+          _CartaoPergunta(
+            pergunta: 'Qual bocal do reservatório?',
+            child: _ListaOpcoes<BocalTitanium>(
+              opcoes: BocalTitanium.values,
+              escolhida: estado.bocalTitanium,
+              rotulo: (b) => b.nome,
+              aoEscolher: estado.escolherBocalTitanium,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _CartaoPergunta extends StatelessWidget {
+  final String pergunta;
+  final Widget child;
+
+  const _CartaoPergunta({required this.pergunta, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return CartaoBranco(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            pergunta,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// Lista de opções em que só uma pode ser escolhida.
+class _ListaOpcoes<T> extends StatelessWidget {
+  final List<T> opcoes;
+  final T? escolhida;
+  final String Function(T) rotulo;
+  final ValueChanged<T> aoEscolher;
+
+  const _ListaOpcoes({
+    required this.opcoes,
+    required this.escolhida,
+    required this.rotulo,
+    required this.aoEscolher,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final o in opcoes)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Semantics(
+              selected: o == escolhida,
+              button: true,
+              child: Material(
+                color: o == escolhida ? Cores.verdeClaro : Cores.branco,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: o == escolhida ? Cores.verde : Cores.borda,
+                    width: o == escolhida ? 2 : 1,
+                  ),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => aoEscolher(o),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          o == escolhida
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          color: o == escolhida
+                              ? Cores.verdeTexto
+                              : Cores.cinza,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            rotulo(o),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}

@@ -7,6 +7,7 @@ enum EtapaConfigurador {
   linhas('Número de linhas', 'Quantas linhas tem a plantadeira?'),
   secoes('Seções', 'Quantas seções fecham separadas?'),
   alimentacao('Alimentação', 'Alimentação elétrica'),
+  acessorios('Acessórios do dosador', 'Acessórios do dosador'),
   resultado('Resultado', 'Configuração gerada');
 
   final String nome;
@@ -32,6 +33,10 @@ class ConfiguradorEstado extends ChangeNotifier {
   /// Chicotes painel escolhidos: comprimento em metros → quantidade.
   Map<int, int>? chicotesPainel;
 
+  bool? reservatorioPipoqueira;
+  BocalTitanium? bocalTitanium;
+  BocalSelenium? bocalSelenium;
+
   /// Etapas do fluxo: a solteira pula a de seções.
   List<EtapaConfigurador> get etapas => [
     for (final e in EtapaConfigurador.values)
@@ -50,6 +55,9 @@ class ConfiguradorEstado extends ChangeNotifier {
     comprimentoIsobus: comprimentoIsobus,
     comprimentoMangueiras: comprimentoMangueiras,
     chicotesPainel: chicotesPainel,
+    reservatorioPipoqueira: reservatorioPipoqueira,
+    bocalTitanium: bocalTitanium,
+    bocalSelenium: bocalSelenium,
   );
 
   ResultadoConfiguracao get resultado => RegrasConfigurador.configurar(entrada);
@@ -85,7 +93,20 @@ class ConfiguradorEstado extends ChangeNotifier {
       perguntarAlternador && temAlternador == null
           ? 'Responda se a máquina terá alternador hidráulico.'
           : null,
+    EtapaConfigurador.acessorios => _bloqueioAcessorios,
     EtapaConfigurador.resultado => null,
+  };
+
+  String? get _bloqueioAcessorios => switch (tecnologia) {
+    Tecnologia.titaniumEletric =>
+      reservatorioPipoqueira == null
+          ? 'Responda se terá reservatório de sementes pipoqueira.'
+          : reservatorioPipoqueira! && bocalTitanium == null
+          ? 'Escolha o bocal do reservatório.'
+          : null,
+    Tecnologia.seleniumEletric =>
+      bocalSelenium == null ? 'Escolha o kit bocal de sementes.' : null,
+    null => 'Escolha a tecnologia.',
   };
 
   String? get _bloqueioSecoes {
@@ -165,6 +186,22 @@ class ConfiguradorEstado extends ChangeNotifier {
 
   void responderAlternadorNaFrente(bool sim) {
     alternadorNaFrente = sim;
+    notifyListeners();
+  }
+
+  void responderPipoqueira(bool sim) {
+    reservatorioPipoqueira = sim;
+    if (!sim) bocalTitanium = null;
+    notifyListeners();
+  }
+
+  void escolherBocalTitanium(BocalTitanium b) {
+    bocalTitanium = b;
+    notifyListeners();
+  }
+
+  void escolherBocalSelenium(BocalSelenium b) {
+    bocalSelenium = b;
     notifyListeners();
   }
 

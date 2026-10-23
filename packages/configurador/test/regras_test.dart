@@ -12,6 +12,9 @@ ResultadoConfiguracao configurar(
   int? mangueiras,
   Map<int, int>? painel,
   bool? naFrente,
+  bool? pipoqueira,
+  BocalTitanium? bocalTitanium,
+  BocalSelenium? bocalSelenium,
 }) => RegrasConfigurador.configurar(
   EntradaConfiguracao(
     tecnologia: tecnologia,
@@ -23,8 +26,22 @@ ResultadoConfiguracao configurar(
     comprimentoIsobus: isobus,
     comprimentoMangueiras: mangueiras,
     chicotesPainel: painel,
+    reservatorioPipoqueira: pipoqueira,
+    bocalTitanium: bocalTitanium,
+    bocalSelenium: bocalSelenium,
   ),
 );
+
+/// Itens próprios de cada tecnologia (discos, reservatório, bocais).
+const itensDaTecnologia = {
+  Componentes.discoMilhoTitanium,
+  Componentes.discoSojaTitanium,
+  Componentes.reservatorioPipoqueira,
+  Componentes.bocalPipoqueira,
+  Componentes.discoSojaSelenium,
+  Componentes.discoMilhoSelenium,
+  Componentes.bocalSelenium,
+};
 
 int? qtd(ResultadoConfiguracao r, String componente) =>
     r.item(componente)?.quantidade;
@@ -304,6 +321,7 @@ void main() {
       isobus: 11,
       painel: {9: 3},
       mangueiras: 12,
+      pipoqueira: false,
     );
     expect(r.pendentes, isEmpty);
     expect(r.item(Componentes.caboIsobus)!.comprimento, 11);
@@ -486,10 +504,80 @@ void main() {
       21,
       13,
     ], tecnologia: Tecnologia.seleniumEletric);
-    // O primeiro item é o conjunto da própria tecnologia.
-    expect(
-      s.itens.skip(1).map((i) => (i.componente, i.quantidade)),
-      t.itens.skip(1).map((i) => (i.componente, i.quantidade)),
-    );
+    // Fora o conjunto, os discos e os bocais, que são de cada tecnologia.
+    Iterable<(String, int)> instalacao(ResultadoConfiguracao r) => r.itens
+        .skip(1)
+        .where((i) => !itensDaTecnologia.contains(i.componente))
+        .where((i) => !BocalTitanium.values.any((b) => b.nome == i.componente))
+        .where((i) => !BocalSelenium.values.any((b) => b.nome == i.componente))
+        .map((i) => (i.componente, i.quantidade));
+    expect(instalacao(s), instalacao(t));
+  });
+
+  group('itens de cada tecnologia', () {
+    test('Titanium: discos de milho e soja, um por linha', () {
+      final r = configurar(45, [17, 17, 11], pipoqueira: false);
+      expect(qtd(r, Componentes.discoMilhoTitanium), 45);
+      expect(qtd(r, Componentes.discoSojaTitanium), 45);
+      expect(r.item(Componentes.discoSojaSelenium), isNull);
+      expect(r.item(Componentes.reservatorioPipoqueira), isNull);
+    });
+
+    test('Titanium: sem resposta da pipoqueira fica pendente', () {
+      final p = configurar(45, [
+        17,
+        17,
+        11,
+      ]).item(Componentes.reservatorioPipoqueira)!;
+      expect(p.status, StatusItem.pendente);
+      expect(p.pendencia, contains('pipoqueira'));
+    });
+
+    test('Titanium com pipoqueira: reservatório e bocal por linha', () {
+      final semBocal = configurar(45, [17, 17, 11], pipoqueira: true);
+      expect(qtd(semBocal, Componentes.reservatorioPipoqueira), 45);
+      expect(
+        semBocal.item(Componentes.bocalPipoqueira)!.status,
+        StatusItem.pendente,
+      );
+      for (final b in BocalTitanium.values) {
+        final r = configurar(
+          45,
+          [17, 17, 11],
+          pipoqueira: true,
+          bocalTitanium: b,
+        );
+        expect(qtd(r, b.nome), 45, reason: b.nome);
+        expect(r.item(Componentes.bocalPipoqueira), isNull);
+      }
+    });
+
+    test('Selenium: discos de soja e milho e o kit bocal escolhido', () {
+      final pendente = configurar(30, [
+        10,
+        10,
+        10,
+      ], tecnologia: Tecnologia.seleniumEletric);
+      expect(qtd(pendente, Componentes.discoSojaSelenium), 30);
+      expect(qtd(pendente, Componentes.discoMilhoSelenium), 30);
+      expect(
+        pendente.item(Componentes.bocalSelenium)!.status,
+        StatusItem.pendente,
+      );
+      expect(pendente.item(Componentes.discoMilhoTitanium), isNull);
+      final r = configurar(
+        30,
+        [10, 10, 10],
+        tecnologia: Tecnologia.seleniumEletric,
+        bocalSelenium: BocalSelenium.engateRapido,
+        // Resposta do Titanium é ignorada no Selenium.
+        pipoqueira: true,
+      );
+      expect(
+        qtd(r, 'Kit bocal de sementes Selenium engate rápido com tela dupla'),
+        30,
+      );
+      expect(r.item(Componentes.reservatorioPipoqueira), isNull);
+    });
   });
 }
