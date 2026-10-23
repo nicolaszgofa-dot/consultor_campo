@@ -49,6 +49,23 @@ void main() {
       expect(e.etapas, hasLength(6));
     });
 
+    test('kit conversão pede a tecnologia do kit', () {
+      final e = ConfiguradorEstado()
+        ..escolherTecnologia(Tecnologia.titaniumEletric);
+      e.escolherKitConversao();
+      expect(e.kitConversao, isTrue);
+      expect(e.tecnologia, isNull);
+      expect(e.bloqueio, contains('Titanium ou Selenium'));
+      e.escolherTecnologiaDoKit(Tecnologia.seleniumEletric);
+      expect(e.bloqueio, isNull);
+      expect(e.resumo, 'Kit conversão · Selenium Elétric');
+      e.avancar();
+      expect(e.etapa, EtapaConfigurador.tipo);
+      // Voltar a uma tecnologia comum desfaz o kit.
+      e.escolherTecnologia(Tecnologia.titaniumEletric);
+      expect(e.kitConversao, isFalse);
+    });
+
     test('acessórios: Titanium pede pipoqueira e bocal', () {
       final e = ConfiguradorEstado()
         ..tecnologia = Tecnologia.titaniumEletric
@@ -217,6 +234,33 @@ void main() {
     await tester.tap(find.bySemanticsLabel('5 m, sugerido'));
     await tester.pump();
     expect(find.text('Gerar relatório'), findsOneWidget);
+  });
+
+  testWidgets('kit conversão na tela de tecnologia', (tester) async {
+    tela(tester, const Size(1194, 834));
+    final estado = ConfiguradorEstado();
+    await abrir(tester, estado);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Kit conversão'));
+    await tester.pump();
+    expect(
+      find.text('O kit conversão é para qual tecnologia?'),
+      findsOneWidget,
+    );
+    final continuar = find.widgetWithText(FilledButton, 'Continuar');
+    expect(tester.widget<FilledButton>(continuar).onPressed, isNull);
+
+    // Segundo "Titanium Elétric" é o da lista do kit.
+    await tester.tap(find.text('Titanium Elétric').last);
+    await tester.pump();
+    expect(estado.kitConversao, isTrue);
+    expect(estado.tecnologia, Tecnologia.titaniumEletric);
+    await tester.tap(continuar);
+    await tester.pumpAndSettle();
+    expect(find.text('Qual é o tipo da plantadeira?'), findsOneWidget);
+    expect(find.text('Kit conversão · Titanium Elétric'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('acima de 60 linhas a tela explica o bloqueio', (tester) async {

@@ -22,6 +22,10 @@ class ConfiguradorEstado extends ChangeNotifier {
   EtapaConfigurador etapa = EtapaConfigurador.tecnologia;
 
   Tecnologia? tecnologia;
+
+  /// Kit conversão: depois de escolhido, o vendedor diz se é para Titanium
+  /// ou Selenium, e o resto do fluxo segue o da tecnologia escolhida.
+  bool kitConversao = false;
   TipoPlantadeira? tipo;
   int totalLinhas = 0;
   List<int> secoes = [];
@@ -69,6 +73,7 @@ class ConfiguradorEstado extends ChangeNotifier {
 
   /// Ex.: "Titanium Elétric · Autotransportável · 55 linhas".
   String get resumo => [
+    if (kitConversao) 'Kit conversão',
     ?tecnologia?.nome,
     ?tipo?.nome,
     if (totalLinhas > 0) '$totalLinhas linhas',
@@ -77,7 +82,11 @@ class ConfiguradorEstado extends ChangeNotifier {
   /// Por que não dá para sair da etapa atual. Nulo = pode avançar.
   String? get bloqueio => switch (etapa) {
     EtapaConfigurador.tecnologia =>
-      tecnologia == null ? 'Escolha a tecnologia.' : null,
+      tecnologia != null
+          ? null
+          : kitConversao
+          ? 'Escolha se o kit conversão é para Titanium ou Selenium.'
+          : 'Escolha a tecnologia.',
     EtapaConfigurador.tipo =>
       tipo == null ? 'Escolha o tipo da plantadeira.' : null,
     EtapaConfigurador.linhas =>
@@ -146,6 +155,21 @@ class ConfiguradorEstado extends ChangeNotifier {
   }
 
   void escolherTecnologia(Tecnologia t) {
+    kitConversao = false;
+    tecnologia = t;
+    notifyListeners();
+  }
+
+  /// Escolhe o kit conversão; a tecnologia do kit vem em seguida.
+  void escolherKitConversao() {
+    if (kitConversao) return;
+    kitConversao = true;
+    tecnologia = null;
+    notifyListeners();
+  }
+
+  void escolherTecnologiaDoKit(Tecnologia t) {
+    kitConversao = true;
     tecnologia = t;
     notifyListeners();
   }

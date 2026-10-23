@@ -33,6 +33,7 @@ Experiência: o vendedor informa as características → o sistema interpreta �
 ## Sequência das etapas
 
 1. Tecnologia que será configurada.
+   - Opções: Titanium Elétric, Selenium Elétric ou **Kit conversão**. No kit conversão, o vendedor escolhe em seguida se é para Titanium Elétric ou Selenium Elétric; daí em diante as etapas e as regras são as da tecnologia escolhida.
 2. Tipo da plantadeira: autotransportável, caixa central, tandem ou solteira.
 3. Número de linhas.
 4. Número de seções que fecham separadas e linhas de cada seção: só para autotransportável, caixa central e tandem. Na solteira a etapa é pulada.
@@ -161,6 +162,7 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
 - Se algum **tipo de plantadeira** muda outras regras além das seções (cabeamento, chicotes).
 - **Commander:** fora desta versão.
+- **Kit conversão:** se os itens do resultado mudam em relação à tecnologia nova (hoje são os mesmos; o kit só aparece no resumo).
 
 ## Casos de teste do motor de regras
 

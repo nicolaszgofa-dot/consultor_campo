@@ -62,54 +62,96 @@ class EtapaTecnologia extends StatelessWidget {
 
   const EtapaTecnologia({super.key, required this.estado});
 
+  Widget _cartao({
+    required Widget imagem,
+    required String nome,
+    required String descricao,
+    required bool selecionado,
+    required VoidCallback aoTocar,
+  }) => CartaoOpcao(
+    selecionado: selecionado,
+    aoTocar: aoTocar,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 170, child: Center(child: imagem)),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(
+              nome,
+              style: const TextStyle(
+                fontFamily: fonteTitulo,
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (selecionado) const Etiqueta('Selecionada'),
+          ],
+        ),
+        Text(
+          descricao,
+          style: const TextStyle(fontSize: 15, color: Cores.textoSecundario),
+        ),
+      ],
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
-    return _LadoALado(
-      filhos: [
-        for (final t in Tecnologia.values)
-          CartaoOpcao(
-            selecionado: estado.tecnologia == t,
-            aoTocar: () => estado.escolherTecnologia(t),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 200,
-                  child: Center(
-                    child: Image.asset(
-                      _imagens[t]!,
-                      fit: BoxFit.contain,
-                      semanticLabel: t.nome,
-                    ),
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _LadoALado(
+          filhos: [
+            for (final t in Tecnologia.values)
+              _cartao(
+                imagem: Image.asset(
+                  _imagens[t]!,
+                  fit: BoxFit.contain,
+                  semanticLabel: t.nome,
                 ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      t.nome,
-                      style: const TextStyle(
-                        fontFamily: fonteTitulo,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    if (estado.tecnologia == t) const Etiqueta('Selecionada'),
-                  ],
+                nome: t.nome,
+                descricao: _descricoes[t]!,
+                selecionado: !estado.kitConversao && estado.tecnologia == t,
+                aoTocar: () => estado.escolherTecnologia(t),
+              ),
+            _cartao(
+              imagem: Container(
+                width: 110,
+                height: 110,
+                decoration: BoxDecoration(
+                  color: Cores.verdeClaro,
+                  borderRadius: BorderRadius.circular(28),
                 ),
-                Text(
-                  _descricoes[t]!,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Cores.textoSecundario,
-                  ),
+                child: const Icon(
+                  Icons.published_with_changes,
+                  size: 60,
+                  color: Cores.verdeTexto,
                 ),
-              ],
+              ),
+              nome: 'Kit conversão',
+              descricao: 'Para Titanium Elétric ou Selenium Elétric',
+              selecionado: estado.kitConversao,
+              aoTocar: estado.escolherKitConversao,
+            ),
+          ],
+        ),
+        if (estado.kitConversao) ...[
+          const SizedBox(height: 12),
+          _CartaoPergunta(
+            pergunta: 'O kit conversão é para qual tecnologia?',
+            child: _ListaOpcoes<Tecnologia>(
+              opcoes: Tecnologia.values,
+              escolhida: estado.tecnologia,
+              rotulo: (t) => t.nome,
+              aoEscolher: estado.escolherTecnologiaDoKit,
             ),
           ),
+        ],
       ],
     );
   }
