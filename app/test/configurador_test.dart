@@ -61,9 +61,27 @@ void main() {
       expect(e.resumo, 'Kit conversão · Selenium Elétric');
       e.avancar();
       expect(e.etapa, EtapaConfigurador.tipo);
+      expect(e.etapas, isNot(contains(EtapaConfigurador.acessorios)));
       // Voltar a uma tecnologia comum desfaz o kit.
       e.escolherTecnologia(Tecnologia.titaniumEletric);
       expect(e.kitConversao, isFalse);
+      expect(e.etapas, contains(EtapaConfigurador.acessorios));
+    });
+
+    test('kit conversão: resultado com o kit e sem discos', () {
+      final e = ConfiguradorEstado()
+        ..escolherKitConversao()
+        ..escolherTecnologiaDoKit(Tecnologia.seleniumEletric)
+        ..tipo = TipoPlantadeira.solteira
+        ..totalLinhas = 20;
+      final r = e.resultado;
+      expect(
+        r.item('Kit conversão Selenium G3 p/ Selenium Elétric')!.quantidade,
+        20,
+      );
+      expect(r.item('Conjunto Selenium Elétric'), isNull);
+      expect(r.item(Componentes.discoSojaSelenium), isNull);
+      expect(r.item(Componentes.bocalSelenium), isNull);
     });
 
     test('acessórios: Titanium pede pipoqueira e bocal', () {

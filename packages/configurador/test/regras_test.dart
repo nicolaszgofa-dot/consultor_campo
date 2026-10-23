@@ -51,6 +51,7 @@ List<(int, int)> faixas(DistribuicaoSaidas d) => [
 ];
 
 void main() {
+  testesKitConversao();
   test('8 linhas sem alternador: itens obrigatórios e cabo da bateria', () {
     final r = configurar(
       8,
@@ -578,6 +579,39 @@ void main() {
         30,
       );
       expect(r.item(Componentes.reservatorioPipoqueira), isNull);
+    });
+  });
+}
+
+void testesKitConversao() {
+  group('kit conversão', () {
+    ResultadoConfiguracao kit(Tecnologia t) => RegrasConfigurador.configurar(
+      EntradaConfiguracao(
+        tecnologia: t,
+        tipo: TipoPlantadeira.autotransportavel,
+        totalLinhas: 30,
+        linhasPorSecao: const [10, 10, 10],
+        kitConversao: true,
+      ),
+    );
+
+    test('Titanium: kit no lugar do conjunto, sem discos nem pipoqueira', () {
+      final r = kit(Tecnologia.titaniumEletric);
+      expect(qtd(r, 'Kit conversão Titanium Elétric'), 30);
+      expect(r.item('Conjunto Titanium Elétric'), isNull);
+      for (final c in itensDaTecnologia) {
+        expect(r.item(c), isNull, reason: c);
+      }
+      expect(qtd(r, Componentes.sensorSemente), 30);
+    });
+
+    test('Selenium: kit G3 no lugar do conjunto, sem discos nem bocal', () {
+      final r = kit(Tecnologia.seleniumEletric);
+      expect(qtd(r, 'Kit conversão Selenium G3 p/ Selenium Elétric'), 30);
+      expect(r.item('Conjunto Selenium Elétric'), isNull);
+      for (final c in itensDaTecnologia) {
+        expect(r.item(c), isNull, reason: c);
+      }
     });
   });
 }

@@ -41,10 +41,16 @@ class ConfiguradorEstado extends ChangeNotifier {
   BocalTitanium? bocalTitanium;
   BocalSelenium? bocalSelenium;
 
-  /// Etapas do fluxo: a solteira pula a de seções.
+  /// Etapas do fluxo: a solteira pula a de seções e o kit conversão pula a
+  /// de acessórios do dosador.
   List<EtapaConfigurador> get etapas => [
     for (final e in EtapaConfigurador.values)
-      if (e != EtapaConfigurador.secoes || (tipo?.secoesSeparadas ?? true)) e,
+      if (switch (e) {
+        EtapaConfigurador.secoes => tipo?.secoesSeparadas ?? true,
+        EtapaConfigurador.acessorios => !kitConversao,
+        _ => true,
+      })
+        e,
   ];
 
   int get indice => etapas.indexOf(etapa);
@@ -62,6 +68,7 @@ class ConfiguradorEstado extends ChangeNotifier {
     reservatorioPipoqueira: reservatorioPipoqueira,
     bocalTitanium: bocalTitanium,
     bocalSelenium: bocalSelenium,
+    kitConversao: kitConversao,
   );
 
   ResultadoConfiguracao get resultado => RegrasConfigurador.configurar(entrada);

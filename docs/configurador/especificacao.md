@@ -33,12 +33,12 @@ Experiência: o vendedor informa as características → o sistema interpreta �
 ## Sequência das etapas
 
 1. Tecnologia que será configurada.
-   - Opções: Titanium Elétric, Selenium Elétric ou **Kit conversão**. No kit conversão, o vendedor escolhe em seguida se é para Titanium Elétric ou Selenium Elétric; daí em diante as etapas e as regras são as da tecnologia escolhida.
+   - Opções: Titanium Elétric, Selenium Elétric ou **Kit conversão**. No kit conversão, o vendedor escolhe em seguida se é para Titanium Elétric ou Selenium Elétric; daí em diante as etapas e as regras são as da tecnologia escolhida, menos a etapa de acessórios do dosador (ver "Kit conversão").
 2. Tipo da plantadeira: autotransportável, caixa central, tandem ou solteira.
 3. Número de linhas.
 4. Número de seções que fecham separadas e linhas de cada seção: só para autotransportável, caixa central e tandem. Na solteira a etapa é pulada.
 5. Alimentação: na solteira de até 12 linhas, se terá alternador; no autotransportável e no tandem, se o alternador pode ir no cabeçalho ou no tandem.
-6. Acessórios do dosador: no Titanium, se terá reservatório de sementes pipoqueira e, se sim, o bocal; no Selenium, o kit bocal de sementes.
+6. Acessórios do dosador (não aparece no kit conversão): no Titanium, se terá reservatório de sementes pipoqueira e, se sim, o bocal; no Selenium, o kit bocal de sementes.
 7. Resultado.
 
 ## Arquitetura da lógica
@@ -115,6 +115,15 @@ Todos com quantidade igual ao número de linhas da configuração.
 
 Enquanto a pergunta da pipoqueira, o bocal do Titanium ou o kit bocal do Selenium não forem respondidos, o item fica pendente.
 
+**Kit conversão**
+- No lugar do conjunto da tecnologia entra o kit, 1 por linha:
+  - Titanium: **Kit conversão Titanium Elétric**;
+  - Selenium: **Kit conversão Selenium G3 p/ Selenium Elétric**.
+- Não entram os discos/anéis de soja e milho.
+- Titanium: não pergunta o reservatório de sementes pipoqueira (nem o bocal).
+- Selenium: não pergunta o kit bocal de sementes.
+- Os demais itens (ECU, sensores, cabos, alternador, chicotes) seguem as mesmas regras.
+
 ## Chicotes
 
 A montagem segue a sequência: alternador → de cada saída sai um **chicote painel** → conexão com os **chicotes de linha** que alimentam o conjunto daquela saída. Quando o conjunto passa de uma seção para outra, outro chicote painel liga os chicotes de linha de uma seção aos da seguinte.
@@ -162,7 +171,6 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
 - Se algum **tipo de plantadeira** muda outras regras além das seções (cabeamento, chicotes).
 - **Commander:** fora desta versão.
-- **Kit conversão:** se os itens do resultado mudam em relação à tecnologia nova (hoje são os mesmos; o kit só aparece no resumo).
 
 ## Casos de teste do motor de regras
 
@@ -194,3 +202,5 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 | Titanium sem responder a pipoqueira | reservatório pendente |
 | Selenium, 30 linhas, kit engate rápido | 30 discos de soja 40 furos, 30 de milho e 30 kits bocal engate rápido |
 | Selenium sem kit bocal escolhido | kit bocal pendente |
+| Kit conversão Titanium, 30 linhas | 30 kits conversão Titanium Elétric; sem conjunto, discos, reservatório ou bocal |
+| Kit conversão Selenium, 30 linhas | 30 kits conversão Selenium G3 p/ Selenium Elétric; sem conjunto, discos ou kit bocal |

@@ -89,6 +89,10 @@ class EntradaConfiguracao {
   /// Selenium Elétric: kit bocal de sementes. Ignorado no Titanium.
   final BocalSelenium? bocalSelenium;
 
+  /// Kit conversão para a [tecnologia]: troca o conjunto pelo kit e não
+  /// leva discos, reservatório pipoqueira nem bocais.
+  final bool kitConversao;
+
   const EntradaConfiguracao({
     required this.tecnologia,
     required this.tipo,
@@ -102,6 +106,7 @@ class EntradaConfiguracao {
     this.reservatorioPipoqueira,
     this.bocalTitanium,
     this.bocalSelenium,
+    this.kitConversao = false,
   });
 
   /// Seções usadas nas regras: na solteira, uma seção com todas as linhas.
@@ -242,6 +247,12 @@ class ResultadoConfiguracao {
 
 abstract final class Componentes {
   static String conjunto(Tecnologia t) => 'Conjunto ${t.nome}';
+
+  static String kitConversao(Tecnologia t) => switch (t) {
+    Tecnologia.titaniumEletric => 'Kit conversão Titanium Elétric',
+    Tecnologia.seleniumEletric =>
+      'Kit conversão Selenium G3 p/ Selenium Elétric',
+  };
   static const ecu = 'Conjunto ECU';
   static const sensorLevante = 'Sensor de levante';
   static const sensorSemente = 'Sensor de semente';
@@ -562,6 +573,7 @@ class RegrasConfigurador {
 
   /// Discos, reservatório e bocais de cada tecnologia, um por linha.
   static List<ItemConfiguracao> _itensDaTecnologia(EntradaConfiguracao e) {
+    if (e.kitConversao) return const [];
     final linhas = e.totalLinhas;
     final porLinha = 'Um por linha ($linhas linhas).';
     ItemConfiguracao item(String componente) => ItemConfiguracao(
@@ -691,7 +703,9 @@ class RegrasConfigurador {
     final itens = <ItemConfiguracao>[
       if (linhas > 0)
         ItemConfiguracao(
-          componente: Componentes.conjunto(e.tecnologia),
+          componente: e.kitConversao
+              ? Componentes.kitConversao(e.tecnologia)
+              : Componentes.conjunto(e.tecnologia),
           quantidade: linhas,
           motivo: 'Um por linha ($linhas linhas).',
         ),

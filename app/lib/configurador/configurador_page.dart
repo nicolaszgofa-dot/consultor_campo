@@ -241,7 +241,7 @@ class _Rodape extends StatelessWidget {
       principal = FilledButton(
         onPressed: estado.bloqueio == null ? estado.avancar : null,
         child: Text(
-          estado.etapa == EtapaConfigurador.acessorios
+          estado.indice == estado.etapas.length - 2
               ? 'Ver configuração'
               : 'Continuar',
           maxLines: 1,
