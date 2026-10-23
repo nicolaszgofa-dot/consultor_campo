@@ -215,25 +215,10 @@ class _EtapaLinhasState extends State<EtapaLinhas> {
   Widget build(BuildContext context) {
     final estado = widget.estado;
     final total = estado.totalLinhas;
-    final tipo = estado.tipo;
-    final String? alternador;
-    if (total < 1 || total > RegrasConfigurador.capacidadeMaxima) {
-      alternador = null;
-    } else if (tipo != null && tipo.secoesSeparadas) {
-      alternador =
-          'Alternador hidráulico obrigatório em ${tipo.nome.toLowerCase()}.';
-    } else if (RegrasConfigurador.alternadorObrigatorio(
-      total,
-      TipoPlantadeira.solteira,
-    )) {
-      alternador =
-          'A partir de 13 linhas o alternador hidráulico é '
-          'obrigatório.';
-    } else {
-      alternador =
-          'Até 12 linhas o alternador é opcional: a pergunta '
-          'aparece na etapa Alimentação.';
-    }
+    // Só o bloqueio acima da capacidade aparece; as regras ficam no motor.
+    final erro = total > RegrasConfigurador.capacidadeMaxima
+        ? estado.bloqueio
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -304,14 +289,9 @@ class _EtapaLinhasState extends State<EtapaLinhas> {
             ],
           ),
         ),
-        if (alternador != null) ...[
+        if (erro != null) ...[
           const SizedBox(height: 12),
-          Aviso(
-            alternador,
-            tipo: tipo != null && tipo.secoesSeparadas || total > 12
-                ? TipoAviso.ok
-                : TipoAviso.info,
-          ),
+          Aviso(erro, tipo: TipoAviso.erro),
         ],
       ],
     );
@@ -725,17 +705,6 @@ class EtapaAlimentacao extends StatelessWidget {
       if (distribuicao != null) {
         filhos.add(_MapaSaidas(distribuicao: distribuicao));
       }
-    } else if (estado.temAlternador == false) {
-      filhos.add(
-        Aviso(
-          'Entram obrigatórios: cabo de alimentação direto da bateria e '
-          '${RegrasConfigurador.chicotesPainelSemAlternador} chicotes painel '
-          'de ${RegrasConfigurador.comprimentoPainelSemAlternador} m (padrão).'
-          '${sugestao == null ? '' : ' Sugestão de cabo ISOBUS: '
-                    '${sugestao.isobus} m.'}',
-          tipo: TipoAviso.ok,
-        ),
-      );
     }
 
     return Column(
@@ -866,12 +835,6 @@ class _MapaSaidas extends StatelessWidget {
                 ],
               ),
             ),
-          const SizedBox(height: 6),
-          const Text(
-            'O limite é sempre a saída do alternador (até 10 linhas). Na '
-            'montagem, o técnico ajusta as saídas conforme as seções reais.',
-            style: TextStyle(fontSize: 13, color: Cores.textoSecundario),
-          ),
         ],
       ),
     );

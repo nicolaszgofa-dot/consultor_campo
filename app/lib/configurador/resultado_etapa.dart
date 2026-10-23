@@ -42,11 +42,6 @@ class EtapaResultado extends StatelessWidget {
           Aviso(v.mensagem, tipo: TipoAviso.atencao),
           const SizedBox(height: 8),
         ],
-        if (resultado.distribuicao != null)
-          const Aviso(
-            'A distribuição das saídas é indicativa: o técnico ajusta na '
-            'montagem, respeitando o limite de 10 linhas por saída.',
-          ),
       ],
     );
   }

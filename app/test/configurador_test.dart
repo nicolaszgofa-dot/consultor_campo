@@ -129,7 +129,7 @@ void main() {
 
     await tester.tap(find.text('8'));
     await tester.pump();
-    expect(find.textContaining('Até 12 linhas o alternador'), findsOneWidget);
+    expect(find.textContaining('alternador'), findsNothing);
     await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();
 
@@ -142,7 +142,7 @@ void main() {
     expect(tester.widget<FilledButton>(verConfiguracao).onPressed, isNull);
     await tester.tap(find.text('Não'));
     await tester.pump();
-    expect(find.textContaining('2 chicotes painel de 4 m'), findsOneWidget);
+    expect(find.textContaining('chicotes painel'), findsNothing);
     await tester.tap(verConfiguracao);
     await tester.pumpAndSettle();
 
@@ -156,6 +156,22 @@ void main() {
     await tester.tap(find.bySemanticsLabel('5 m, sugerido'));
     await tester.pump();
     expect(find.text('Gerar relatório'), findsOneWidget);
+  });
+
+  testWidgets('acima de 60 linhas a tela explica o bloqueio', (tester) async {
+    tela(tester, const Size(430, 2400));
+    final estado = ConfiguradorEstado()
+      ..escolherTecnologia(Tecnologia.titaniumEletric)
+      ..avancar()
+      ..escolherTipo(TipoPlantadeira.tandem)
+      ..avancar();
+    await abrir(tester, estado);
+    await tester.tap(find.byTooltip('Mais uma linha'));
+    await tester.pump();
+    expect(find.textContaining('Fale com a engenharia'), findsNothing);
+    estado.definirLinhas(61);
+    await tester.pump();
+    expect(find.textContaining('Fale com a engenharia'), findsOneWidget);
   });
 
   testWidgets('voltar do cabeçalho volta uma etapa', (tester) async {
