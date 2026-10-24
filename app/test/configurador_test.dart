@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:configurador/configurador.dart';
 import 'package:consultor_campo/configurador/configurador_estado.dart';
 import 'package:consultor_campo/configurador/configurador_page.dart';
+import 'package:consultor_campo/configurador/etapas.dart';
 import 'package:consultor_campo/main.dart';
 import 'package:consultor_campo/tema.dart';
 import 'package:flutter/material.dart';
@@ -128,6 +131,17 @@ void main() {
           'da plantadeira.',
         ),
       );
+    });
+
+    test('toda marca do catálogo tem logo, menos SFIL', () {
+      final marcas = {
+        for (final catalogo in adaptacoes.values) ...catalogo.keys,
+      };
+      final semLogo = marcas.where((m) => !logosMarcas.containsKey(m));
+      expect(semLogo, ['SFIL']);
+      for (final caminho in logosMarcas.values) {
+        expect(File(caminho).existsSync(), isTrue, reason: caminho);
+      }
     });
 
     test('kit conversão não tem adaptação', () {

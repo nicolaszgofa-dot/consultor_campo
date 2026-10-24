@@ -27,6 +27,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/configurador/
+    - assets/marcas/
   # Barlow (SIL Open Font License, assets/fonts/OFL.txt), embutida para
   # funcionar sem internet no campo.
   fonts:

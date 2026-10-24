@@ -1071,6 +1071,27 @@ class EtapaAdaptacao extends StatelessWidget {
   }
 }
 
+/// Logo de cada marca de plantadeira. Marca sem logo mostra só o nome.
+const logosMarcas = {
+  'AGCO': 'assets/marcas/agco.webp',
+  'Baldan': 'assets/marcas/baldan.webp',
+  'CNH': 'assets/marcas/cnh.png',
+  'Fankhauser': 'assets/marcas/fankhauser.png',
+  'Genius': 'assets/marcas/genius.jpg',
+  'Horsch': 'assets/marcas/horsch.png',
+  'Imasa': 'assets/marcas/imasa.png',
+  'Jacto': 'assets/marcas/jacto.png',
+  'John Deere': 'assets/marcas/john_deere.png',
+  'Jumil': 'assets/marcas/jumil.jpg',
+  'KF': 'assets/marcas/kf.jpg',
+  'Kuhn': 'assets/marcas/kuhn.jpg',
+  'Planticenter': 'assets/marcas/planticenter.png',
+  'Semeato': 'assets/marcas/semeato.jpg',
+  'Stara': 'assets/marcas/stara.png',
+  'Tatu Marchesan': 'assets/marcas/tatu_marchesan.png',
+  'Vence Tudo': 'assets/marcas/vence_tudo.png',
+};
+
 class _BotaoMarca extends StatelessWidget {
   final String texto;
   final bool ativo;
@@ -1084,32 +1105,55 @@ class _BotaoMarca extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logo = logosMarcas[texto];
+    final nome = Text(
+      texto,
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        fontSize: logo == null ? 18 : 14,
+        fontWeight: FontWeight.w700,
+        color: ativo ? Cores.verdeTexto : Cores.tinta,
+      ),
+    );
     return Semantics(
       selected: ativo,
       button: true,
-      child: Material(
-        color: ativo ? Cores.verdeEscuro : Cores.branco,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: ativo ? Cores.verdeEscuro : Cores.cinza),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: aoTocar,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 120, minHeight: 52),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Center(
-                widthFactor: 1,
-                child: Text(
-                  texto,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: ativo ? Cores.branco : Cores.tinta,
-                  ),
-                ),
+      label: texto,
+      child: ExcludeSemantics(
+        child: Material(
+          color: Cores.branco,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(
+              color: ativo ? Cores.verde : Cores.borda,
+              width: ativo ? 3 : 1,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: aoTocar,
+            child: SizedBox(
+              width: 150,
+              height: 104,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: logo == null
+                    ? Center(child: nome)
+                    : Column(
+                        children: [
+                          Expanded(
+                            child: Image.asset(
+                              logo,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, _, _) => const SizedBox(),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          nome,
+                        ],
+                      ),
               ),
             ),
           ),
