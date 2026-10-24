@@ -45,12 +45,25 @@ void main() {
     telaAlta(tester);
     await tester.pumpWidget(const ConsultorCampoApp());
 
-    expect(find.text('Avaliação de plantio'), findsOneWidget);
-    expect(find.text('Abrir avaliações'), findsOneWidget);
-    for (final t in ['Configurador', 'ROI', 'Material técnico', 'Relatórios']) {
+    final titulos = [
+      'Avaliação de plantio',
+      'Configurador',
+      'ROI',
+      'Material técnico',
+      'Relatórios',
+    ];
+    for (final t in titulos) {
       expect(find.text(t), findsOneWidget);
     }
     expect(find.text('EM BREVE'), findsNWidgets(2));
+    // Nenhuma funcionalidade em destaque: todos os cartões do mesmo tamanho.
+    final tamanhos = {
+      for (final t in titulos)
+        tester.getSize(
+          find.ancestor(of: find.text(t), matching: find.byType(InkWell)).first,
+        ),
+    };
+    expect(tamanhos, hasLength(1));
   });
 
   testWidgets('funcionalidade em breve abre a tela provisória', (tester) async {
@@ -64,7 +77,7 @@ void main() {
   testWidgets('identificação leva às leituras da trena', (tester) async {
     telaAlta(tester);
     await tester.pumpWidget(const ConsultorCampoApp());
-    await tester.tap(find.text('Abrir avaliações'));
+    await tester.tap(find.text('Avaliação de plantio'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Nova avaliação de plantio'));
     await tester.pumpAndSettle();
@@ -101,7 +114,7 @@ void main() {
   testWidgets('identificação pede os valores obrigatórios', (tester) async {
     telaAlta(tester);
     await tester.pumpWidget(const ConsultorCampoApp());
-    await tester.tap(find.text('Abrir avaliações'));
+    await tester.tap(find.text('Avaliação de plantio'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Nova avaliação de plantio'));
     await tester.pumpAndSettle();
