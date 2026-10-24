@@ -43,6 +43,16 @@ final funcionalidades = <Funcionalidade>[
     tela: () => const RoiPage(),
   ),
   const Funcionalidade(
+    titulo: 'Playbook',
+    descricao: 'Roteiro da visita e argumentos para o cliente',
+    icone: Icons.assignment_outlined,
+  ),
+  const Funcionalidade(
+    titulo: 'Conceito',
+    descricao: 'Conceitos técnicos por trás das tecnologias J.Assy',
+    icone: Icons.lightbulb_outline,
+  ),
+  const Funcionalidade(
     titulo: 'Material técnico',
     descricao: 'Catálogos, manuais e fichas técnicas',
     icone: Icons.menu_book_outlined,
