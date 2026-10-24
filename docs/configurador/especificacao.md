@@ -130,7 +130,7 @@ Enquanto a pergunta da pipoqueira, o bocal do Titanium ou o kit bocal do Seleniu
 Depois das etapas da máquina, o vendedor escolhe a **marca** da plantadeira e, em seguida, o **modelo**, entre as adaptações da tecnologia escolhida. Só vale para Titanium Elétric e Selenium Elétric; o kit conversão não tem essa etapa.
 
 - O catálogo completo está em `packages/configurador/lib/src/adaptacoes.dart`, com as marcas em ordem alfabética.
-- **Titanium Elétric:** 15 marcas e 32 modelos. Fonte: sumário do guia de montagem Titanium. Quando o guia não traz modelo, o nome da marca é o modelo.
+- **Titanium Elétric:** 14 marcas e 32 modelos. Fonte: sumário do guia de montagem Titanium. Quando o guia não traz modelo, o nome da marca é o modelo. **SFIL** não é marca: é um modelo comum a Tatu Marchesan, Stara e Semeato.
 - **Selenium Elétric:** 11 marcas e 37 modelos. Fonte: sumário do guia de montagem Selenium, só as opções de acionamento elétrico (as de eixo flexível ficam de fora), mais a Macanuda Top Fertilizante Série 02 (Vence Tudo), que está na lista de condutores.
 - Nomes de marca padronizados nas duas listas: **Tatu Marchesan** e **CNH**.
 - Trocar a tecnologia ou a marca descarta o modelo escolhido. Uma adaptação que não existe no catálogo da tecnologia bloqueia.

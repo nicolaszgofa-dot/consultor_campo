@@ -55,6 +55,7 @@ void main() {
   testesKitConversao();
   testesAdaptacao();
   testesCondutorSelenium();
+  testesSfil();
   test('8 linhas sem alternador: itens obrigatórios e cabo da bateria', () {
     final r = configurar(
       8,
@@ -622,9 +623,9 @@ void testesKitConversao() {
 
 void testesAdaptacao() {
   group('adaptação', () {
-    test('catálogo: 15 marcas e 32 modelos no Titanium', () {
+    test('catálogo: 14 marcas e 32 modelos no Titanium', () {
       final t = adaptacoes[Tecnologia.titaniumEletric]!;
-      expect(t, hasLength(15));
+      expect(t, hasLength(14));
       expect(t.values.fold(0, (s, m) => s + m.length), 32);
     });
 
@@ -763,5 +764,17 @@ void testesCondutorSelenium() {
         isEmpty,
       );
     });
+  });
+}
+
+void testesSfil() {
+  test('SFIL é modelo de Tatu Marchesan, Stara e Semeato, não marca', () {
+    final t = adaptacoes[Tecnologia.titaniumEletric]!;
+    expect(t.containsKey('SFIL'), isFalse);
+    final comSfil = [
+      for (final MapEntry(key: marca, value: modelos) in t.entries)
+        if (modelos.contains('SFIL')) marca,
+    ];
+    expect(comSfil, ['Semeato', 'Stara', 'Tatu Marchesan']);
   });
 }

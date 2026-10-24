@@ -21,7 +21,8 @@ class Adaptacao {
 /// Adaptações disponíveis por tecnologia: marca → modelos, em ordem
 /// alfabética de marca. Fonte: guias de montagem Titanium e Selenium; no
 /// Selenium só entram as opções de acionamento elétrico. Quando o guia não
-/// traz modelo, o nome da marca é o modelo.
+/// traz modelo, o nome da marca é o modelo. SFIL é um modelo comum a Tatu
+/// Marchesan, Stara e Semeato, não uma marca.
 const adaptacoes = <Tecnologia, Map<String, List<String>>>{
   Tecnologia.titaniumEletric: {
     'AGCO': [
@@ -44,15 +45,10 @@ const adaptacoes = <Tecnologia, Map<String, List<String>>>{
       'Sol Quadra / Sol Tower',
       'Land Master',
       'PSL',
-      'TATU/Semeato/SFIL',
+      'SFIL',
     ],
-    'SFIL': ['TATU/Semeato/SFIL'],
-    'Stara': ['ST1', 'ST2', 'ST3'],
-    'Tatu Marchesan': [
-      'USAP (antiga)',
-      'USAP S-0120 (nova)',
-      'TATU/Semeato/SFIL',
-    ],
+    'Stara': ['ST1', 'ST2', 'ST3', 'SFIL'],
+    'Tatu Marchesan': ['USAP (antiga)', 'USAP S-0120 (nova)', 'SFIL'],
     'Vence Tudo': ['Vence Tudo'],
   },
   Tecnologia.seleniumEletric: {

@@ -133,12 +133,12 @@ void main() {
       );
     });
 
-    test('toda marca do catálogo tem logo, menos SFIL', () {
+    test('toda marca do catálogo tem logo', () {
       final marcas = {
         for (final catalogo in adaptacoes.values) ...catalogo.keys,
       };
       final semLogo = marcas.where((m) => !logosMarcas.containsKey(m));
-      expect(semLogo, ['SFIL']);
+      expect(semLogo, isEmpty);
       for (final caminho in logosMarcas.values) {
         expect(File(caminho).existsSync(), isTrue, reason: caminho);
       }
