@@ -41,6 +41,7 @@ const itensDaTecnologia = {
   Componentes.discoSojaSelenium,
   Componentes.discoMilhoSelenium,
   Componentes.bocalSelenium,
+  Componentes.condutorSelenium,
 };
 
 int? qtd(ResultadoConfiguracao r, String componente) =>
@@ -53,6 +54,7 @@ List<(int, int)> faixas(DistribuicaoSaidas d) => [
 void main() {
   testesKitConversao();
   testesAdaptacao();
+  testesCondutorSelenium();
   test('8 linhas sem alternador: itens obrigatórios e cabo da bateria', () {
     final r = configurar(
       8,
@@ -510,6 +512,7 @@ void main() {
     Iterable<(String, int)> instalacao(ResultadoConfiguracao r) => r.itens
         .skip(1)
         .where((i) => !itensDaTecnologia.contains(i.componente))
+        .where((i) => !i.componente.startsWith('Condutor de sementes'))
         .where((i) => !BocalTitanium.values.any((b) => b.nome == i.componente))
         .where((i) => !BocalSelenium.values.any((b) => b.nome == i.componente))
         .map((i) => (i.componente, i.quantidade));
@@ -625,10 +628,10 @@ void testesAdaptacao() {
       expect(t.values.fold(0, (s, m) => s + m.length), 32);
     });
 
-    test('catálogo: 11 marcas e 36 modelos no Selenium, sem eixo flexível', () {
+    test('catálogo: 11 marcas e 37 modelos no Selenium, sem eixo flexível', () {
       final s = adaptacoes[Tecnologia.seleniumEletric]!;
       expect(s, hasLength(11));
-      expect(s.values.fold(0, (n, m) => n + m.length), 36);
+      expect(s.values.fold(0, (n, m) => n + m.length), 37);
       for (final modelos in s.values) {
         for (final m in modelos) {
           expect(m, isNot(contains('flexível')));
@@ -666,6 +669,80 @@ void testesAdaptacao() {
         entrada(const Adaptacao('Stara', 'ST2')),
       );
       expect(erros.single.mensagem, contains('não existe para Selenium'));
+    });
+  });
+}
+
+void testesCondutorSelenium() {
+  group('condutor de sementes do Selenium', () {
+    ResultadoConfiguracao selenium(Adaptacao? a, {bool kit = false}) =>
+        RegrasConfigurador.configurar(
+          EntradaConfiguracao(
+            tecnologia: Tecnologia.seleniumEletric,
+            tipo: TipoPlantadeira.solteira,
+            totalLinhas: 20,
+            adaptacao: a,
+            kitConversao: kit,
+          ),
+        );
+
+    test('toda adaptação do Selenium tem condutor', () {
+      final catalogo = adaptacoes[Tecnologia.seleniumEletric]!;
+      for (final MapEntry(key: marca, value: modelos) in catalogo.entries) {
+        for (final modelo in modelos) {
+          expect(
+            condutoresSelenium[marca]?[modelo],
+            isNotNull,
+            reason: '$marca · $modelo',
+          );
+        }
+      }
+      expect(condutoresSelenium.values.fold(0, (n, m) => n + m.length), 37);
+    });
+
+    test('retrabalhado: entra o condutor da adaptação, um por linha', () {
+      final r = selenium(const Adaptacao('Horsch', 'Maestro Duo 36.50'));
+      final c = r.item('Condutor de sementes retrabalhado JD1 - 20000000608')!;
+      expect(c.quantidade, 20);
+      expect(c.status, StatusItem.definido);
+      expect(c.motivo, contains('Horsch · Maestro Duo 36.50'));
+    });
+
+    test('original: entra o condutor original', () {
+      final r = selenium(const Adaptacao('CNH', 'S-2200 Easy Riser'));
+      expect(qtd(r, 'Condutor de sementes original'), 20);
+    });
+
+    test('exemplos da lista', () {
+      String condutor(String marca, String modelo) =>
+          condutoresSelenium[marca]![modelo]!;
+      expect(
+        condutor('Jumil', '2980 Pantográfica'),
+        'Condutor de sementes retrabalhado JM3 - 30000000002',
+      );
+      expect(
+        condutor('Tatu Marchesan', 'COP CE Suprema'),
+        'Condutor de sementes retrabalhado - 20000000568',
+      );
+      expect(
+        condutor('Vence Tudo', 'Macanuda Top Fertilizante Série 02'),
+        'Condutor de sementes retrabalhado VT1 - 20000000654',
+      );
+    });
+
+    test('sem adaptação fica pendente; kit e Titanium não têm', () {
+      final p = selenium(null).item(Componentes.condutorSelenium)!;
+      expect(p.status, StatusItem.pendente);
+      final kit = selenium(null, kit: true);
+      expect(
+        kit.itens.where((i) => i.componente.startsWith('Condutor')),
+        isEmpty,
+      );
+      final titanium = configurar(30, [10, 10, 10], pipoqueira: false);
+      expect(
+        titanium.itens.where((i) => i.componente.startsWith('Condutor')),
+        isEmpty,
+      );
     });
   });
 }

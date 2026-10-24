@@ -93,10 +93,73 @@ const adaptacoes = <Tecnologia, Map<String, List<String>>>{
     ],
     'Stara': ['Princesa', 'Vitória'],
     'Tatu Marchesan': ['Ultraflex', 'COP CE Suprema', 'USAP Chassi S-0120'],
-    'Vence Tudo': ['Panther', 'Panther Mecânica para Pneumática'],
+    'Vence Tudo': [
+      'Panther',
+      'Panther Mecânica para Pneumática',
+      'Macanuda Top Fertilizante Série 02',
+    ],
   },
 };
 
 /// Se [a] existe no catálogo da tecnologia [t].
+const _original = 'Condutor de sementes original';
+const _jd1 = 'Condutor de sementes retrabalhado JD1 - 20000000608';
+const _jm1 = 'Condutor de sementes retrabalhado JM1 - 20000000653';
+const _jm3 = 'Condutor de sementes retrabalhado JM3 - 30000000002';
+const _kh1 = 'Condutor de sementes retrabalhado KH1 - 20000000526';
+const _sm4 = 'Condutor de sementes retrabalhado SM4 - 20000000621';
+const _vt1 = 'Condutor de sementes retrabalhado VT1 - 20000000654';
+
+/// Condutor de sementes de cada adaptação do Selenium Elétric (marca →
+/// modelo → condutor), um por linha.
+const condutoresSelenium = <String, Map<String, String>>{
+  'AGCO': {
+    'Pantográfica – Chassi novo (cx. única)': _original,
+    'Momentum': _original,
+    'Pantográfica – Chassi novo (cx. individual)': _original,
+  },
+  'CNH': {'S-2200 Easy Riser': _original, 'S-3200 Easy Riser': _original},
+  'Horsch': {'Maestro Duo 36.50': _jd1},
+  'Jacto': {'Meridia 200': _original},
+  'John Deere': {
+    'S-2100 SN abaixo de 99.999 (linha chapa)': _jd1,
+    'S-2100 SN acima de 100.000 (linha fundido)': _jd1,
+    'S-1100 SN acima de 100.000 (linha fundido)': _original,
+    'S-1100 SN abaixo de 99.999 (cx. individual)': _original,
+    'S-1100 SN abaixo de 99.999 (cx. suspensa)': _original,
+    'S-9200 Vacumeter/Radial meter': _jd1,
+    'S-9200 Vacumeter/Radial meter (cx. individual)': _jd1,
+  },
+  'Jumil': {
+    '3090 (a partir de 2009) / 3090 SS / 7090 / 8090 SS (até 2009)': _jm1,
+    '2980 Pantográfica': _jm3,
+    '3070 Chassis entre Setembro/2012 e Março/2015 (cx. individual)': _original,
+    '3070/2670 Chassis Março/2017 – Atual (cx. suspensa)': _original,
+    '3070/2670 Chassis Março/2017 – Atual (cx. individual)': _original,
+    '7090 Chassi 2980 Pantográfica (cx. individual)': _jm3,
+    '7090 Chassi 2980 Pantográfica (cx. suspensa)': _jm3,
+    '2980 Pivotada anterior a 2005 (cx. individual)': _original,
+    '2980 Pivotada anterior a 2005 (cx. suspensa)': _original,
+    '2640 (cx. suspensa)': _original,
+  },
+  'Kuhn': {'PDM/PD Máxima 1200': _kh1, 'Prime e Prime AT P': _original},
+  'Semeato': {
+    'Sol TT – Chassi vermelho': _sm4,
+    'Sol TT – Chassi preto': _sm4,
+    'Sol TT V02 – Ponto de fixação reto': _sm4,
+  },
+  'Stara': {'Princesa': _original, 'Vitória': _original},
+  'Tatu Marchesan': {
+    'Ultraflex': _jd1,
+    'COP CE Suprema': 'Condutor de sementes retrabalhado - 20000000568',
+    'USAP Chassi S-0120': _jd1,
+  },
+  'Vence Tudo': {
+    'Panther': _vt1,
+    'Panther Mecânica para Pneumática': _vt1,
+    'Macanuda Top Fertilizante Série 02': _vt1,
+  },
+};
+
 bool adaptacaoValida(Tecnologia t, Adaptacao a) =>
     adaptacoes[t]?[a.marca]?.contains(a.modelo) ?? false;

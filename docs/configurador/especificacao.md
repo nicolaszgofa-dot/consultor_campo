@@ -131,10 +131,11 @@ Depois das etapas da máquina, o vendedor escolhe a **marca** da plantadeira e, 
 
 - O catálogo completo está em `packages/configurador/lib/src/adaptacoes.dart`, com as marcas em ordem alfabética.
 - **Titanium Elétric:** 15 marcas e 32 modelos. Fonte: sumário do guia de montagem Titanium. Quando o guia não traz modelo, o nome da marca é o modelo.
-- **Selenium Elétric:** 11 marcas e 36 modelos. Fonte: sumário do guia de montagem Selenium, só as opções de acionamento elétrico (as de eixo flexível ficam de fora).
+- **Selenium Elétric:** 11 marcas e 37 modelos. Fonte: sumário do guia de montagem Selenium, só as opções de acionamento elétrico (as de eixo flexível ficam de fora), mais a Macanuda Top Fertilizante Série 02 (Vence Tudo), que está na lista de condutores.
 - Nomes de marca padronizados nas duas listas: **Tatu Marchesan** e **CNH**.
 - Trocar a tecnologia ou a marca descarta o modelo escolhido. Uma adaptação que não existe no catálogo da tecnologia bloqueia.
 - No resultado, a adaptação aparece como "Adaptação: marca · modelo".
+- **Selenium Elétric:** cada adaptação define o **condutor de sementes**, que entra no resultado com 1 por linha. Pode ser o "Condutor de sementes original" ou um retrabalhado (JD1, JM1, JM3, KH1, SM4, VT1 ou o 20000000568 da Tatu Marchesan COP CE Suprema). A tabela completa está em `condutoresSelenium`, no mesmo arquivo do catálogo. Sem adaptação escolhida, o condutor fica pendente. O kit conversão e o Titanium Elétric não têm condutor.
 
 ## Chicotes
 
@@ -183,7 +184,7 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
 - Se algum **tipo de plantadeira** muda outras regras além das seções (cabeamento, chicotes).
 - **Commander:** fora desta versão.
-- **Adaptação:** se a marca e o modelo escolhidos geram itens no resultado (código, quantidade). Hoje só aparecem como informação.
+- **Adaptação Titanium:** se a marca e o modelo geram itens no resultado. Hoje só aparecem como informação.
 - **Plantadeira fora do catálogo de adaptações:** o que fazer quando a marca ou o modelo não estão na lista.
 
 ## Casos de teste do motor de regras
@@ -220,3 +221,6 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 | Kit conversão Selenium, 30 linhas | 30 kits conversão Selenium G3 p/ Selenium Elétric; sem conjunto, discos ou kit bocal |
 | Selenium, adaptação CNH · S-2200 Easy Riser | válida |
 | Selenium, adaptação Stara · ST2 (só existe no Titanium) | erro: adaptação não existe para Selenium Elétric |
+| Selenium, 20 linhas, adaptação Horsch · Maestro Duo 36.50 | 20 condutores de sementes retrabalhados JD1 - 20000000608 |
+| Selenium, 20 linhas, adaptação CNH · S-2200 Easy Riser | 20 condutores de sementes originais |
+| Selenium sem adaptação | condutor de sementes pendente |

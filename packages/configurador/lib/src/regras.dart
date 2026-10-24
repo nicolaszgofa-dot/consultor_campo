@@ -288,6 +288,9 @@ abstract final class Componentes {
 
   /// Kit bocal do Selenium antes de o vendedor escolher.
   static const bocalSelenium = 'Kit bocal de sementes Selenium';
+
+  /// Condutor de sementes do Selenium antes de escolher a adaptação.
+  static const condutorSelenium = 'Condutor de sementes';
 }
 
 class RegrasConfigurador {
@@ -587,6 +590,30 @@ class RegrasConfigurador {
     TipoPlantadeira.solteira => 'solteira',
   };
 
+  /// Selenium Elétric (fora do kit conversão): condutor de sementes da
+  /// adaptação escolhida, um por linha.
+  static ItemConfiguracao? _condutorSelenium(EntradaConfiguracao e) {
+    if (e.tecnologia != Tecnologia.seleniumEletric || e.kitConversao) {
+      return null;
+    }
+    final a = e.adaptacao;
+    final condutor = a == null ? null : condutoresSelenium[a.marca]?[a.modelo];
+    if (condutor == null) {
+      return ItemConfiguracao(
+        componente: Componentes.condutorSelenium,
+        quantidade: e.totalLinhas,
+        motivo: 'Um por linha (${e.totalLinhas} linhas).',
+        status: StatusItem.pendente,
+        pendencia: 'Escolher a adaptação (marca e modelo da plantadeira).',
+      );
+    }
+    return ItemConfiguracao(
+      componente: condutor,
+      quantidade: e.totalLinhas,
+      motivo: 'Pela adaptação $a, um por linha.',
+    );
+  }
+
   /// Discos, reservatório e bocais de cada tecnologia, um por linha.
   static List<ItemConfiguracao> _itensDaTecnologia(EntradaConfiguracao e) {
     if (e.kitConversao) return const [];
@@ -726,6 +753,7 @@ class RegrasConfigurador {
           motivo: 'Um por linha ($linhas linhas).',
         ),
       if (linhas > 0) ..._itensDaTecnologia(e),
+      if (linhas > 0) ?_condutorSelenium(e),
       const ItemConfiguracao(
         componente: Componentes.ecu,
         quantidade: 1,
