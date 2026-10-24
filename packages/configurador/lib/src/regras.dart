@@ -167,7 +167,8 @@ class ItemConfiguracao {
   });
 }
 
-enum NivelValidacao { erro, aviso }
+/// [info] só informa o vendedor; [aviso] pede atenção; [erro] bloqueia.
+enum NivelValidacao { erro, aviso, info }
 
 class Validacao {
   final NivelValidacao nivel;
@@ -607,10 +608,26 @@ class RegrasConfigurador {
         pendencia: 'Escolher a adaptação (marca e modelo da plantadeira).',
       );
     }
+    if (condutor == condutorOriginal) return null;
     return ItemConfiguracao(
       componente: condutor,
       quantidade: e.totalLinhas,
       motivo: 'Pela adaptação $a, um por linha.',
+    );
+  }
+
+  /// Aviso de que a plantadeira mantém o condutor de sementes original.
+  static Validacao? _avisoCondutorOriginal(EntradaConfiguracao e) {
+    final a = e.adaptacao;
+    if (e.tecnologia != Tecnologia.seleniumEletric ||
+        e.kitConversao ||
+        a == null ||
+        condutoresSelenium[a.marca]?[a.modelo] != condutorOriginal) {
+      return null;
+    }
+    return Validacao(
+      NivelValidacao.info,
+      'A adaptação $a usa o condutor de sementes original da plantadeira.',
     );
   }
 
@@ -824,6 +841,8 @@ class RegrasConfigurador {
         ),
       ?_chicotePainel(e, distribuicao),
     ];
+
+    if (_avisoCondutorOriginal(e) case final info?) validacoes.add(info);
 
     final painel = itens.lastOrNull;
     if (painel != null &&

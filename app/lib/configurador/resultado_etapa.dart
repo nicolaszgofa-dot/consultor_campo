@@ -17,6 +17,9 @@ class EtapaResultado extends StatelessWidget {
     final avisos = resultado.validacoes
         .where((v) => v.nivel == NivelValidacao.aviso)
         .toList();
+    final informacoes = resultado.validacoes
+        .where((v) => v.nivel == NivelValidacao.info)
+        .toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -65,6 +68,10 @@ class EtapaResultado extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 8),
+        ],
+        for (final v in informacoes) ...[
+          Aviso(v.mensagem),
           const SizedBox(height: 8),
         ],
         for (final item in resultado.itens) ...[

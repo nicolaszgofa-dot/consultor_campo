@@ -109,6 +109,27 @@ void main() {
       expect(e.marcaAdaptacao, isNull);
     });
 
+    test('Selenium com condutor original mostra só o aviso', () {
+      final e = ConfiguradorEstado()
+        ..escolherTecnologia(Tecnologia.seleniumEletric)
+        ..tipo = TipoPlantadeira.solteira
+        ..totalLinhas = 20
+        ..escolherMarcaAdaptacao('Stara')
+        ..escolherModeloAdaptacao('Princesa');
+      final r = e.resultado;
+      expect(
+        r.itens.where((i) => i.componente.startsWith('Condutor')),
+        isEmpty,
+      );
+      expect(
+        r.validacoes.map((v) => v.mensagem),
+        contains(
+          'A adaptação Stara · Princesa usa o condutor de sementes original '
+          'da plantadeira.',
+        ),
+      );
+    });
+
     test('kit conversão não tem adaptação', () {
       final e = ConfiguradorEstado()
         ..escolherKitConversao()

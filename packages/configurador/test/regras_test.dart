@@ -708,9 +708,28 @@ void testesCondutorSelenium() {
       expect(c.motivo, contains('Horsch · Maestro Duo 36.50'));
     });
 
-    test('original: entra o condutor original', () {
+    test('original: não gera item, só um aviso informativo', () {
       final r = selenium(const Adaptacao('CNH', 'S-2200 Easy Riser'));
-      expect(qtd(r, 'Condutor de sementes original'), 20);
+      expect(
+        r.itens.where((i) => i.componente.startsWith('Condutor')),
+        isEmpty,
+      );
+      final info = r.validacoes.where((v) => v.nivel == NivelValidacao.info);
+      expect(
+        info.single.mensagem,
+        'A adaptação CNH · S-2200 Easy Riser usa o condutor de sementes '
+        'original da plantadeira.',
+      );
+      expect(info.single.bloqueia, isFalse);
+      expect(r.pendentes, isNot(contains(Componentes.condutorSelenium)));
+    });
+
+    test('retrabalhado não gera aviso de condutor original', () {
+      final r = selenium(const Adaptacao('Kuhn', 'PDM/PD Máxima 1200'));
+      expect(
+        r.validacoes.where((v) => v.nivel == NivelValidacao.info),
+        isEmpty,
+      );
     });
 
     test('exemplos da lista', () {

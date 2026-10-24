@@ -102,7 +102,10 @@ const adaptacoes = <Tecnologia, Map<String, List<String>>>{
 };
 
 /// Se [a] existe no catálogo da tecnologia [t].
-const _original = 'Condutor de sementes original';
+/// A plantadeira mantém o condutor de sementes dela: não gera item, só um
+/// aviso informativo no resultado.
+const condutorOriginal = 'Condutor de sementes original';
+const _original = condutorOriginal;
 const _jd1 = 'Condutor de sementes retrabalhado JD1 - 20000000608';
 const _jm1 = 'Condutor de sementes retrabalhado JM1 - 20000000653';
 const _jm3 = 'Condutor de sementes retrabalhado JM3 - 30000000002';
