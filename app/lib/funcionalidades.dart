@@ -18,15 +18,16 @@ const configurador = Funcionalidade(
   icone: Icons.tune,
 );
 
+const roi = Funcionalidade(
+  titulo: 'ROI',
+  descricao: 'Retorno do investimento para o produtor',
+  icone: Icons.trending_up,
+);
+
 /// Funcionalidades ainda em desenvolvimento, na ordem da tela inicial.
-/// A avaliação de plantio fica em destaque e o Configurador logo abaixo,
-/// fora desta lista.
+/// A avaliação de plantio fica em destaque e o Configurador e o ROI logo
+/// abaixo, fora desta lista.
 const emBreve = <Funcionalidade>[
-  Funcionalidade(
-    titulo: 'ROI',
-    descricao: 'Retorno do investimento para o produtor',
-    icone: Icons.trending_up,
-  ),
   Funcionalidade(
     titulo: 'Material técnico',
     descricao: 'Catálogos, manuais e fichas técnicas',

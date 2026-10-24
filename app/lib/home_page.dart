@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'avaliacao/avaliacao_hub_page.dart';
 import 'configurador/configurador_page.dart';
+import 'roi/roi_page.dart';
 import 'em_breve_page.dart';
 import 'funcionalidades.dart';
 import 'tema.dart';
@@ -33,6 +34,12 @@ class HomePage extends StatelessWidget {
                       funcionalidade: configurador,
                       emBreve: false,
                       aoAbrir: () => _abrir(context, const ConfiguradorPage()),
+                    ),
+                    const SizedBox(height: 10),
+                    _CartaoFuncionalidade(
+                      funcionalidade: roi,
+                      emBreve: false,
+                      aoAbrir: () => _abrir(context, const RoiPage()),
                     ),
                     const SizedBox(height: 10),
                     for (final f in emBreve) ...[

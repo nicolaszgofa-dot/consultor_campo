@@ -37,6 +37,14 @@ jobs:
           flutter analyze
           flutter test
 
+      - name: Pacote roi
+        working-directory: packages/roi
+        run: |
+          flutter pub get
+          dart format --output=none --set-exit-if-changed .
+          flutter analyze
+          flutter test
+
       - name: App
         working-directory: app
         run: |
