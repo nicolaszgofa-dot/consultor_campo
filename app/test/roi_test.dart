@@ -59,6 +59,22 @@ void main() {
       expect(r.jassy.porLinha, closeTo(7272.727272727273, 1e-6));
     });
 
+    test('redução de 85% e perda conservadora já vêm preenchidas', () {
+      final e = RoiEstado();
+      expect(e.texto('red'), '85');
+      expect(e.texto('perda'), '0,5');
+      expect(e.premissas.reducaoSobreposicao, closeTo(0.85, 1e-12));
+      expect(e.premissas.perdaCurvas, closeTo(0.005, 1e-12));
+      expect(e.editou, isFalse);
+      final perda = gruposRoi[3].campos.firstWhere((c) => c.chave == 'perda');
+      expect(e.atalhoEscolhido(perda), 'Conservador');
+      e.mudar('perda', '1,0');
+      expect(e.atalhoEscolhido(perda), 'Provável');
+      e.mudar('perda', '1,5');
+      expect(e.atalhoEscolhido(perda), isNull);
+      expect(e.premissas.perdaCurvas, closeTo(0.015, 1e-12));
+    });
+
     test('obrigatórios e percentuais bloqueiam o avanço', () {
       final e = RoiEstado();
       expect(e.bloqueio, 'Área plantada: Obrigatório.');
@@ -127,6 +143,34 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Sementes e sobreposição'), findsOneWidget);
     expect(find.text('PASSO 2 DE 7'), findsOneWidget);
+  });
+
+  testWidgets('perda sem compensação: botões de cenário e valor livre', (
+    tester,
+  ) async {
+    tela(tester, const Size(1194, 1400));
+    final estado = RoiEstado()..etapa = 3;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: temaConsultor(),
+        home: RoiPage(estado: estado),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Conservador · 0,5%'), findsOneWidget);
+    expect(find.text('0,5'), findsOneWidget);
+
+    await tester.tap(find.text('Potencial · 2%'));
+    await tester.pump();
+    expect(estado.texto('perda'), '2');
+    expect(find.text('2'), findsOneWidget);
+
+    // O vendedor ainda pode digitar outro valor.
+    await tester.enterText(find.widgetWithText(TextField, '2'), '1,2');
+    await tester.pump();
+    expect(estado.premissas.perdaCurvas, closeTo(0.012, 1e-12));
+    final perda = gruposRoi[3].campos.firstWhere((c) => c.chave == 'perda');
+    expect(estado.atalhoEscolhido(perda), isNull);
   });
 
   testWidgets('tablet: resultado e comparativo do exemplo', (tester) async {

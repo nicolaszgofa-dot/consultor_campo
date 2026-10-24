@@ -12,7 +12,10 @@ Calculadora para o vendedor mostrar ao produtor o retorno do retrofit J.Assy. Ba
 6. Resultado
 7. Comparativo
 
-Cada campo mostra a orientação "como levantar no cliente" da planilha e um botão **?** com o texto "Como apresentar ao cliente". Indicadores e gráficos do resultado e do comparativo também têm o botão. Os campos começam vazios (o app é público: nenhum preço vem preenchido).
+Cada campo mostra a orientação "como levantar no cliente" da planilha e um botão **?** com o texto "Como apresentar ao cliente". Indicadores e gráficos do resultado e do comparativo também têm o botão. Os campos começam vazios (o app é público: nenhum preço vem preenchido), menos dois valores mais técnicos, que já vêm preenchidos e o vendedor pode mudar:
+
+- **Redução esperada:** 85%.
+- **Perda sem compensação:** 0,5% (Conservador). Embaixo do campo há três botões que preenchem o valor: Conservador 0,5%, Provável 1% e Potencial 2%. Qualquer outro valor pode ser digitado.
 
 Obrigatórios: área plantada, investimento do retrofit e vida econômica (maiores que zero). Percentuais entre 0 e 100%. Os demais podem ficar vazios (contam como zero).
 

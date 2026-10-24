@@ -20,6 +20,12 @@ class CampoRoi {
   final bool percentual;
   final bool obrigatorio;
 
+  /// Valor que já vem preenchido (como digitado). O vendedor pode mudar.
+  final String? padrao;
+
+  /// Botões que preenchem um valor pronto: (nome, valor como digitado).
+  final List<(String, String)> atalhos;
+
   const CampoRoi(
     this.chave,
     this.rotulo,
@@ -28,6 +34,8 @@ class CampoRoi {
     this.apresentar, {
     this.percentual = false,
     this.obrigatorio = false,
+    this.padrao,
+    this.atalhos = const [],
   });
 }
 
@@ -111,6 +119,7 @@ const gruposRoi = [
           'linha desliga sozinha ao entrar em área já plantada. Mostre na '
           'cabeceira de um talhão do próprio cliente.',
       percentual: true,
+      padrao: '85',
     ),
   ]),
   GrupoRoi('Taxa variável', [
@@ -154,10 +163,12 @@ const gruposRoi = [
       'perda',
       'Perda sem compensação',
       '% da receita',
-      'Usar cenário conservador',
+      'Escolha o cenário ou digite outro valor',
       'Perda de receita nas curvas quando cada linha não ajusta a dosagem à '
-          'própria velocidade. Comece pelo valor conservador.',
+          'própria velocidade. Comece pelo cenário conservador.',
       percentual: true,
+      padrao: '0,5',
+      atalhos: [('Conservador', '0,5'), ('Provável', '1'), ('Potencial', '2')],
     ),
     CampoRoi(
       'oper',
@@ -290,8 +301,11 @@ class RoiEstado extends ChangeNotifier {
   int etapa = 0;
   CenarioRoi cenario = CenarioRoi.provavel;
 
-  /// Texto digitado em cada campo.
-  final Map<String, String> valores = {};
+  /// Texto digitado em cada campo; começa com os valores padrão.
+  final Map<String, String> valores = {
+    for (final c in gruposRoi.expand((g) => g.campos))
+      if (c.padrao != null) c.chave: c.padrao!,
+  };
 
   String texto(String chave) => valores[chave] ?? '';
 
@@ -352,9 +366,24 @@ class RoiEstado extends ChangeNotifier {
     return null;
   }
 
+  final Set<String> _editados = {};
+
+  /// Se o vendedor já digitou algo (os valores padrão não contam).
+  bool get editou => _editados.isNotEmpty;
+
   void mudar(String chave, String texto) {
     valores[chave] = texto;
+    _editados.add(chave);
     notifyListeners();
+  }
+
+  /// Atalho escolhido no campo: o que tem o mesmo valor do digitado.
+  String? atalhoEscolhido(CampoRoi c) {
+    final v = lerValorRoi(texto(c.chave));
+    for (final (nome, valor) in c.atalhos) {
+      if (v != null && lerValorRoi(valor) == v) return nome;
+    }
+    return null;
   }
 
   void avancar() {

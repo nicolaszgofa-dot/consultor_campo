@@ -117,7 +117,7 @@ class EtapaPremissasRoi extends StatelessWidget {
             ],
           ),
         ),
-        if (bloqueio != null && estado.valores.isNotEmpty) ...[
+        if (bloqueio != null && estado.editou) ...[
           const SizedBox(height: 12),
           Aviso(bloqueio, tipo: TipoAviso.erro),
         ],
@@ -216,21 +216,56 @@ class _CampoRoiState extends State<_CampoRoi> {
         ),
       ],
     );
+    final escolhido = widget.estado.atalhoEscolhido(c);
+    final atalhos = c.atalhos.isEmpty
+        ? null
+        : Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final (nome, valor) in c.atalhos)
+                ChoiceChip(
+                  label: Text('$nome · $valor%'),
+                  selected: nome == escolhido,
+                  showCheckmark: false,
+                  selectedColor: Cores.verdeEscuro,
+                  labelStyle: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: nome == escolhido ? Cores.branco : Cores.tinta,
+                  ),
+                  onSelected: (_) {
+                    _controle.text = valor;
+                    widget.estado.mudar(c.chave, valor);
+                  },
+                ),
+            ],
+          );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: LayoutBuilder(
         builder: (context, box) => box.maxWidth >= 560
-            ? Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(child: rotulo),
-                  const SizedBox(width: 16),
-                  entrada,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(child: rotulo),
+                      const SizedBox(width: 16),
+                      entrada,
+                    ],
+                  ),
+                  if (atalhos != null) ...[const SizedBox(height: 10), atalhos],
                 ],
               )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [rotulo, const SizedBox(height: 8), entrada],
+                children: [
+                  rotulo,
+                  const SizedBox(height: 8),
+                  entrada,
+                  if (atalhos != null) ...[const SizedBox(height: 8), atalhos],
+                ],
               ),
       ),
     );
