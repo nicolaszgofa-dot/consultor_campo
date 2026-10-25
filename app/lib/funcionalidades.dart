@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'avaliacao/avaliacao_hub_page.dart';
+import 'conceito/conceito_page.dart';
 import 'configurador/configurador_page.dart';
 import 'roi/roi_page.dart';
 
@@ -52,10 +53,11 @@ final funcionalidades = <Funcionalidade>[
     descricao: 'Roteiro da visita e argumentos para o cliente',
     icone: Icons.assignment_outlined,
   ),
-  const Funcionalidade(
+  Funcionalidade(
     titulo: 'Conceito',
     descricao: 'Conceitos técnicos por trás das tecnologias J.Assy',
     icone: Icons.lightbulb_outline,
+    tela: () => const ConceitoPage(),
   ),
   const Funcionalidade(
     titulo: 'Material técnico',
