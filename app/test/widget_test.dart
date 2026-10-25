@@ -41,7 +41,7 @@ Future<void> abrirLinhas(WidgetTester tester, AvaliacaoEstado estado) async {
 }
 
 void main() {
-  testWidgets('menu inicial com as sete funcionalidades', (tester) async {
+  testWidgets('menu inicial com as oito funcionalidades', (tester) async {
     telaAlta(tester);
     await tester.pumpWidget(const ConsultorCampoApp());
 
@@ -49,6 +49,7 @@ void main() {
       'Avaliação de plantio',
       'Configurador',
       'ROI',
+      'Mercado',
       'Playbook',
       'Conceito',
       'Material técnico',
@@ -57,7 +58,7 @@ void main() {
     for (final t in titulos) {
       expect(find.text(t), findsOneWidget);
     }
-    expect(find.text('EM BREVE'), findsNWidgets(4));
+    expect(find.text('EM BREVE'), findsNWidgets(5));
     // Nenhuma funcionalidade em destaque: todos os cartões do mesmo tamanho.
     final tamanhos = {
       for (final t in titulos)

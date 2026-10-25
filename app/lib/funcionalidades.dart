@@ -43,6 +43,11 @@ final funcionalidades = <Funcionalidade>[
     tela: () => const RoiPage(),
   ),
   const Funcionalidade(
+    titulo: 'Mercado',
+    descricao: 'Cotações e informações do mercado agrícola',
+    icone: Icons.show_chart,
+  ),
+  const Funcionalidade(
     titulo: 'Playbook',
     descricao: 'Roteiro da visita e argumentos para o cliente',
     icone: Icons.assignment_outlined,
