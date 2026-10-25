@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'avaliacao/avaliacao_hub_page.dart';
 import 'conceito/conceito_page.dart';
 import 'configurador/configurador_page.dart';
+import 'cotacoes/cotacoes_page.dart';
 import 'roi/roi_page.dart';
 
 class Funcionalidade {
@@ -43,10 +44,11 @@ final funcionalidades = <Funcionalidade>[
     icone: Icons.trending_up,
     tela: () => const RoiPage(),
   ),
-  const Funcionalidade(
+  Funcionalidade(
     titulo: 'Mercado',
     descricao: 'Cotações e informações do mercado agrícola',
     icone: Icons.show_chart,
+    tela: () => const CotacoesPage(),
   ),
   const Funcionalidade(
     titulo: 'Playbook',

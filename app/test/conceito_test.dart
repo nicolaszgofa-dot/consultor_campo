@@ -38,7 +38,7 @@ void main() {
   ) async {
     tela(tester, const Size(800, 2600));
     await tester.pumpWidget(const ConsultorCampoApp());
-    expect(find.text('EM BREVE'), findsNWidgets(4));
+    expect(find.text('EM BREVE'), findsNWidgets(3));
     await tester.tap(find.text('Conceito'));
     await tester.pumpAndSettle();
     expect(find.byType(ConceitoPage), findsOneWidget);

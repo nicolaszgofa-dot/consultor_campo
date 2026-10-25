@@ -58,7 +58,7 @@ void main() {
     for (final t in titulos) {
       expect(find.text(t), findsOneWidget);
     }
-    expect(find.text('EM BREVE'), findsNWidgets(4));
+    expect(find.text('EM BREVE'), findsNWidgets(3));
     // Nenhuma funcionalidade em destaque: todos os cartões do mesmo tamanho.
     final tamanhos = {
       for (final t in titulos)
