@@ -6,6 +6,7 @@ import '../ui/componentes.dart';
 import '../ui/formatos.dart';
 import 'cotacoes_estado.dart';
 import 'informar_preco.dart';
+import 'mapa_uf.dart';
 
 /// Mercado: cotação da saca por praça e por estado, com estimativa para as
 /// cidades sem praça e preços informados pelo vendedor.
@@ -89,7 +90,7 @@ class _Largo extends StatelessWidget {
                       children: [
                         _Referencias(estado: estado),
                         const SizedBox(height: 14),
-                        _MapaGrade(estado: estado),
+                        _Mapa(estado: estado),
                         const SizedBox(height: 10),
                         _Legenda(estado: estado),
                       ],
@@ -131,6 +132,18 @@ class _Estreito extends StatelessWidget {
         ],
         const SizedBox(height: 14),
         _Referencias(estado: estado),
+        const SizedBox(height: 14),
+        CartaoBranco(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Mapa(estado: estado, abrirAoTocar: true),
+              const SizedBox(height: 8),
+              _Legenda(estado: estado),
+            ],
+          ),
+        ),
         const SizedBox(height: 16),
         const RotuloSecao('Por estado · Conab, produtor'),
         const SizedBox(height: 6),
@@ -441,18 +454,6 @@ class _ResultadoBusca extends StatelessWidget {
 
 // ------------------------------------------------------- mapa e estados
 
-/// Posição (coluna, linha) de cada UF na grade que imita o mapa.
-const _grade = <String, (int, int)>{
-  'RR': (1, 0), 'AP': (2, 0), //
-  'AM': (1, 1), 'PA': (2, 1), 'MA': (3, 1), 'CE': (4, 1), 'RN': (5, 1),
-  'AC': (0, 2), 'RO': (1, 2), 'MT': (2, 2), 'TO': (3, 2), 'PI': (4, 2),
-  'PE': (5, 2), 'PB': (6, 2), //
-  'MS': (2, 3), 'GO': (3, 3), 'DF': (4, 3), 'BA': (5, 3), 'AL': (6, 3),
-  'PR': (2, 4), 'SP': (3, 4), 'MG': (4, 4), 'ES': (5, 4), 'SE': (6, 4),
-  'SC': (2, 5), 'RJ': (4, 5), //
-  'RS': (2, 6),
-};
-
 const _claro = Color(0xFFDDF1DF);
 const _escuro = Color(0xFF145A1D);
 
@@ -466,115 +467,42 @@ Map<String, Cotacao> _conabPorUf(List<Cotacao> cotacoes) => {
   for (final uf in nomesUf.keys) uf: ?conabDoEstado(uf, cotacoes),
 };
 
-class _MapaGrade extends StatelessWidget {
+Color _corDoPreco(double preco, (double, double) faixa) {
+  final (min, max) = faixa;
+  final f = max > min ? (preco - min) / (max - min) : 0.5;
+  return f < 0.5
+      ? Color.lerp(_claro, Cores.verde, f * 2)!
+      : Color.lerp(Cores.verde, _escuro, (f - 0.5) * 2)!;
+}
+
+class _Mapa extends StatelessWidget {
   final CotacoesEstado estado;
 
-  const _MapaGrade({required this.estado});
+  /// No celular, tocar no estado já abre o detalhe.
+  final bool abrirAoTocar;
+
+  const _Mapa({required this.estado, this.abrirAoTocar = false});
 
   @override
   Widget build(BuildContext context) {
     final conab = _conabPorUf(estado.cotacoes);
     final faixa = _faixa(conab);
-    return LayoutBuilder(
-      builder: (context, box) {
-        const gap = 5.0;
-        final lado = (box.maxWidth - 6 * gap) / 7;
-        final alto = lado * 0.82;
-        return SizedBox(
-          height: 7 * alto + 6 * gap,
-          child: Stack(
-            children: [
-              for (final e in _grade.entries)
-                Positioned(
-                  left: e.value.$1 * (lado + gap),
-                  top: e.value.$2 * (alto + gap),
-                  width: lado,
-                  height: alto,
-                  child: _QuadroUf(
-                    uf: e.key,
-                    conab: conab[e.key],
-                    faixa: faixa,
-                    selecionado: e.key == estado.uf,
-                    aoTocar: () => estado.escolherUf(e.key),
-                  ),
-                ),
-            ],
-          ),
-        );
+    return MapaBrasil(
+      // Estreito demais para o preço caber em todas as etiquetas.
+      mostrarValores: MediaQuery.sizeOf(context).width >= 600,
+      valores: {
+        for (final e in conab.entries) e.key: numeroBr(e.value.preco, 1),
       },
-    );
-  }
-}
-
-class _QuadroUf extends StatelessWidget {
-  final String uf;
-  final Cotacao? conab;
-  final (double, double)? faixa;
-  final bool selecionado;
-  final VoidCallback aoTocar;
-
-  const _QuadroUf({
-    required this.uf,
-    required this.conab,
-    required this.faixa,
-    required this.selecionado,
-    required this.aoTocar,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    var fundo = const Color(0xFFF0F1F2);
-    var texto = Cores.cinzaEscuro;
-    if (conab != null && faixa != null) {
-      final (min, max) = faixa!;
-      final f = max > min ? (conab!.preco - min) / (max - min) : 0.5;
-      fundo = f < 0.5
-          ? Color.lerp(_claro, Cores.verde, f * 2)!
-          : Color.lerp(Cores.verde, _escuro, (f - 0.5) * 2)!;
-      texto = f > 0.35 ? Cores.branco : Cores.verdeEscuro;
-    }
-    return Semantics(
-      button: true,
-      selected: selecionado,
-      label:
-          '${nomesUf[uf]}, '
-          '${conab == null ? 'sem dado' : '${numeroBr(conab!.preco, 2)} reais'}',
-      excludeSemantics: true,
-      child: Material(
-        color: fundo,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: selecionado
-              ? const BorderSide(color: Cores.tinta, width: 3)
-              : BorderSide.none,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: aoTocar,
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    uf,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: texto,
-                    ),
-                  ),
-                  Text(
-                    conab == null ? '—' : numeroBr(conab!.preco, 1),
-                    style: TextStyle(fontSize: 12, color: texto),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      cores: {
+        if (faixa != null)
+          for (final e in conab.entries)
+            e.key: _corDoPreco(e.value.preco, faixa),
+      },
+      selecionado: estado.uf,
+      aoEscolher: (uf) {
+        estado.escolherUf(uf);
+        if (abrirAoTocar) _abrirUf(context, estado);
+      },
     );
   }
 }

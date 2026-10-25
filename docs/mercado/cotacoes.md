@@ -6,7 +6,7 @@ Preço da saca (R$/sc 60 kg) de soja e milho por praça e por estado. O vendedor
 
 - **Produto:** Soja ou Milho.
 - **Status:** hora da última atualização. Sem internet, mostra os valores salvos e a hora em que foram recebidos. Aviso quando a cotação mais nova é de antes do último dia útil.
-- **Mapa por estado (tablet):** grade com a média Conab do estado, mais escura quanto maior o preço. Tocar abre o estado. No celular, o mapa vira lista (estados com preço primeiro).
+- **Mapa do Brasil:** contorno real dos estados (malha do IBGE, simplificada em `app/lib/cotacoes/mapa_brasil.dart`), cor pela média Conab, mais escura quanto maior o preço. Tocar no estado ou na etiqueta abre o estado. No tablet a etiqueta traz UF e preço; no celular só a UF, e abaixo do mapa vem a lista de estados (com preço primeiro).
 - **Referências nacionais:** indicadores Cepea e B3 futuro.
 - **Estado:** média Conab da semana, praças com cotação (praça, porto, indicador, informado) e as outras cidades com preço estimado.
 - **Cidade:** busca sem acento; o cartão mostra preço, etiqueta de origem e explicação. "Usar como minha região" guarda a cidade no aparelho e o Mercado abre nela.

@@ -46,6 +46,7 @@ Future<void> abrir(WidgetTester tester, CotacoesEstado estado) async {
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  testesMapa();
 
   group('estado', () {
     test('sem internet e sem nada salvo, usa o feed do app', () async {
@@ -149,7 +150,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Sua região'), findsOneWidget);
 
-    await tester.tap(find.text('GO'));
+    await tester.tap(find.textContaining(RegExp(r'^GO'), findRichText: true));
     await tester.pumpAndSettle();
     expect(find.text('Goiás'), findsOneWidget);
     expect(find.text('Rio Verde'), findsOneWidget);
@@ -203,5 +204,20 @@ void main() {
     expect(e.informados.single.fonte, 'Cooperativa Boa Safra');
     expect(find.text('Sinop'), findsWidgets);
     expect(find.text('Informado'), findsWidgets);
+  });
+}
+
+void testesMapa() {
+  testWidgets('celular: tocar no estado do mapa abre o detalhe', (
+    tester,
+  ) async {
+    tela(tester, const Size(390, 2400));
+    final e = estadoTeste();
+    await abrir(tester, e);
+    await tester.tap(find.bySemanticsLabel('BA 145,8'));
+    await tester.pumpAndSettle();
+    expect(e.uf, 'BA');
+    expect(find.text('Luís Eduardo Magalhães'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
