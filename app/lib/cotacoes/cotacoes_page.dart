@@ -13,7 +13,11 @@ import 'mapa_uf.dart';
 class CotacoesPage extends StatefulWidget {
   final CotacoesEstado? estado;
 
-  const CotacoesPage({super.key, this.estado});
+  /// Falso dentro de outra tela que já tem cabeçalho (aba da Inteligência
+  /// de mercado).
+  final bool comCabecalho;
+
+  const CotacoesPage({super.key, this.estado, this.comCabecalho = true});
 
   @override
   State<CotacoesPage> createState() => _CotacoesPageState();
@@ -36,25 +40,25 @@ class _CotacoesPageState extends State<CotacoesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final conteudo = ListenableBuilder(
+      listenable: _estado,
+      builder: (context, _) {
+        if (!_estado.carregado) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return LayoutBuilder(
+          builder: (context, box) => box.maxWidth >= 900
+              ? _Largo(estado: _estado)
+              : _Estreito(estado: _estado),
+        );
+      },
+    );
+    if (!widget.comCabecalho) return conteudo;
     return Scaffold(
       body: Column(
         children: [
           const CabecalhoFluxo(titulo: 'Mercado'),
-          Expanded(
-            child: ListenableBuilder(
-              listenable: _estado,
-              builder: (context, _) {
-                if (!_estado.carregado) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                return LayoutBuilder(
-                  builder: (context, box) => box.maxWidth >= 900
-                      ? _Largo(estado: _estado)
-                      : _Estreito(estado: _estado),
-                );
-              },
-            ),
-          ),
+          Expanded(child: conteudo),
         ],
       ),
     );

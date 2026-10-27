@@ -49,7 +49,7 @@ void main() {
       'Avaliação de plantio',
       'Configurador',
       'ROI',
-      'Mercado',
+      'Inteligência de mercado',
       'Playbook',
       'Conceito',
       'Material técnico',

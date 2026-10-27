@@ -276,13 +276,7 @@ abstract final class ApresentarRoi {
 
 /// Lê números digitados no formato brasileiro, inclusive com ponto de milhar
 /// ("300.000", "1.500.000,00").
-double? lerValorRoi(String texto) {
-  final t = texto.replaceAll('R\$', '').replaceAll(' ', '').trim();
-  if (RegExp(r'^\d{1,3}(\.\d{3})+(,\d+)?$').hasMatch(t)) {
-    return lerNumero(t.replaceAll('.', '').replaceAll(',', '.'));
-  }
-  return lerNumero(t);
-}
+double? lerValorRoi(String texto) => lerReais(texto);
 
 /// Etapas: 0 a 4 são os grupos de premissas, 5 o resultado, 6 o comparativo.
 class RoiEstado extends ChangeNotifier {

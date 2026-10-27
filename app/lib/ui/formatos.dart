@@ -31,6 +31,16 @@ DateTime? lerData(String texto) {
   return d.day == dia && d.month == mes ? d : null;
 }
 
+/// Lê valores em reais, inclusive com ponto de milhar ("2.200",
+/// "1.500.000,00"); sem esse padrão, cai em [lerNumero].
+double? lerReais(String texto) {
+  final t = texto.replaceAll('R\$', '').replaceAll(' ', '').trim();
+  if (RegExp(r'^\d{1,3}(\.\d{3})+(,\d+)?$').hasMatch(t)) {
+    return lerNumero(t.replaceAll('.', '').replaceAll(',', '.'));
+  }
+  return lerNumero(t);
+}
+
 /// Lê um número digitado com vírgula ou ponto ("0,50", "1.200,5", "0.5").
 double? lerNumero(String texto) {
   var t = texto.replaceAll('R\$', '').replaceAll(' ', '').trim();

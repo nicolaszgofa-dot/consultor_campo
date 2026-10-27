@@ -118,12 +118,12 @@ void main() {
     });
   });
 
-  testWidgets('o menu abre o Mercado, que não está mais em breve', (
+  testWidgets('o menu abre a Inteligência de mercado, na aba Cotações', (
     tester,
   ) async {
     tela(tester, const Size(800, 2600));
     await tester.pumpWidget(const ConsultorCampoApp());
-    await tester.tap(find.text('Mercado'));
+    await tester.tap(find.text('Inteligência de mercado'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(CotacoesPage), findsOneWidget);
