@@ -218,7 +218,7 @@ class _IdentificacaoPageState extends State<IdentificacaoPage> {
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Avaliação com trena: no mínimo 5 linhas de 10 m.',
+                    'Avaliação com trena: recomendado 5 linhas de 10 m.',
                     style: TextStyle(
                       fontSize: 14,
                       color: Cores.textoSecundario,

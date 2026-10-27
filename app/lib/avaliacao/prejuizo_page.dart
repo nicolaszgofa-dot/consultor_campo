@@ -70,6 +70,10 @@ class _PrejuizoPageState extends State<PrejuizoPage> {
       titulo: 'Prejuízo em R\$',
       passo: 4,
       filhos: [
+        if (widget.estado.resultado.amostraPequena)
+          AvisoAmostra(
+            linhasCompletas: widget.estado.resultado.linhasCompletas,
+          ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

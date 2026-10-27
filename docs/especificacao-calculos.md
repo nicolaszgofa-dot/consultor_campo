@@ -103,7 +103,8 @@ Código: `packages/avaliacao_plantio/lib/src/avaliacao/avaliacao_calc.dart`.
 | Regra | Valor |
 |---|---|
 | Linha completa | última leitura da trena ≥ 1.000 cm (10 m) |
-| Resultado liberado | pelo menos **5 linhas completas** |
+| Resultado liberado | pelo menos **1 linha completa** |
+| Amostra pequena | menos de **5 linhas completas** (recomendado): o resultado sai com aviso nas telas de leituras, resultado e prejuízo |
 | Total | soma das plantas esperadas, faltando e a mais de todas as linhas |
 | No lugar certo (%) | `100 − (faltando + a mais) ÷ esperadas × 100` |
 | CV e DV da avaliação | sobre todos os espaçamentos das linhas juntos |
@@ -112,7 +113,8 @@ Código: `packages/avaliacao_plantio/lib/src/avaliacao/avaliacao_calc.dart`.
 | Caso (4 sementes/m) | Resultado esperado |
 |---|---|
 | 5 linhas perfeitas de 10 m | 200 esperadas, 100% no lugar certo, CV 0% |
-| 4 linhas de 10 m + 1 de 9,75 m | 4 completas, resultado bloqueado |
+| 4 linhas de 10 m + 1 de 9,75 m | 4 completas, resultado liberado com aviso de amostra pequena |
+| 1 linha de 9,75 m | nenhuma completa, sem resultado |
 | 4 linhas com 1 falha + 1 com 5 | 9 faltando, 95,5% no lugar certo, linha 5 com 178% mais falhas que a média |
 
 ## Prejuízo em R$

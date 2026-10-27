@@ -46,6 +46,8 @@ class _ResultadoPageState extends State<ResultadoPage> {
     final pctDuplas = r.total.percentualAMais;
     final noLugar = r.percentualNoLugarCerto;
     final pior = r.linhaComMaisFalhas();
+    // Linhas vazias (abas criadas e não medidas) não entram na conta.
+    final medidas = r.linhas.where((l) => l.plantas > 0).length;
     final comprimentoM = r.linhas.fold<double>(
       0,
       (s, l) => s + l.comprimentoCm / 100,
@@ -55,6 +57,7 @@ class _ResultadoPageState extends State<ResultadoPage> {
       titulo: id.talhao.isEmpty ? 'Resultado' : 'Resultado · ${id.talhao}',
       passo: 3,
       filhos: [
+        if (r.amostraPequena) AvisoAmostra(linhasCompletas: r.linhasCompletas),
         CartaoBranco(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -87,7 +90,8 @@ class _ResultadoPageState extends State<ResultadoPage> {
                     ),
                   ),
                   Text(
-                    '${r.linhas.length} linhas · ${numeroBr(comprimentoM, 0)} m\n'
+                    '${medidas == 1 ? '1 linha' : '$medidas linhas'} · '
+                    '${numeroBr(comprimentoM, 0)} m\n'
                     '${numeroBr(r.total.plantasEsperadas, 0)} plantas esperadas',
                     textAlign: TextAlign.right,
                     style: const TextStyle(
@@ -156,10 +160,11 @@ class _ResultadoPageState extends State<ResultadoPage> {
               const RotuloSecao('Por linha'),
               const SizedBox(height: 8),
               for (var i = 0; i < r.linhas.length; i++)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 3),
-                  child: _BarraLinha(nome: 'L${i + 1}', linha: r.linhas[i]),
-                ),
+                if (r.linhas[i].plantas > 0)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: _BarraLinha(nome: 'L${i + 1}', linha: r.linhas[i]),
+                  ),
               if (pior != null) ...[
                 const SizedBox(height: 6),
                 Container(
@@ -240,6 +245,55 @@ class _ResultadoPageState extends State<ResultadoPage> {
     Cultura.feijao =>
       'Calculado pelo CV dos espaçamentos (Bisognin et al., 2019).',
   };
+}
+
+/// Menos linhas que o recomendado: o resultado sai, mas com cautela.
+class AvisoAmostra extends StatelessWidget {
+  final int linhasCompletas;
+
+  const AvisoAmostra({super.key, required this.linhasCompletas});
+
+  @override
+  Widget build(BuildContext context) {
+    final linhas = linhasCompletas == 1 ? '1 linha' : '$linhasCompletas linhas';
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4E0),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFF2D49B)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: Cores.atencao),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                text: 'Amostra pequena: ',
+                style: const TextStyle(fontWeight: FontWeight.w700),
+                children: [
+                  TextSpan(
+                    text:
+                        '$linhas de 10 m, de ${RegrasAvaliacao.linhasRecomendadas} '
+                        'recomendadas. O resultado é pouco confiável; complete '
+                        'mais linhas antes de levar ao cliente.',
+                    style: const TextStyle(fontWeight: FontWeight.w400),
+                  ),
+                ],
+              ),
+              style: const TextStyle(
+                fontSize: 14,
+                height: 1.4,
+                color: Color(0xFF7A4800),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Faixa extends StatelessWidget {

@@ -66,7 +66,10 @@ class AvaliacaoEstado extends ChangeNotifier {
   AvaliacaoEstado(this.identificacao, {List<List<double>>? linhas})
     : _linhas =
           linhas ??
-          [for (var i = 0; i < RegrasAvaliacao.linhasMinimas; i++) <double>[]];
+          [
+            for (var i = 0; i < RegrasAvaliacao.linhasRecomendadas; i++)
+              <double>[],
+          ];
 
   int get linhaAtual => _atual;
 

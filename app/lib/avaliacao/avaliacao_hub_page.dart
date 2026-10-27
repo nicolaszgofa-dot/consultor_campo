@@ -87,7 +87,7 @@ class AvaliacaoHubPage extends StatelessWidget {
                     titulo: 'Plantabilidade com trena',
                     texto:
                         'Falhas, duplas, CV e perda em sacas e em R\$. '
-                        'Mínimo de 5 linhas de 10 m.',
+                        'Recomendado: 5 linhas de 10 m.',
                     botao: 'Nova avaliação de plantio',
                     tela: IdentificacaoPage(),
                   ),

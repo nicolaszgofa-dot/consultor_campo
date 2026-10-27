@@ -100,7 +100,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(LinhasPage), findsOneWidget);
     expect(find.text('0 de 5 linhas completas'), findsOneWidget);
-    expect(find.text('Faltam 5 linhas'), findsOneWidget);
+    expect(
+      find.text('Complete 1 linha de 10 m para ver o resultado'),
+      findsOneWidget,
+    );
 
     final campo = find.widgetWithText(TextField, 'Leitura da trena (cm)');
     await tester.enterText(campo, '25');
@@ -134,7 +137,7 @@ void main() {
     expect(find.byType(LinhasPage), findsNothing);
   });
 
-  testWidgets('resultado bloqueado com menos de 5 linhas de 10 m', (
+  testWidgets('menos de 5 linhas: resultado sai com aviso de amostra pequena', (
     tester,
   ) async {
     telaAlta(tester);
@@ -144,8 +147,50 @@ void main() {
     );
     await abrirLinhas(tester, estado);
     expect(find.text('4 de 5 linhas completas'), findsOneWidget);
-    expect(find.text('Falta completar 1 linha'), findsOneWidget);
-    expect(find.textContaining('Ver resultado'), findsNothing);
+    expect(
+      find.text('Amostra pequena: falta 1 linha para o recomendado.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Ver resultado das 4 linhas'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Amostra pequena', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.textContaining('4 linhas · 40 m'), findsOneWidget);
+    expect(find.text('100,0%'), findsWidgets);
+  });
+
+  testWidgets('uma linha completa já libera o resultado', (tester) async {
+    telaAlta(tester);
+    final estado = AvaliacaoEstado(
+      identificacao,
+      linhas: [linhaPerfeita(), <double>[]],
+    );
+    await abrirLinhas(tester, estado);
+    await tester.tap(find.text('Ver resultado da 1 linha'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('1 linha · 10 m'), findsOneWidget);
+    expect(
+      find.textContaining('1 linha de 10 m, de 5', findRichText: true),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('5 linhas: resultado sem aviso', (tester) async {
+    telaAlta(tester);
+    final estado = AvaliacaoEstado(
+      identificacao,
+      linhas: [for (var i = 0; i < 5; i++) linhaPerfeita()],
+    );
+    await abrirLinhas(tester, estado);
+    expect(find.textContaining('Amostra pequena'), findsNothing);
+    await tester.tap(find.text('Ver resultado das 5 linhas'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Amostra pequena', findRichText: true),
+      findsNothing,
+    );
   });
 
   testWidgets('resultado e prejuízo com 5 linhas', (tester) async {

@@ -19,12 +19,14 @@ List<double> linhaComFalhas(int falhas) {
 }
 
 void main() {
-  test('5 linhas perfeitas de 10 m: suficiente e 100% no lugar certo', () {
+  test('5 linhas perfeitas de 10 m: amostra completa e 100% no lugar certo',
+      () {
     final r = AvaliacaoCalc.calcular(parametros, [
       for (var i = 0; i < 5; i++) linhaPerfeita(),
     ]);
     expect(r.linhasCompletas, 5);
-    expect(r.suficiente, isTrue);
+    expect(r.temResultado, isTrue);
+    expect(r.amostraPequena, isFalse);
     expect(r.total.plantasEsperadas, 200);
     expect(r.plantas, 200);
     expect(r.percentualNoLugarCerto, 100);
@@ -32,14 +34,20 @@ void main() {
     expect(r.linhaComMaisFalhas(), isNull);
   });
 
-  test('linha com menos de 10 m não conta para o mínimo', () {
+  test('linha com menos de 10 m não conta; 4 linhas = amostra pequena', () {
     final r = AvaliacaoCalc.calcular(parametros, [
       for (var i = 0; i < 4; i++) linhaPerfeita(),
       linhaPerfeita(975),
     ]);
     expect(r.linhas.last.completa, isFalse);
     expect(r.linhasCompletas, 4);
-    expect(r.suficiente, isFalse);
+    expect(r.temResultado, isTrue);
+    expect(r.amostraPequena, isTrue);
+  });
+
+  test('sem nenhuma linha de 10 m não há resultado', () {
+    final r = AvaliacaoCalc.calcular(parametros, [linhaPerfeita(975)]);
+    expect(r.temResultado, isFalse);
   });
 
   test('falha e dupla numa linha', () {

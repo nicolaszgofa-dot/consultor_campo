@@ -46,7 +46,7 @@ class _LinhasPageState extends State<LinhasPage> {
         final estado = widget.estado;
         final r = estado.resultado;
         final atual = r.linhas[estado.linhaAtual];
-        final faltam = RegrasAvaliacao.linhasMinimas - r.linhasCompletas;
+        final faltam = RegrasAvaliacao.linhasRecomendadas - r.linhasCompletas;
 
         return TelaFluxo(
           titulo: 'Leituras da trena',
@@ -58,7 +58,7 @@ class _LinhasPageState extends State<LinhasPage> {
               spacing: 12,
               children: [
                 Text(
-                  '${r.linhasCompletas} de ${RegrasAvaliacao.linhasMinimas} '
+                  '${r.linhasCompletas} de ${RegrasAvaliacao.linhasRecomendadas} '
                   'linhas completas',
                   style: const TextStyle(
                     fontSize: 15,
@@ -66,7 +66,7 @@ class _LinhasPageState extends State<LinhasPage> {
                   ),
                 ),
                 const Text(
-                  'mínimo: 5 linhas × 10 m',
+                  'recomendado: 5 linhas × 10 m',
                   style: TextStyle(fontSize: 13, color: Cores.textoSecundario),
                 ),
               ],
@@ -82,14 +82,47 @@ class _LinhasPageState extends State<LinhasPage> {
               aoDesfazer: estado.removerUltima,
             ),
           ],
-          rodape: r.suficiente
-              ? FilledButton(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ResultadoPage(estado: estado),
+          rodape: r.temResultado
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (r.amostraPequena) ...[
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            size: 18,
+                            color: Cores.atencao,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Amostra pequena: ${faltam == 1 ? 'falta 1 linha' : 'faltam $faltam linhas'} '
+                              'para o recomendado.',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Cores.atencao,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                    FilledButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ResultadoPage(estado: estado),
+                        ),
+                      ),
+                      child: Text(
+                        r.linhasCompletas == 1
+                            ? 'Ver resultado da 1 linha'
+                            : 'Ver resultado das ${r.linhasCompletas} linhas',
+                      ),
                     ),
-                  ),
-                  child: Text('Ver resultado das ${r.linhasCompletas} linhas'),
+                  ],
                 )
               : Container(
                   constraints: const BoxConstraints(minHeight: 56),
@@ -106,7 +139,7 @@ class _LinhasPageState extends State<LinhasPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Text(
-                        'Resultado liberado com 5 linhas de 10 m',
+                        'Complete 1 linha de 10 m para ver o resultado',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,
@@ -115,9 +148,8 @@ class _LinhasPageState extends State<LinhasPage> {
                         ),
                       ),
                       Text(
-                        faltam == 1
-                            ? 'Falta completar 1 linha'
-                            : 'Faltam $faltam linhas',
+                        'Recomendado: ${RegrasAvaliacao.linhasRecomendadas} '
+                        'linhas',
                         style: const TextStyle(
                           fontSize: 13,
                           color: Cores.textoSecundario,
@@ -147,8 +179,9 @@ class _AbasLinhas extends StatelessWidget {
         for (var i = 0; i < resultado.linhas.length; i++)
           _Aba(
             nome: 'L${i + 1}',
+            // A fonte do app não tem o ✓; a aba verde já marca a completa.
             detalhe: resultado.linhas[i].completa
-                ? '✓ 10 m'
+                ? '10 m'
                 : '${numeroBr(resultado.linhas[i].comprimentoCm / 100)} m',
             ativa: i == estado.linhaAtual,
             completa: resultado.linhas[i].completa,

@@ -2,9 +2,11 @@ import '../estatistica.dart';
 import '../perda/perda_calc.dart';
 import '../plantabilidade/plantabilidade_calc.dart';
 
-/// Regras mínimas para uma avaliação valer para o relatório.
+/// Regras da avaliação com trena. Com pelo menos 1 linha completa o
+/// resultado sai; abaixo de [linhasRecomendadas] ele vem com aviso de
+/// amostra pequena.
 class RegrasAvaliacao {
-  static const int linhasMinimas = 5;
+  static const int linhasRecomendadas = 5;
   static const double comprimentoMinimoCm = 1000;
 }
 
@@ -48,8 +50,12 @@ class ResultadoAvaliacao {
 
   int get linhasCompletas => linhas.where((l) => l.completa).length;
 
-  /// Já tem as linhas mínimas para gerar resultado e relatório.
-  bool get suficiente => linhasCompletas >= RegrasAvaliacao.linhasMinimas;
+  /// Já dá para ver o resultado: pelo menos 1 linha de 10 m.
+  bool get temResultado => linhasCompletas >= 1;
+
+  /// Menos linhas que o recomendado: resultado pouco confiável.
+  bool get amostraPequena =>
+      linhasCompletas < RegrasAvaliacao.linhasRecomendadas;
 
   int get plantas => linhas.fold(0, (s, l) => s + l.plantas);
 
