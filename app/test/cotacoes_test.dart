@@ -137,6 +137,10 @@ void main() {
     await abrir(tester, e);
 
     expect(find.text('Mato Grosso'), findsOneWidget);
+    expect(
+      find.textContaining('Em conceito', findRichText: true),
+      findsOneWidget,
+    );
     expect(find.text('Tangará da Serra'), findsOneWidget);
     expect(find.textContaining('Sem internet'), findsOneWidget);
     expect(find.textContaining('Cotações de 02/10/2026'), findsNothing);
@@ -166,6 +170,10 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Marechal Cândido Rondon'), findsOneWidget);
+    expect(
+      find.textContaining('Em conceito', findRichText: true),
+      findsOneWidget,
+    );
     expect(find.text('Indicador Paranaguá · Cepea'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

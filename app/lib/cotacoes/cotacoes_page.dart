@@ -177,6 +177,8 @@ class _UfPage extends StatelessWidget {
               builder: (context, _) => ListView(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
                 children: [
+                  const AlertaConceito(),
+                  const SizedBox(height: 12),
                   Seletor<Produto>(
                     opcoes: Produto.values,
                     selecionada: estado.produto,
@@ -197,6 +199,51 @@ class _UfPage extends StatelessWidget {
 
 // ------------------------------------------------------------------- topo
 
+/// O Mercado ainda é um conceito: os preços não servem de referência.
+class AlertaConceito extends StatelessWidget {
+  const AlertaConceito({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFDECEA),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Cores.prejuizo),
+        ),
+        child: const Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Cores.prejuizo),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  text: 'Em conceito. ',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                  children: [
+                    TextSpan(
+                      text:
+                          'Esta tela ainda está em teste. Os preços e as '
+                          'estimativas não devem ser considerados como certos '
+                          'nem usados em negociação.',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+                style: TextStyle(fontSize: 14, color: Color(0xFF7A1A12)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _Topo extends StatelessWidget {
   final CotacoesEstado estado;
 
@@ -208,6 +255,8 @@ class _Topo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const AlertaConceito(),
+        const SizedBox(height: 12),
         _BarraStatus(estado: estado),
         if (estado.desatualizado && ultima != null) ...[
           const SizedBox(height: 8),
