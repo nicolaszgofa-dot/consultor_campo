@@ -17,7 +17,9 @@ Nada de preço vem preenchido, porque o app é público. As linhas vêm do ROI. 
 
 O retorno do PDF recalcula o ROI com **investimento = linhas × valor por linha** e as linhas da proposta. Se esse total for diferente do investimento digitado no ROI, a tela avisa.
 
-## Páginas do PDF (A4)
+## Seções do PDF (A4)
+
+As seções correm uma atrás da outra e quebram de página onde couber (cerca de 4 páginas). O título de cada seção fica junto do primeiro bloco, e os termos ficam junto das assinaturas. O rodapé de todas as páginas traz o aviso de estimativa e o número da página.
 
 1. **Proposta:** logo, cidade e data, cliente, foto e descrição do produto, características, plantadeira, valor por linha, total e total por extenso, e uma chamada para o payback.
 2. **Retorno:** curva do ganho acumulado contra o investimento, com o ponto de payback; payback, ROI anual e ganho por ha; rosca com a composição do ganho; barras dos três cenários.

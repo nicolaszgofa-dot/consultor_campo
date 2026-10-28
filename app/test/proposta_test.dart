@@ -67,7 +67,9 @@ void main() {
     });
   });
 
-  testWidgets('gera o PDF de 5 páginas para os dois produtos', (tester) async {
+  testWidgets('gera o PDF em até 4 páginas para os dois produtos', (
+    tester,
+  ) async {
     await tester.runAsync(() async {
       final recursos = await RecursosPdf.carregar();
       for (final produto in ProdutoProposta.values) {
@@ -82,7 +84,7 @@ void main() {
           expect(texto.startsWith('%PDF'), isTrue);
           expect(
             RegExp(r'/Type\s*/Page\b').allMatches(texto).length,
-            5,
+            inInclusiveRange(3, 4),
             reason: '${produto.nome} $f',
           );
         }

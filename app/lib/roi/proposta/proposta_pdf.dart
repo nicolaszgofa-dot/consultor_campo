@@ -122,25 +122,58 @@ Future<Uint8List> gerarPropostaPdf({
     ),
   );
   final m = _Montador(dados, p, r, cenario, recursos);
-  final paginas = [m.proposta, m.retorno, m.produto, m.condicoes, m.anexo];
-  for (var i = 0; i < paginas.length; i++) {
-    doc.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.fromLTRB(34, 26, 34, 20),
-        build: (_) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-          children: [
-            m.topo(capa: i == 0),
-            pw.SizedBox(height: 14),
-            pw.Expanded(child: paginas[i]()),
-            m.rodape(i, paginas.length),
-          ],
-        ),
+  // As seções correm uma atrás da outra e quebram de página onde couber, para
+  // a folha A4 não sobrar em branco.
+  final secoes = [
+    (
+      m.proposta(),
+      'Apresentamos nossa proposta para o fornecimento dos '
+          'produtos acima.',
+    ),
+    (m.retorno(), null),
+    (
+      m.produto(),
+      'Resultados de pesquisa citados conforme as fontes '
+          'indicadas. Na sua fazenda, meça com a Avaliação de plantio.',
+    ),
+    (m.condicoes(), null),
+    (m.anexo(), null),
+  ];
+  doc.addPage(
+    pw.MultiPage(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.fromLTRB(34, 26, 34, 20),
+      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+      header: (ctx) => pw.Padding(
+        padding: const pw.EdgeInsets.only(bottom: 14),
+        child: m.topo(capa: ctx.pageNumber == 1),
       ),
-    );
-  }
+      footer: (ctx) => m.rodape(ctx.pageNumber, ctx.pagesCount),
+      build: (_) => [
+        for (final (i, (secao, nota)) in secoes.indexed) ...[
+          if (i > 0) pw.SizedBox(height: 26),
+          ..._quebravel(secao),
+          if (nota != null) ...[pw.SizedBox(height: 8), m.nota(nota)],
+        ],
+      ],
+    ),
+  );
   return doc.save();
+}
+
+/// Abre a coluna da seção em blocos que podem ir para a página seguinte; o
+/// título fica junto do primeiro bloco.
+List<pw.Widget> _quebravel(pw.Widget secao) {
+  final filhos = (secao as pw.Column).children;
+  return [
+    pw.Inseparable(
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+        children: filhos.take(3).toList(),
+      ),
+    ),
+    ...filhos.skip(3),
+  ];
 }
 
 class _Montador {
@@ -264,19 +297,13 @@ class _Montador {
     ),
   );
 
-  pw.Widget rodape(int i, int total) {
-    const textos = [
-      'Apresentamos nossa proposta para o fornecimento dos produtos acima. '
-          'Condições na página 4.',
-      'Estimativa calculada com as premissas informadas pelo cliente '
-          '(página 5). Não é garantia de resultado.',
-      'Resultados de pesquisa citados conforme as fontes indicadas. Na sua '
-          'fazenda, meça com a Avaliação de plantio.',
-      'Faturamento sujeito à análise de crédito.',
-      'Estimativa calculada com as premissas acima, informadas pelo cliente. '
-          'Não é garantia de resultado.',
-    ];
+  /// Observação no fim de uma seção.
+  pw.Widget nota(String texto) =>
+      pw.Text(texto, style: _t(8, cor: _C.secundario));
+
+  pw.Widget rodape(int pagina, int total) {
     return pw.Container(
+      margin: const pw.EdgeInsets.only(top: 12),
       padding: const pw.EdgeInsets.only(top: 6),
       decoration: const pw.BoxDecoration(
         border: pw.Border(top: pw.BorderSide(color: _C.borda, width: 0.75)),
@@ -285,11 +312,15 @@ class _Montador {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Expanded(
-            child: pw.Text(textos[i], style: _t(7.8, cor: _C.secundario)),
+            child: pw.Text(
+              'Estimativa de retorno calculada com as premissas informadas '
+              'pelo cliente (Anexo). Não é garantia de resultado.',
+              style: _t(7.8, cor: _C.secundario),
+            ),
           ),
           pw.SizedBox(width: 16),
           pw.Text(
-            'Página ${i + 1} de $total',
+            'Página $pagina de $total',
             style: _t(7.8, cor: _C.secundario),
           ),
         ],
@@ -550,7 +581,7 @@ class _Montador {
                         pw.TextSpan(
                           text:
                               ' em ${numeroBr(p.vidaSafras, 0)} safras. Veja '
-                              'na página 2.',
+                              'em Retorno do investimento.',
                         ),
                       ],
                     ),
@@ -1423,32 +1454,42 @@ class _Montador {
             ),
         ],
         pw.SizedBox(height: 16),
-        termo(
-          IconeProposta.ferramenta,
-          'Instalação:',
-          'os equipamentos são instalados na fazenda pela equipe da J.Assy, '
-              'com entrega técnica e laudo técnico de responsabilidade pelo '
-              'funcionamento.',
-        ),
-        if (d.garantia.trim().isNotEmpty)
-          termo(
-            IconeProposta.escudo,
-            'Garantia:',
-            'equipamentos com ${d.garantia.trim()} de garantia.',
+        // Termos e assinaturas não se separam entre páginas.
+        pw.Inseparable(
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            children: [
+              termo(
+                IconeProposta.ferramenta,
+                'Instalação:',
+                'os equipamentos são instalados na fazenda pela equipe da J.Assy, '
+                    'com entrega técnica e laudo técnico de responsabilidade pelo '
+                    'funcionamento.',
+              ),
+              if (d.garantia.trim().isNotEmpty)
+                termo(
+                  IconeProposta.escudo,
+                  'Garantia:',
+                  'equipamentos com ${d.garantia.trim()} de garantia.',
+                ),
+              pw.SizedBox(height: 2),
+              nota('Faturamento sujeito à análise de crédito.'),
+              pw.SizedBox(height: 44),
+              pw.Row(
+                children: [
+                  assinatura(
+                    d.consultor,
+                    [
+                      'Consultor J.Assy',
+                      d.contatoConsultor,
+                    ].where((x) => x.trim().isNotEmpty).join(' · '),
+                  ),
+                  pw.SizedBox(width: 36),
+                  assinatura(d.cliente, 'De acordo'),
+                ],
+              ),
+            ],
           ),
-        pw.Spacer(),
-        pw.Row(
-          children: [
-            assinatura(
-              d.consultor,
-              [
-                'Consultor J.Assy',
-                d.contatoConsultor,
-              ].where((x) => x.trim().isNotEmpty).join(' · '),
-            ),
-            pw.SizedBox(width: 36),
-            assinatura(d.cliente, 'De acordo'),
-          ],
         ),
         pw.SizedBox(height: 10),
       ],
