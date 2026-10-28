@@ -2,3 +2,4 @@
 library;
 
 export 'src/calculadora.dart';
+export 'src/proposta.dart';

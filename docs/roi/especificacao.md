@@ -93,3 +93,7 @@ Sem área, investimento ou vida econômica, os indicadores que dividem por eles 
 
 - Usar a perda medida na avaliação de plantio como cenário de plantabilidade (próxima versão).
 - Trazer o número de linhas do Configurador quando o vendedor acabou de configurar a máquina.
+
+## Proposta em PDF
+
+No resultado e no comparativo, o vendedor gera a proposta comercial com o retorno em PDF. Regras: [proposta.md](proposta.md).

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../tema.dart';
 import '../ui/componentes.dart';
 import 'roi_estado.dart';
+import 'proposta/proposta_page.dart';
 import 'roi_etapas.dart';
 
 /// ROI do retrofit em 7 etapas: 5 de premissas, resultado e comparativo. No
@@ -195,6 +196,13 @@ class _Rodape extends StatelessWidget {
 
   const _Rodape({required this.estado});
 
+  void _abrirProposta(BuildContext context) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) =>
+          PropostaPage(premissas: estado.premissas, cenario: estado.cenario),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final rotulo = switch (estado.etapa) {
@@ -231,20 +239,43 @@ class _Rodape extends StatelessWidget {
                 ),
               const SizedBox(width: 12),
               Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: estado.etapa < RoiEstado.etapaComparativo
-                      ? FilledButton(
-                          onPressed: estado.bloqueio == null
-                              ? estado.avancar
-                              : null,
-                          child: Text(
-                            rotulo,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    if (estado.etapa == RoiEstado.etapaResultado)
+                      OutlinedButton.icon(
+                        onPressed: () => _abrirProposta(context),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(64, 52),
+                          foregroundColor: Cores.tinta,
+                          side: const BorderSide(color: Cores.cinza),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                        )
-                      : const SizedBox.shrink(),
+                        ),
+                        icon: const Icon(Icons.picture_as_pdf),
+                        label: const Text('Proposta'),
+                      ),
+                    if (estado.etapa < RoiEstado.etapaComparativo)
+                      FilledButton(
+                        onPressed: estado.bloqueio == null
+                            ? estado.avancar
+                            : null,
+                        child: Text(
+                          rotulo,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      )
+                    else
+                      FilledButton.icon(
+                        onPressed: () => _abrirProposta(context),
+                        icon: const Icon(Icons.picture_as_pdf),
+                        label: const Text('Gerar proposta'),
+                      ),
+                  ],
                 ),
               ),
             ],

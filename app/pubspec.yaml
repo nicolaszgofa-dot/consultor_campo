@@ -20,6 +20,8 @@ dependencies:
     path: ../packages/roi
   shared_preferences: ^2.5.6
   http: ^1.6.0
+  pdf: ^3.13.1
+  printing: ^5.15.1
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +34,7 @@ flutter:
     - assets/configurador/
     - assets/cotacoes/
     - assets/marcas/
+    - assets/proposta/
   # Barlow (SIL Open Font License, assets/fonts/OFL.txt), embutida para
   # funcionar sem internet no campo.
   fonts:

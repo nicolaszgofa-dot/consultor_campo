@@ -50,5 +50,5 @@ Toda mudança entra por Pull Request com pelo menos uma aprovação. O CI roda a
 
 - Cadastro de clientes, fazendas e talhões
 - Salvar avaliações no aparelho e sincronizar quando houver internet
-- Relatório em PDF para o cliente
+- Relatório em PDF da avaliação para o cliente (a proposta com o ROI já sai em PDF: `docs/roi/proposta.md`)
 - Versão Android para uso no campo
