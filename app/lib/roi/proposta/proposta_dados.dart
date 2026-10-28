@@ -197,15 +197,19 @@ enum ProdutoProposta {
         'Frete e instalação',
       ],
     },
-    provaNumero: '37',
-    provaTexto: 'modelos de plantadeira com adaptação Selenium, em 11 marcas',
-    provaFonte: 'Catálogo J.Assy',
+    // Sem o nome do concorrente: o PDF vai para o cliente.
+    provaNumero: '85,4%',
+    provaTexto:
+        'de espaçamentos aceitáveis em campo, contra 76,1% de um dosador a '
+        'vácuo concorrente',
+    provaFonte: 'Ensaio J.Assy',
     beneficios: [
       BeneficioProduto(
         IconeProposta.velocidade,
         'Espaçamento certo sem regulagem',
-        'O pneumático não precisa de regulagem e entrega sementes mais bem '
-            'espaçadas: menos falhas e duplas na linha.',
+        'O pneumático não precisa de regulagem e fecha o estande: 9,2 plantas '
+            'por metro contra 8,5 do dosador a vácuo concorrente (ensaio '
+            'J.Assy).',
         FonteRoi.plantabilidade,
       ),
       BeneficioProduto(

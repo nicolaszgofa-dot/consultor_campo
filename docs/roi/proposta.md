@@ -32,5 +32,5 @@ Os textos do produto vêm dos modelos de proposta e das fichas de batalha, sem c
 ## Pendências
 
 - Card próprio de proposta na tela inicial, puxando também do Configurador (produto, plantadeira, linhas e itens).
-- Prova de desempenho em campo para o Selenium (hoje o destaque é a cobertura de 37 modelos).
+- Detalhar cultura, velocidade e repetições do ensaio J.Assy usado como prova do Selenium (`docs/base-conhecimento/ensaio-jassy-dosadores.md`).
 - No web, a prévia do PDF carrega o leitor de PDF da internet; sem conexão, use o Android.

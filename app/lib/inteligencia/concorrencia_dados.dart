@@ -327,6 +327,9 @@ final linhasProduto = <LinhaProduto>[
     numeroTexto: 'modelos de plantadeira com adaptação Selenium, em 11 marcas',
     numeroFonte: 'Catálogo do Configurador',
     ganhamos: [
+      'Ensaio J.Assy em campo: Selenium Elétric com 85,4% de aceitáveis '
+          'contra 76,1% do vSet, e 9,2 contra 8,5 plantas por metro, com '
+          'diferença estatística.',
       'Menos dano à semente que os dosadores mecânicos (UNESP).',
       'Reposição para 11 marcas e 37 modelos, inclusive no lugar do original '
           'de fábrica.',
@@ -366,8 +369,10 @@ final linhasProduto = <LinhaProduto>[
         objecoes: [
           Objecao(
             'O vSet tem 99% de singulação.',
-            'É dado do fabricante, em bancada. Proponha medir as duas máquinas '
-                'na fazenda com a Avaliação de plantio.',
+            'É dado do fabricante, em bancada. No ensaio J.Assy em campo, o '
+                'Selenium Elétric teve 85,4% de aceitáveis contra 76,1% do '
+                'vSet e mais plantas por metro (9,2 x 8,5). Proponha medir as '
+                'duas máquinas na fazenda com a Avaliação de plantio.',
           ),
         ],
       ),
@@ -414,6 +419,15 @@ final linhasProduto = <LinhaProduto>[
     ],
     provas: [
       Prova(
+        'Ensaio J.Assy',
+        TipoProva.contraConcorrente,
+        'Selenium Elétric x vSet em campo: 85,4% x 76,1% de aceitáveis e '
+            '9,2 x 8,5 plantas/m, com diferença estatística. CV (33,1% x '
+            '40,9%) e falhas (13,7% x 20,0%) sem diferença estatística.',
+        'Prova principal contra o vSet. Venda aceitáveis e estande, não '
+            'falhas.',
+      ),
+      Prova(
         'UNESP 2021–2022',
         TipoProva.citaJassy,
         'Selenium e Jumil (pneumáticos) tiveram mais viabilidade e vigor que '
@@ -445,7 +459,9 @@ final linhasProduto = <LinhaProduto>[
     cuidado:
         'Na UNESP o melhor resultado geral foi do Jumil, e em umidade da '
         'semente de milho o Selenium ficou atrás do Plantsystem. Use o estudo '
-        'como pneumático x mecânico, não Selenium x Jumil.',
+        'como pneumático x mecânico, não Selenium x Jumil. No ensaio J.Assy, '
+        'o Selenium Elétric variou bastante entre repetições e não diferiu do '
+        'vSet em CV e falhas; o ensaio é interno, não independente.',
     perguntas: [
       'Qual a marca e o modelo da plantadeira?',
       'Planta em terreno inclinado?',
@@ -484,7 +500,10 @@ final linhasProduto = <LinhaProduto>[
             'linha, wireless',
           ),
           'onde': tem('Adaptação para 11 marcas e 37 modelos'),
-          'desemp': info('Menos dano à semente que os mecânicos (UNESP)'),
+          'desemp': info(
+            'Elétric: 85,4% de aceitáveis contra 76,1% do vSet (ensaio '
+            'J.Assy); menos dano à semente que os mecânicos (UNESP)',
+          ),
         },
       ),
       ProdutoTecnico(
@@ -823,11 +842,15 @@ final linhasProduto = <LinhaProduto>[
         'Pesquisas mostram que o tubo condutor e a velocidade mudam duplas e '
         'falhas. O Selenium Neo elimina essa etapa na plantadeira que o '
         'cliente já tem.',
-    numero: '16 km/h',
-    numeroTexto: 'velocidade de plantio do Selenium Neo, com dois motores',
-    numeroFonte: 'J.Assy, Agrishow 2024',
+    numero: '94,4%',
+    numeroTexto:
+        'de espaçamentos aceitáveis do Selenium Neo, contra 84,3% do V Control',
+    numeroFonte: 'Ensaio J.Assy',
     ganhamos: [
-      'Dois motores sincronizados: disco e esteira.',
+      'Ensaio J.Assy em campo: 94,4% de aceitáveis e CV de 24,4%, contra '
+          '84,3% e 33,2% do V Control, com diferença estatística.',
+      'Até 16 km/h com dois motores sincronizados: disco e esteira (J.Assy, '
+          'Agrishow 2024).',
       'Retrofit na plantadeira atual; o ExactEmerge vem só de fábrica.',
       'Sensor de semente na esteira, ISOBUS, linha a linha e taxa variável.',
     ],
@@ -860,8 +883,9 @@ final linhasProduto = <LinhaProduto>[
           Objecao(
             'O V Control tem estudo da UFRGS.',
             'O estudo confirma que a esteira funciona em alta velocidade, o '
-                'que vale para o Neo também. O Neo tem dois motores '
-                'sincronizados e sensor na esteira.',
+                'que vale para o Neo também. No ensaio J.Assy lado a lado, o '
+                'Neo teve 94,4% de aceitáveis contra 84,3% do V Control e CV '
+                'de 24,4% contra 33,2%.',
             confirmar: true,
           ),
         ],
@@ -875,6 +899,15 @@ final linhasProduto = <LinhaProduto>[
       ),
     ],
     provas: [
+      Prova(
+        'Ensaio J.Assy',
+        TipoProva.contraConcorrente,
+        'Selenium Neo x V Control em campo: 94,4% x 84,3% de aceitáveis e CV '
+            'de 24,4% x 33,2%, com diferença estatística. Falhas (5,1% x '
+            '13,9%) e plantas/m (9,4 x 9,4) sem diferença estatística.',
+        'Prova principal contra o V Control. Venda aceitáveis e CV, não '
+            'falhas.',
+      ),
       Prova(
         'UFPel 2024',
         TipoProva.sustenta,
@@ -898,8 +931,9 @@ final linhasProduto = <LinhaProduto>[
       ),
     ],
     cuidado:
-        'Não há estudo independente do Selenium Neo na base. Os 16 km/h são '
-        'do fabricante; proponha teste na fazenda.',
+        'O ensaio do Neo é interno (J.Assy), não independente, e a diferença '
+        'em falhas não foi significativa. Os 16 km/h são do fabricante; '
+        'proponha teste na fazenda.',
     perguntas: [
       'Em que velocidade quer plantar?',
       'Quantos hectares por dia precisa fazer na janela?',
