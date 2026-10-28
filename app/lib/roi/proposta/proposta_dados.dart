@@ -234,10 +234,82 @@ enum ProdutoProposta {
         FonteRoi.operacao,
       ),
     ],
+  ),
+  neo(
+    nome: 'Selenium Neo',
+    imagem: null,
+    fornecimentos: {Fornecimento.completo: 'Dosador com esteira'},
+    itemProposta: {Fornecimento.completo: 'dosadores Selenium Neo com esteira'},
+    descricao:
+        'O Selenium Neo leva a semente do disco ao solo por uma esteira, sem '
+        'a queda livre no tubo: ela chega no espaçamento do disco mesmo em '
+        'alta velocidade. Dois motores sincronizados, disco e esteira, '
+        'comandados via ISOBUS.',
+    caracteristicas: [
+      (IconeProposta.velocidade, 'Plantio em até 16 km/h'),
+      (IconeProposta.linhas, 'Desligamento automático linha a linha'),
+      (IconeProposta.mapa, 'Plantio em taxa variável'),
+      (IconeProposta.sinal, 'Comunicação sem fio'),
+      (IconeProposta.monitor, 'Regulagem pelo monitor do trator'),
+      (IconeProposta.olho, 'Sensor de sementes na esteira'),
+    ],
+    // A confirmar com a engenharia: lista montada a partir das fichas.
+    sistema: {
+      Fornecimento.completo: [
+        'Dosador Selenium Neo',
+        'Esteira condutora de sementes',
+        'Motores do disco e da esteira',
+        'Sensor de sementes na esteira',
+        'Alternador hidráulico',
+        'Mangueiras hidráulicas',
+        'Módulo ECU',
+        'Cabo ISOBUS',
+        'Cabos de energia',
+        'Antena de comunicação',
+        'Sensor de levante',
+        'Frete e instalação',
+      ],
+    },
+    provaNumero: '94,4%',
+    provaTexto:
+        'de espaçamentos aceitáveis em campo, contra 84,3% de um dosador de '
+        'esteira concorrente',
+    provaFonte: 'Ensaio J.Assy',
+    beneficios: [
+      BeneficioProduto(
+        IconeProposta.semente,
+        'Semente no espaçamento do disco',
+        'A esteira tira a queda livre do tubo: CV de 24,4% contra 33,2% do '
+            'dosador de esteira concorrente (ensaio J.Assy).',
+        FonteRoi.plantabilidade,
+      ),
+      BeneficioProduto(
+        IconeProposta.velocidade,
+        'Mais hectares na janela',
+        'Até 16 km/h com dois motores sincronizados: plantio rápido sem '
+            'abrir mão do espaçamento.',
+      ),
+      BeneficioProduto(
+        IconeProposta.linhas,
+        'Desliga linha a linha',
+        'Cada linha para sozinha em área já plantada: menos semente dobrada '
+            'em cabeceiras e recortes.',
+        FonteRoi.sobreposicao,
+      ),
+      BeneficioProduto(
+        IconeProposta.mapa,
+        'Taxa variável no ISOBUS',
+        'A população certa em cada zona, comandada pelo monitor que já está '
+            'no trator.',
+        FonteRoi.taxaVariavel,
+      ),
+    ],
   );
 
   final String nome;
-  final String imagem;
+
+  /// Foto do produto (WebP). Nula = sem foto no app ainda.
+  final String? imagem;
   final Map<Fornecimento, String> fornecimentos;
   final Map<Fornecimento, String> itemProposta;
   final String descricao;
@@ -266,15 +338,41 @@ enum ProdutoProposta {
 /// Parcela depois da entrada: fração do total e quando vence.
 typedef ParcelaProposta = ({double fracao, String quando});
 
-/// Tudo o que o vendedor preenche ao gerar a proposta. Nenhum valor vem
-/// preenchido: o app é público.
-class DadosProposta {
+/// Um produto da proposta. [valorCampanha] nulo = sem condição especial.
+class ItemProposta {
   final ProdutoProposta produto;
   final Fornecimento fornecimento;
   final String plantadeira;
   final int linhas;
   final double valorLinha;
+  final double? valorCampanha;
+
+  const ItemProposta({
+    required this.produto,
+    required this.fornecimento,
+    required this.plantadeira,
+    required this.linhas,
+    required this.valorLinha,
+    this.valorCampanha,
+  });
+
+  bool get temCampanha => valorCampanha != null;
+
+  /// Valor por linha que vale na proposta.
+  double get valorFinal => valorCampanha ?? valorLinha;
+
+  double get totalTabela => linhas * valorLinha;
+  double get total => linhas * valorFinal;
+}
+
+/// Tudo o que o vendedor preenche ao gerar a proposta. Nenhum valor vem
+/// preenchido: o app é público. Nada disso é salvo.
+class DadosProposta {
+  final List<ItemProposta> itens;
   final String impostos;
+
+  /// Uma página por produto, com prova, benefícios e o que vem no sistema.
+  final bool paginasProdutos;
 
   final String cliente;
   final String documento;
@@ -295,12 +393,9 @@ class DadosProposta {
   final String garantia;
 
   const DadosProposta({
-    required this.produto,
-    required this.fornecimento,
-    required this.plantadeira,
-    required this.linhas,
-    required this.valorLinha,
+    required this.itens,
     this.impostos = '',
+    this.paginasProdutos = true,
     required this.cliente,
     this.documento = '',
     this.inscricao = '',
@@ -319,7 +414,19 @@ class DadosProposta {
     this.garantia = '',
   });
 
-  double get total => linhas * valorLinha;
+  double get total => itens.fold(0, (s, i) => s + i.total);
+  double get totalTabela => itens.fold(0, (s, i) => s + i.totalTabela);
+
+  /// Quanto o cliente deixa de pagar com as condições de campanha.
+  double get economia => totalTabela - total;
+
+  int get linhas => itens.fold(0, (s, i) => s + i.linhas);
+
+  /// O produto, quando a proposta tem um só. Nulo com produtos diferentes.
+  ProdutoProposta? get produtoUnico {
+    final produtos = itens.map((i) => i.produto).toSet();
+    return produtos.length == 1 ? produtos.first : null;
+  }
 
   /// Valores da entrada e das parcelas, somando o total.
   List<double> get valoresPagamento => dividirEmParcelas(total, [

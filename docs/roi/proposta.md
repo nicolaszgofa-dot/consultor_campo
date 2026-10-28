@@ -1,6 +1,6 @@
 # Proposta comercial com o ROI
 
-O vendedor gera a proposta comercial em PDF a partir do ROI: botão **Proposta** no resultado e **Gerar proposta** no comparativo. A proposta e o retorno saem num documento só. Base: os modelos de proposta Titanium e Selenium (Eletric e Motorização) da J.Assy. No futuro a proposta pode ganhar um card próprio na tela inicial.
+O vendedor gera a proposta comercial em PDF a partir do ROI: botão **Proposta** no resultado e **Gerar proposta** no comparativo. A proposta e o retorno saem num documento só. Base: os modelos de proposta Titanium e Selenium (Eletric e Motorização) da J.Assy. A proposta também tem um card próprio na tela inicial: `docs/proposta/proposta-comercial.md`.
 
 O código fica em `app/lib/roi/proposta/`. O valor por extenso e a divisão em parcelas ficam em `packages/roi/lib/src/proposta.dart`, com testes.
 
@@ -31,6 +31,6 @@ Os textos do produto vêm dos modelos de proposta e das fichas de batalha, sem c
 
 ## Pendências
 
-- Card próprio de proposta na tela inicial, puxando também do Configurador (produto, plantadeira, linhas e itens).
+- O card próprio de proposta já existe (`docs/proposta/proposta-comercial.md`); falta puxar do Configurador (produto, plantadeira, linhas e itens).
 - Detalhar cultura, velocidade e repetições do ensaio J.Assy usado como prova do Selenium (`docs/base-conhecimento/ensaio-jassy-dosadores.md`).
 - No web, a prévia do PDF carrega o leitor de PDF da internet; sem conexão, use o Android.

@@ -12,7 +12,10 @@ import 'roi_etapas.dart';
 class RoiPage extends StatefulWidget {
   final RoiEstado? estado;
 
-  const RoiPage({super.key, this.estado});
+  /// Aberto pela proposta comercial: os botões de proposta voltam para ela.
+  final bool naProposta;
+
+  const RoiPage({super.key, this.estado, this.naProposta = false});
 
   @override
   State<RoiPage> createState() => _RoiPageState();
@@ -77,7 +80,7 @@ class _RoiPageState extends State<RoiPage> {
                         : pagina,
                   ),
                 ),
-                _Rodape(estado: _estado),
+                _Rodape(estado: _estado, naProposta: widget.naProposta),
               ],
             ),
           ),
@@ -193,15 +196,20 @@ class _ItemTrilho extends StatelessWidget {
 
 class _Rodape extends StatelessWidget {
   final RoiEstado estado;
+  final bool naProposta;
 
-  const _Rodape({required this.estado});
+  const _Rodape({required this.estado, required this.naProposta});
 
-  void _abrirProposta(BuildContext context) => Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) =>
-          PropostaPage(premissas: estado.premissas, cenario: estado.cenario),
-    ),
-  );
+  void _abrirProposta(BuildContext context) => naProposta
+      ? Navigator.of(context).pop()
+      : Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => PropostaPage(
+              premissas: estado.premissas,
+              cenario: estado.cenario,
+            ),
+          ),
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -255,8 +263,12 @@ class _Rodape extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        icon: const Icon(Icons.picture_as_pdf),
-                        label: const Text('Proposta'),
+                        icon: Icon(
+                          naProposta ? Icons.reply : Icons.picture_as_pdf,
+                        ),
+                        label: Text(
+                          naProposta ? 'Usar na proposta' : 'Proposta',
+                        ),
                       ),
                     if (estado.etapa < RoiEstado.etapaComparativo)
                       FilledButton(
@@ -272,8 +284,12 @@ class _Rodape extends StatelessWidget {
                     else
                       FilledButton.icon(
                         onPressed: () => _abrirProposta(context),
-                        icon: const Icon(Icons.picture_as_pdf),
-                        label: const Text('Gerar proposta'),
+                        icon: Icon(
+                          naProposta ? Icons.reply : Icons.picture_as_pdf,
+                        ),
+                        label: Text(
+                          naProposta ? 'Usar na proposta' : 'Gerar proposta',
+                        ),
                       ),
                   ],
                 ),

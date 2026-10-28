@@ -15,12 +15,19 @@ import 'roi_test.dart' show estadoExemplo, tela;
 DadosProposta dadosExemplo({
   ProdutoProposta produto = ProdutoProposta.titanium,
   Fornecimento fornecimento = Fornecimento.completo,
+  List<ItemProposta>? itens,
 }) => DadosProposta(
-  produto: produto,
-  fornecimento: fornecimento,
-  plantadeira: 'Tatu PST',
-  linhas: 66,
-  valorLinha: 7300,
+  itens:
+      itens ??
+      [
+        ItemProposta(
+          produto: produto,
+          fornecimento: fornecimento,
+          plantadeira: 'Tatu PST',
+          linhas: 66,
+          valorLinha: 7300,
+        ),
+      ],
   impostos: '+ Difal',
   cliente: 'Fazenda Santa Rita',
   documento: '000.000.000-00',
@@ -55,9 +62,9 @@ void main() {
       for (final produto in ProdutoProposta.values) {
         expect(produto.beneficios, hasLength(4), reason: produto.nome);
         expect(produto.caracteristicas, hasLength(6), reason: produto.nome);
-        for (final f in Fornecimento.values) {
+        for (final f in produto.fornecimentos.keys) {
           expect(produto.sistema[f], contains('Frete e instalação'));
-          expect(produto.fornecimentos[f], isNotEmpty);
+          expect(produto.itemProposta[f], isNotEmpty);
         }
       }
       expect(
@@ -73,7 +80,7 @@ void main() {
     await tester.runAsync(() async {
       final recursos = await RecursosPdf.carregar();
       for (final produto in ProdutoProposta.values) {
-        for (final f in Fornecimento.values) {
+        for (final f in produto.fornecimentos.keys) {
           final bytes = await gerarPropostaPdf(
             dados: dadosExemplo(produto: produto, fornecimento: f),
             premissas: estadoExemplo().premissas,

@@ -38,6 +38,7 @@ flutter test
 | `docs/configurador/` | Especificação do Configurador e pendências técnicas |
 | `packages/roi/` | Cálculo do ROI do retrofit J.Assy (benefícios, payback e comparativo) |
 | `docs/roi/` | Especificação do ROI, a partir da planilha da J.Assy |
+| `docs/proposta/` | Proposta comercial (card próprio): etapas, PDF e o que não é salvo |
 | `docs/especificacao-calculos.md` | Regras de cálculo e casos de validação |
 | `docs/base-conhecimento/` | Base técnica com fontes: plantabilidade, estande, CV, singularização, perdas e emergência |
 | `docs/prototipo-web/` | Protótipo HTML das calculadoras (sem Flutter) |

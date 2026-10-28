@@ -4,6 +4,7 @@ import 'avaliacao/avaliacao_hub_page.dart';
 import 'conceito/conceito_page.dart';
 import 'configurador/configurador_page.dart';
 import 'inteligencia/inteligencia_page.dart';
+import 'proposta/propostas_page.dart';
 import 'roi/roi_page.dart';
 
 class Funcionalidade {
@@ -43,6 +44,12 @@ final funcionalidades = <Funcionalidade>[
     descricao: 'Retorno do investimento para o produtor',
     icone: Icons.trending_up,
     tela: () => const RoiPage(),
+  ),
+  Funcionalidade(
+    titulo: 'Proposta comercial',
+    descricao: 'Proposta em PDF com produtos, condições e retorno',
+    icone: Icons.request_quote_outlined,
+    tela: () => const PropostasPage(),
   ),
   Funcionalidade(
     titulo: 'Inteligência de mercado',

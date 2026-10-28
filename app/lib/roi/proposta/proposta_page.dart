@@ -128,11 +128,15 @@ class _PropostaPageState extends State<PropostaPage> {
   ];
 
   DadosProposta _dados() => DadosProposta(
-    produto: _produto!,
-    fornecimento: _fornecimento,
-    plantadeira: _t('plantadeira'),
-    linhas: _linhas,
-    valorLinha: _valor,
+    itens: [
+      ItemProposta(
+        produto: _produto!,
+        fornecimento: _fornecimento,
+        plantadeira: _t('plantadeira'),
+        linhas: _linhas,
+        valorLinha: _valor,
+      ),
+    ],
     impostos: _t('impostos'),
     cliente: _t('cliente'),
     documento: _t('documento'),
@@ -258,15 +262,15 @@ class _PropostaPageState extends State<PropostaPage> {
       titulo: 'Proposta comercial',
       filhos: [
         _secao('Produto', [
-          _chips(
-            ProdutoProposta.values,
-            _produto,
-            (p) => p.nome,
-            (p) => _produto = p,
-          ),
+          _chips(ProdutoProposta.values, _produto, (p) => p.nome, (p) {
+            _produto = p;
+            if (!p.fornecimentos.containsKey(_fornecimento)) {
+              _fornecimento = Fornecimento.completo;
+            }
+          }),
           if (_produto != null)
             _chips(
-              Fornecimento.values,
+              _produto!.fornecimentos.keys.toList(),
               _fornecimento,
               (f) => _produto!.fornecimentos[f]!,
               (f) => _fornecimento = f,

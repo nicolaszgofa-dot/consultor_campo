@@ -44,7 +44,7 @@ class RecursosPdf {
       logo: await bytes('assets/proposta/logo_jassy.png'),
       imagens: {
         for (final p in ProdutoProposta.values)
-          p: await _paraPng(await bytes(p.imagem)),
+          if (p.imagem != null) p: await _paraPng(await bytes(p.imagem!)),
       },
     );
   }
@@ -103,16 +103,17 @@ String _safras(double? v) =>
 String _pct(double? v, [int casas = 0]) =>
     v == null ? '–' : percentual(v * 100, casas);
 
-/// Gera a proposta comercial com o ROI: proposta, retorno, produto, condições
-/// e anexo com as premissas. O investimento do ROI é o total da proposta.
+/// Gera a proposta comercial: proposta, retorno, uma página por produto,
+/// condições e anexo com as premissas. Sem [premissas], o retorno e o anexo
+/// ficam de fora. O investimento do ROI é o total da proposta.
 Future<Uint8List> gerarPropostaPdf({
   required DadosProposta dados,
-  required PremissasRoi premissas,
-  required CenarioRoi cenario,
+  PremissasRoi? premissas,
+  CenarioRoi cenario = CenarioRoi.provavel,
   required RecursosPdf recursos,
 }) {
-  final p = premissasDaProposta(premissas, dados);
-  final r = CalculadoraRoi.calcular(p);
+  final p = premissas == null ? null : premissasDaProposta(premissas, dados);
+  final r = p == null ? null : CalculadoraRoi.calcular(p);
   final doc = pw.Document(
     title: 'Proposta comercial – ${dados.cliente}',
     author: 'J.Assy',
@@ -124,20 +125,29 @@ Future<Uint8List> gerarPropostaPdf({
   final m = _Montador(dados, p, r, cenario, recursos);
   // As seções correm uma atrás da outra e quebram de página onde couber, para
   // a folha A4 não sobrar em branco.
-  final secoes = [
+  // Uma página de produto por produto diferente da proposta.
+  final produtos = [
+    if (dados.paginasProdutos)
+      for (final (i, item) in dados.itens.indexed)
+        if (dados.itens.indexWhere((x) => x.produto == item.produto) == i) item,
+  ];
+  final secoes = <(pw.Widget, String?)>[
     (
       m.proposta(),
       'Apresentamos nossa proposta para o fornecimento dos '
           'produtos acima.',
     ),
-    (m.retorno(), null),
-    (
-      m.produto(),
-      'Resultados de pesquisa citados conforme as fontes '
-          'indicadas. Na sua fazenda, meça com a Avaliação de plantio.',
-    ),
+    if (m.comRetorno) (m.retorno(), null),
+    for (final (i, item) in produtos.indexed)
+      (
+        m.produto(item, ultimo: i == produtos.length - 1),
+        i == produtos.length - 1
+            ? 'Resultados de pesquisa citados conforme as fontes indicadas. '
+                  'Na sua fazenda, meça com a Avaliação de plantio.'
+            : null,
+      ),
     (m.condicoes(), null),
-    (m.anexo(), null),
+    if (m.comRetorno) (m.anexo(), null),
   ];
   doc.addPage(
     pw.MultiPage(
@@ -178,14 +188,23 @@ List<pw.Widget> _quebravel(pw.Widget secao) {
 
 class _Montador {
   final DadosProposta d;
-  final PremissasRoi p;
-  final ResultadoRoi r;
+  final PremissasRoi? _p;
+  final ResultadoRoi? _r;
   final CenarioRoi cenario;
   final RecursosPdf f;
 
-  _Montador(this.d, this.p, this.r, this.cenario, this.f);
+  _Montador(this.d, this._p, this._r, this.cenario, this.f);
 
+  /// Se a proposta leva o retorno do investimento.
+  bool get comRetorno => _r != null;
+  PremissasRoi get p => _p!;
+  ResultadoRoi get r => _r!;
   ResultadoCenario get c => r.cenarios[cenario]!;
+
+  /// "Com o Titanium Elétric" ou, com produtos diferentes, a solução.
+  String get _comSolucao => d.produtoUnico == null
+      ? 'Com a modernização J.Assy'
+      : 'Com o ${d.produtoUnico!.nome}';
   bool get temComparativo => p.concorrente > 0 || p.plantadeiraNova > 0;
 
   pw.TextStyle _t(
@@ -313,8 +332,11 @@ class _Montador {
         children: [
           pw.Expanded(
             child: pw.Text(
-              'Estimativa de retorno calculada com as premissas informadas '
-              'pelo cliente (Anexo). Não é garantia de resultado.',
+              comRetorno
+                  ? 'Estimativa de retorno calculada com as premissas '
+                        'informadas pelo cliente (Anexo). Não é garantia de '
+                        'resultado.'
+                  : 'Proposta comercial J.Assy · ${d.cliente}',
               style: _t(7.8, cor: _C.secundario),
             ),
           ),
@@ -337,46 +359,6 @@ class _Montador {
       ('Tel.', d.telefone),
       ('E-mail', d.email),
     ].where((x) => x.$2.trim().isNotEmpty).toList();
-    final caracts = d.produto.caracteristicas;
-    final impostos = d.impostos.trim();
-
-    pw.Widget caixaValor(
-      String t,
-      String v,
-      String nota, {
-      bool total = false,
-    }) => pw.Expanded(
-      flex: total ? 13 : 10,
-      child: pw.Container(
-        padding: const pw.EdgeInsets.symmetric(horizontal: 13, vertical: 10),
-        decoration: total
-            ? null
-            : const pw.BoxDecoration(
-                border: pw.Border(
-                  right: pw.BorderSide(color: _C.divisorEscuro),
-                ),
-              ),
-        child: pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              t.toUpperCase(),
-              style: _t(8, fonte: f.semi, cor: _C.verdeSuave, espaco: 0.5),
-            ),
-            pw.Text(
-              v,
-              style: _t(
-                total ? 24 : 19,
-                fonte: f.titulo,
-                cor: total ? _C.verdeVivo : _C.branco,
-              ),
-            ),
-            if (nota.isNotEmpty)
-              pw.Text(nota, style: _t(8.5, cor: _C.verdeClaro)),
-          ],
-        ),
-      ),
-    );
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
@@ -422,134 +404,9 @@ class _Montador {
             ],
           ),
         ),
+        ...(d.itens.length == 1 ? _itemUnico(d.itens.single) : _variosItens()),
         pw.SizedBox(height: 16),
-        pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Container(
-              width: 168,
-              height: 168,
-              decoration: pw.BoxDecoration(
-                color: _C.verdeClaro,
-                borderRadius: pw.BorderRadius.circular(8),
-              ),
-              child: pw.Stack(
-                alignment: pw.Alignment.center,
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(12),
-                    child: pw.Image(pw.MemoryImage(f.imagens[d.produto]!)),
-                  ),
-                  pw.Positioned(
-                    bottom: 4,
-                    child: pw.Text(
-                      'Foto meramente ilustrativa',
-                      style: _t(6.5, cor: _C.secundario),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            pw.SizedBox(width: 16),
-            pw.Expanded(
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    '${d.linhas} ${d.produto.itemProposta[d.fornecimento]}'
-                        .toUpperCase(),
-                    style: _t(
-                      9.5,
-                      fonte: f.negrito,
-                      cor: _C.verdeTexto,
-                      espaco: 0.4,
-                    ),
-                  ),
-                  pw.Text(d.produto.nome, style: _t(26, fonte: f.titulo)),
-                  pw.SizedBox(height: 4),
-                  pw.Text(d.produto.descricao, style: _t(9.8, altura: 1.5)),
-                  pw.SizedBox(height: 8),
-                  for (var i = 0; i < caracts.length; i += 2)
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.only(bottom: 5),
-                      child: pw.Row(
-                        children: [
-                          for (final (icone, texto) in caracts.skip(i).take(2))
-                            pw.Expanded(
-                              child: pw.Row(
-                                children: [
-                                  _iconeRedondo(icone, 20),
-                                  pw.SizedBox(width: 6),
-                                  pw.Expanded(
-                                    child: pw.Text(
-                                      texto,
-                                      style: _t(9, fonte: f.medio),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 14),
-        pw.Container(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 11, vertical: 8),
-          decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: _C.borda, width: 0.75),
-            borderRadius: pw.BorderRadius.circular(4),
-          ),
-          child: pw.Row(
-            children: [
-              _icone(IconeProposta.ferramenta, t: 18),
-              pw.SizedBox(width: 8),
-              pw.Expanded(
-                child: pw.RichText(
-                  text: pw.TextSpan(
-                    style: _t(10),
-                    children: [
-                      const pw.TextSpan(text: 'Será instalado na plantadeira '),
-                      pw.TextSpan(
-                        text: '${d.plantadeira} de ${d.linhas} linhas',
-                        style: _t(10, fonte: f.negrito),
-                      ),
-                      const pw.TextSpan(
-                        text: ', na fazenda, pela equipe da J.Assy.',
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        pw.SizedBox(height: 14),
-        pw.Container(
-          decoration: pw.BoxDecoration(
-            color: _C.verdeEscuro,
-            borderRadius: pw.BorderRadius.circular(6),
-          ),
-          child: pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              caixaValor('Valor por linha', reais(d.valorLinha), impostos),
-              caixaValor('Linhas', '${d.linhas}', d.plantadeira),
-              caixaValor(
-                'Valor total',
-                reais(d.total),
-                [valorPorExtenso(d.total), impostos].join(' ').trim(),
-                total: true,
-              ),
-            ],
-          ),
-        ),
-        pw.SizedBox(height: 16),
-        if (c.payback != null)
+        if (comRetorno && c.payback != null)
           pw.Container(
             padding: const pw.EdgeInsets.only(left: 10, top: 3, bottom: 3),
             decoration: const pw.BoxDecoration(
@@ -592,6 +449,297 @@ class _Montador {
           ),
       ],
     );
+  }
+
+  /// Foto do produto, ou o nome num quadro quando ainda não há foto.
+  pw.Widget _foto(ProdutoProposta produto, double lado) {
+    final imagem = f.imagens[produto];
+    return pw.Container(
+      width: lado,
+      height: lado,
+      decoration: pw.BoxDecoration(
+        color: _C.verdeClaro,
+        borderRadius: pw.BorderRadius.circular(lado > 100 ? 8 : 5),
+      ),
+      child: pw.Stack(
+        alignment: pw.Alignment.center,
+        children: [
+          if (imagem != null)
+            pw.Padding(
+              padding: pw.EdgeInsets.all(lado * 0.07),
+              child: pw.Image(pw.MemoryImage(imagem)),
+            )
+          else
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(6),
+              child: pw.Text(
+                produto.nome,
+                textAlign: pw.TextAlign.center,
+                style: _t(
+                  lado > 100 ? 20 : 10,
+                  fonte: f.titulo,
+                  cor: _C.verdeTexto,
+                ),
+              ),
+            ),
+          if (lado > 100 && imagem != null)
+            pw.Positioned(
+              bottom: 4,
+              child: pw.Text(
+                'Foto meramente ilustrativa',
+                style: _t(6.5, cor: _C.secundario),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _caixaValor(
+    String t,
+    String v,
+    String nota, {
+    bool total = false,
+    bool ultimo = false,
+  }) => pw.Expanded(
+    flex: total ? 13 : 10,
+    child: pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+      decoration: ultimo
+          ? null
+          : const pw.BoxDecoration(
+              border: pw.Border(right: pw.BorderSide(color: _C.divisorEscuro)),
+            ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            t.toUpperCase(),
+            style: _t(8, fonte: f.semi, cor: _C.verdeSuave, espaco: 0.5),
+          ),
+          pw.Text(
+            v,
+            style: _t(
+              total ? 24 : 19,
+              fonte: f.titulo,
+              cor: total ? _C.verdeVivo : _C.branco,
+            ),
+          ),
+          if (nota.isNotEmpty)
+            pw.Text(nota, style: _t(8.5, cor: _C.verdeClaro)),
+        ],
+      ),
+    ),
+  );
+
+  String get _extenso =>
+      [valorPorExtenso(d.total), d.impostos.trim()].join(' ').trim();
+
+  /// Um produto só: foto grande, descrição, características e valores.
+  List<pw.Widget> _itemUnico(ItemProposta item) {
+    final caracts = item.produto.caracteristicas;
+    final impostos = d.impostos.trim();
+    return [
+      pw.SizedBox(height: 16),
+      pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          _foto(item.produto, 168),
+          pw.SizedBox(width: 16),
+          pw.Expanded(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  '${item.linhas} ${item.produto.itemProposta[item.fornecimento]}'
+                      .toUpperCase(),
+                  style: _t(
+                    9.5,
+                    fonte: f.negrito,
+                    cor: _C.verdeTexto,
+                    espaco: 0.4,
+                  ),
+                ),
+                pw.Text(item.produto.nome, style: _t(26, fonte: f.titulo)),
+                pw.SizedBox(height: 4),
+                pw.Text(item.produto.descricao, style: _t(9.8, altura: 1.5)),
+                pw.SizedBox(height: 8),
+                for (var i = 0; i < caracts.length; i += 2)
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.only(bottom: 5),
+                    child: pw.Row(
+                      children: [
+                        for (final (icone, texto) in caracts.skip(i).take(2))
+                          pw.Expanded(
+                            child: pw.Row(
+                              children: [
+                                _iconeRedondo(icone, 20),
+                                pw.SizedBox(width: 6),
+                                pw.Expanded(
+                                  child: pw.Text(
+                                    texto,
+                                    style: _t(9, fonte: f.medio),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      pw.SizedBox(height: 14),
+      _instalacao(
+        pw.TextSpan(
+          text: '${item.plantadeira} de ${item.linhas} linhas',
+          style: _t(10, fonte: f.negrito),
+        ),
+      ),
+      pw.SizedBox(height: 14),
+      pw.Container(
+        decoration: pw.BoxDecoration(
+          color: _C.verdeEscuro,
+          borderRadius: pw.BorderRadius.circular(6),
+        ),
+        child: pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            _caixaValor(
+              item.temCampanha ? 'Condição especial' : 'Valor por linha',
+              reais(item.valorFinal),
+              [
+                if (item.temCampanha) 'Sem campanha: ${reais(item.valorLinha)}',
+                impostos,
+              ].where((x) => x.isNotEmpty).join(' · '),
+            ),
+            _caixaValor('Linhas', '${item.linhas}', item.plantadeira),
+            _caixaValor(
+              'Valor total',
+              reais(d.total),
+              _extenso,
+              total: true,
+              ultimo: true,
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  pw.Widget _instalacao(pw.InlineSpan onde) => pw.Container(
+    padding: const pw.EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+    decoration: pw.BoxDecoration(
+      border: pw.Border.all(color: _C.borda, width: 0.75),
+      borderRadius: pw.BorderRadius.circular(4),
+    ),
+    child: pw.Row(
+      children: [
+        _icone(IconeProposta.ferramenta, t: 18),
+        pw.SizedBox(width: 8),
+        pw.Expanded(
+          child: pw.RichText(
+            text: pw.TextSpan(
+              style: _t(10),
+              children: [
+                const pw.TextSpan(text: 'Será instalado na plantadeira '),
+                onde,
+                const pw.TextSpan(text: ', na fazenda, pela equipe da J.Assy.'),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  /// Vários produtos: uma linha por item e o total da proposta.
+  List<pw.Widget> _variosItens() {
+    return [
+      pw.SizedBox(height: 16),
+      _rotulo('Produtos da proposta'),
+      for (final item in d.itens)
+        pw.Container(
+          padding: const pw.EdgeInsets.symmetric(vertical: 8),
+          decoration: const pw.BoxDecoration(
+            border: pw.Border(bottom: pw.BorderSide(color: _C.borda)),
+          ),
+          child: pw.Row(
+            children: [
+              _foto(item.produto, 58),
+              pw.SizedBox(width: 12),
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(item.produto.nome, style: _t(15, fonte: f.titulo)),
+                    pw.Text(
+                      '${item.linhas} '
+                      '${item.produto.itemProposta[item.fornecimento]}',
+                      style: _t(9.5, fonte: f.semi, cor: _C.verdeTexto),
+                    ),
+                    pw.Text(
+                      'Plantadeira ${item.plantadeira} · instalação na '
+                      'fazenda pela equipe da J.Assy',
+                      style: _t(8.8, cor: _C.secundario),
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(width: 12),
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
+                children: [
+                  pw.Text(reais(item.total), style: _t(15, fonte: f.titulo)),
+                  pw.Text(
+                    '${reais(item.valorFinal)} por linha',
+                    style: _t(8.8, cor: _C.secundario),
+                  ),
+                  if (item.temCampanha)
+                    pw.Text(
+                      'sem campanha ${reais(item.valorLinha)}',
+                      style: _t(
+                        8.2,
+                        cor: _C.secundario,
+                      ).copyWith(decoration: pw.TextDecoration.lineThrough),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      pw.SizedBox(height: 12),
+      pw.Container(
+        decoration: pw.BoxDecoration(
+          color: _C.verdeEscuro,
+          borderRadius: pw.BorderRadius.circular(6),
+        ),
+        child: pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            if (d.economia > 0) ...[
+              _caixaValor('Sem campanha', reais(d.totalTabela), ''),
+              _caixaValor('Economia do cliente', reais(d.economia), ''),
+            ] else
+              _caixaValor(
+                'Linhas',
+                '${d.linhas}',
+                '${d.itens.length} produtos',
+              ),
+            _caixaValor(
+              'Valor total',
+              reais(d.total),
+              _extenso,
+              total: true,
+              ultimo: true,
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 
   // 2. Retorno --------------------------------------------------------------
@@ -671,7 +819,7 @@ class _Montador {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'Com o ${d.produto.nome}, a fazenda ganha em '
+                      '$_comSolucao, a fazenda ganha em '
                       '${numeroBr(p.vidaSafras, 0)} safras',
                       style: _t(9.8, cor: _C.verdeSuave),
                     ),
@@ -1056,14 +1204,14 @@ class _Montador {
 
   // 3. Produto --------------------------------------------------------------
 
-  pw.Widget produto() {
-    final itens = d.produto.sistema[d.fornecimento]!;
+  pw.Widget produto(ItemProposta item, {required bool ultimo}) {
+    final itens = item.produto.sistema[item.fornecimento]!;
     final porColuna = (itens.length / 3).ceil();
-    final beneficios = d.produto.beneficios;
+    final beneficios = item.produto.beneficios;
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
-        _tituloPagina('O que muda na plantadeira', d.produto.nome),
+        _tituloPagina('O que muda na plantadeira', item.produto.nome),
         pw.SizedBox(height: 12),
         pw.Container(
           padding: const pw.EdgeInsets.only(left: 10, top: 4, bottom: 4),
@@ -1073,7 +1221,7 @@ class _Montador {
           child: pw.Row(
             children: [
               pw.Text(
-                d.produto.provaNumero,
+                item.produto.provaNumero,
                 style: _t(30, fonte: f.titulo, cor: _C.verdeTexto),
               ),
               pw.SizedBox(width: 10),
@@ -1081,9 +1229,9 @@ class _Montador {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(d.produto.provaTexto, style: _t(10.5)),
+                    pw.Text(item.produto.provaTexto, style: _t(10.5)),
                     pw.Text(
-                      d.produto.provaFonte,
+                      item.produto.provaFonte,
                       style: _t(8, cor: _C.secundario),
                     ),
                   ],
@@ -1168,43 +1316,47 @@ class _Montador {
             ),
           ),
         ),
-        pw.SizedBox(height: 12),
-        pw.Container(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-          decoration: pw.BoxDecoration(
-            color: _C.verdeClaro,
-            borderRadius: pw.BorderRadius.circular(6),
-          ),
-          child: pw.Row(
-            children: [
-              _icone(IconeProposta.escudo, t: 24),
-              pw.SizedBox(width: 10),
-              pw.Expanded(
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(
-                      'Solução completa J.Assy',
-                      style: _t(11.5, fonte: f.titulo),
-                    ),
-                    pw.Text(
-                      'Dosador e motor elétrico no mesmo pacote, com um '
-                      'fornecedor só respondendo pelos dois. O motor sozinho '
-                      'não corrige um dosador gasto.',
-                      style: _t(9.2),
-                    ),
-                  ],
+        // A solução completa vale para todos: só no último produto.
+        if (ultimo) pw.SizedBox(height: 12),
+        if (ultimo)
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: pw.BoxDecoration(
+              color: _C.verdeClaro,
+              borderRadius: pw.BorderRadius.circular(6),
+            ),
+            child: pw.Row(
+              children: [
+                _icone(IconeProposta.escudo, t: 24),
+                pw.SizedBox(width: 10),
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'Solução completa J.Assy',
+                        style: _t(11.5, fonte: f.titulo),
+                      ),
+                      pw.Text(
+                        'Dosador e motor elétrico no mesmo pacote, com um '
+                        'fornecedor só respondendo pelos dois. O motor sozinho '
+                        'não corrige um dosador gasto.',
+                        style: _t(9.2),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
 
   pw.Widget _cartaoBeneficio(BeneficioProduto b) {
-    final valor = b.fonte == null ? null : valorDaFonte(r, cenario, b.fonte!);
+    final valor = b.fonte == null || !comRetorno
+        ? null
+        : valorDaFonte(r, cenario, b.fonte!);
     final rotulo = switch (b.fonte) {
       FonteRoi.plantabilidade => 'em plantabilidade',
       FonteRoi.sobreposicao => 'em sobreposição',
@@ -1370,6 +1522,12 @@ class _Montador {
                       ],
                     ),
                   ),
+                  if (d.economia > 0)
+                    pw.Text(
+                      'Sem campanha ${reais(d.totalTabela)} · economia de '
+                      '${reais(d.economia)}',
+                      style: _t(9, cor: _C.verdeClaro),
+                    ),
                 ],
               ),
               pw.SizedBox(width: 16),
@@ -1504,7 +1662,9 @@ class _Montador {
         'Retrofit J.Assy',
         p.investimento,
         _C.verde,
-        '${d.produto.nome} na plantadeira atual',
+        d.produtoUnico == null
+            ? 'Produtos J.Assy na plantadeira atual'
+            : '${d.produtoUnico!.nome} na plantadeira atual',
       ),
       if (temComparativo) ...[
         (
