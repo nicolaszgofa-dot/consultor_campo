@@ -262,12 +262,17 @@ class _PropostaPageState extends State<PropostaPage> {
       titulo: 'Proposta comercial',
       filhos: [
         _secao('Produto', [
-          _chips(ProdutoProposta.values, _produto, (p) => p.nome, (p) {
-            _produto = p;
-            if (!p.fornecimentos.containsKey(_fornecimento)) {
-              _fornecimento = Fornecimento.completo;
-            }
-          }),
+          _chips(
+            ProdutoProposta.values.where((p) => p.porLinha).toList(),
+            _produto,
+            (p) => p.nome,
+            (p) {
+              _produto = p;
+              if (!p.fornecimentos.containsKey(_fornecimento)) {
+                _fornecimento = Fornecimento.completo;
+              }
+            },
+          ),
           if (_produto != null)
             _chips(
               _produto!.fornecimentos.keys.toList(),

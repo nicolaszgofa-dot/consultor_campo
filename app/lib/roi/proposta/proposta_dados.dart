@@ -304,11 +304,169 @@ enum ProdutoProposta {
         FonteRoi.taxaVariavel,
       ),
     ],
+  ),
+  // Júpiter, Level e Commander: lista do sistema fica para depois.
+  jupiter(
+    nome: 'Júpiter',
+    imagem: 'assets/configurador/jupiter.png',
+    fornecimentos: {Fornecimento.completo: 'Dosador de adubo'},
+    itemProposta: {Fornecimento.completo: 'dosadores de adubo Júpiter'},
+    descricao:
+        'O Júpiter dosa o adubo por volume, com rotor e calha: a dose não '
+        'depende do nível do depósito nem da rampa do terreno. Encaixe '
+        'rápido, sem ferramentas.',
+    caracteristicas: [
+      (IconeProposta.velocidade, 'Dose de 100 a 600 kg/ha'),
+      (IconeProposta.curva, 'Desempenho em aclive e declive'),
+      (IconeProposta.linhas, 'Menor variação entre linhas'),
+      (IconeProposta.ferramenta, 'Encaixe sem ferramentas'),
+      (IconeProposta.semente, 'Quebra torrões de adubo'),
+      (IconeProposta.escudo, 'Prêmio iF Design 2023'),
+    ],
+    sistema: {},
+    provaNumero: '100–600',
+    provaTexto:
+        'kg/ha de faixa de dose no mesmo dosador, com encaixe sem '
+        'ferramentas',
+    provaFonte: 'J.Assy',
+    solucaoCompleta: false,
+    beneficios: [
+      BeneficioProduto(
+        IconeProposta.curva,
+        'Dose certa em qualquer terreno',
+        'O rotor volumétrico mantém a dose em aclive, em declive e com o '
+            'depósito cheio ou vazio.',
+      ),
+      BeneficioProduto(
+        IconeProposta.linhas,
+        'Linhas por igual',
+        'Rotor e calha dão menor variação de adubo entre as linhas.',
+      ),
+      BeneficioProduto(
+        IconeProposta.ferramenta,
+        'Menos parada',
+        'Encaixe sem ferramentas e quebra-torrões: regulagem e limpeza mais '
+            'rápidas.',
+      ),
+      BeneficioProduto(
+        IconeProposta.velocidade,
+        'Faixa ampla de dose',
+        'De 100 a 600 kg/ha no mesmo dosador, para cada adubo e cada talhão.',
+      ),
+    ],
+  ),
+  level(
+    nome: 'Level',
+    imagem: 'assets/configurador/level.png',
+    fornecimentos: {Fornecimento.completo: 'Controle de pressão'},
+    itemProposta: {
+      Fornecimento.completo: 'linhas com controle de pressão Level',
+    },
+    descricao:
+        'O Level ajusta a pressão de cada linha da plantadeira conforme o '
+        'solo, para a semente ficar na profundidade certa. Funciona na tela '
+        'ISOBUS do trator, sem monitor próprio, e se comunica sem fio.',
+    caracteristicas: [
+      (IconeProposta.linhas, 'Pressão linha a linha'),
+      (IconeProposta.semente, 'Profundidade uniforme'),
+      (IconeProposta.monitor, 'Na tela ISOBUS do trator'),
+      (IconeProposta.sinal, 'Comunicação sem fio'),
+      (IconeProposta.velocidade, 'Menos trepidação da linha'),
+      (IconeProposta.culturas, 'Emergência por igual'),
+    ],
+    sistema: {},
+    provaNumero: '100%',
+    provaTexto: 'ISOBUS e sem fio: usa a tela que já está no trator',
+    provaFonte: 'J.Assy',
+    solucaoCompleta: false,
+    beneficios: [
+      BeneficioProduto(
+        IconeProposta.semente,
+        'Profundidade certa',
+        'Pressão ajustada a cada linha, conforme o solo: a semente fica na '
+            'profundidade certa.',
+      ),
+      BeneficioProduto(
+        IconeProposta.culturas,
+        'Emergência por igual',
+        'Plantas que nascem juntas competem menos entre si e produzem mais.',
+      ),
+      BeneficioProduto(
+        IconeProposta.monitor,
+        'Sem monitor extra',
+        'Roda na tela ISOBUS do trator; não precisa de monitor próprio.',
+      ),
+      BeneficioProduto(
+        IconeProposta.velocidade,
+        'Linha estável',
+        'Menos trepidação da linha, mesmo em velocidade.',
+      ),
+    ],
+  ),
+  commander(
+    nome: 'Commander',
+    imagem: 'assets/configurador/commander.png',
+    fornecimentos: {Fornecimento.completo: 'Controle de seções'},
+    itemProposta: {Fornecimento.completo: 'seções controladas pelo Commander'},
+    unidade: 'seção',
+    unidades: 'seções',
+    descricao:
+        'O Commander controla as seções hidráulicas da plantadeira, na '
+        'semente e no adubo, com corte de seção e taxa variável conforme o '
+        'mapa de prescrição. Até 16 seções por máquina, via ISOBUS e sem fio.',
+    caracteristicas: [
+      (IconeProposta.linhas, 'Corte de seção na semente e no adubo'),
+      (IconeProposta.mapa, 'Taxa variável de semente e adubo'),
+      (IconeProposta.monitor, 'Sistema ISOBUS'),
+      (IconeProposta.sinal, 'Comunicação sem fio'),
+      (IconeProposta.check, 'Até 16 seções por máquina'),
+      (IconeProposta.semente, 'Menos desperdício de insumos'),
+    ],
+    sistema: {},
+    provaNumero: '16',
+    provaTexto: 'seções por máquina, controladas por um só Commander',
+    provaFonte: 'J.Assy',
+    solucaoCompleta: false,
+    beneficios: [
+      BeneficioProduto(
+        IconeProposta.linhas,
+        'Corta onde já plantou',
+        'Cada seção desliga sozinha em área já plantada, na semente e no '
+            'adubo.',
+        FonteRoi.sobreposicao,
+      ),
+      BeneficioProduto(
+        IconeProposta.mapa,
+        'Taxa variável nos dois insumos',
+        'A dose certa de semente e de adubo em cada zona do mapa de '
+            'prescrição.',
+        FonteRoi.taxaVariavel,
+      ),
+      BeneficioProduto(
+        IconeProposta.monitor,
+        'Na tela do trator',
+        'ISOBUS: o comando fica no monitor que já está na cabine.',
+      ),
+      BeneficioProduto(
+        IconeProposta.sinal,
+        'Sem fios pela máquina',
+        'Comunicação sem fio: instalação mais limpa e menos manutenção.',
+      ),
+    ],
   );
 
   final String nome;
 
-  /// Foto do produto (WebP). Nula = sem foto no app ainda.
+  /// Como o produto é cobrado: por linha ou por seção.
+  final String unidade;
+  final String unidades;
+
+  /// Se entra a faixa "Solução completa" (dosador + motor no mesmo pacote).
+  final bool solucaoCompleta;
+
+  bool get porLinha => unidade == 'linha';
+
+  /// Foto do produto. Nula = sem foto no app ainda.
   final String? imagem;
   final Map<Fornecimento, String> fornecimentos;
   final Map<Fornecimento, String> itemProposta;
@@ -332,6 +490,9 @@ enum ProdutoProposta {
     required this.provaTexto,
     required this.provaFonte,
     required this.beneficios,
+    this.unidade = 'linha',
+    this.unidades = 'linhas',
+    this.solucaoCompleta = true,
   });
 }
 
@@ -420,7 +581,18 @@ class DadosProposta {
   /// Quanto o cliente deixa de pagar com as condições de campanha.
   double get economia => totalTabela - total;
 
-  int get linhas => itens.fold(0, (s, i) => s + i.linhas);
+  /// Linhas de plantio da proposta: por plantadeira, a maior quantidade
+  /// entre os itens cobrados por linha (Titanium e Júpiter na mesma máquina
+  /// não somam duas vezes). Seções do Commander não contam.
+  int get linhas {
+    final porPlantadeira = <String, int>{};
+    for (final i in itens.where((i) => i.produto.porLinha)) {
+      final chave = i.plantadeira.trim().toLowerCase();
+      final atual = porPlantadeira[chave] ?? 0;
+      if (i.linhas > atual) porPlantadeira[chave] = i.linhas;
+    }
+    return porPlantadeira.values.fold(0, (s, n) => s + n);
+  }
 
   /// O produto, quando a proposta tem um só. Nulo com produtos diferentes.
   ProdutoProposta? get produtoUnico {

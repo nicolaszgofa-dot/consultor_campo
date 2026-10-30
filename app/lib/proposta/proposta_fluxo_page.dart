@@ -463,8 +463,8 @@ class _EtapaItens extends StatelessWidget {
             ],
           ),
           const Text(
-            'Nenhum valor vem preenchido. Júpiter, Level e motorização avulsa '
-            'entram numa próxima etapa.',
+            'Nenhum valor vem preenchido. O Commander é cobrado por seção; os '
+            'demais, por linha.',
             style: TextStyle(fontSize: 13, color: Cores.textoSecundario),
           ),
         ]),
@@ -535,7 +535,7 @@ class _CartaoItem extends StatelessWidget {
             ),
             _Campo(
               valor: item.linhas,
-              rotulo: 'Linhas',
+              rotulo: _maiuscula(item.produto.unidades),
               numero: true,
               aoMudar: (t) => mudar((i) => i.linhas = t),
             ),
@@ -544,7 +544,7 @@ class _CartaoItem extends StatelessWidget {
           _par(
             _Campo(
               valor: item.valorLinha,
-              rotulo: 'Valor por linha (tabela)',
+              rotulo: 'Valor por ${item.produto.unidade} (tabela)',
               numero: true,
               sufixo: 'R\$',
               aoMudar: (t) => mudar((i) => i.valorLinha = t),
@@ -927,3 +927,5 @@ class _Previa extends StatelessWidget {
     );
   }
 }
+
+String _maiuscula(String t) => t[0].toUpperCase() + t.substring(1);

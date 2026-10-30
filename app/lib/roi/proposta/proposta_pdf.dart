@@ -595,7 +595,9 @@ class _Montador {
       pw.SizedBox(height: 14),
       _instalacao(
         pw.TextSpan(
-          text: '${item.plantadeira} de ${item.linhas} linhas',
+          text:
+              '${item.plantadeira}'
+              '${item.produto.porLinha ? ' de ${item.linhas} linhas' : ''}',
           style: _t(10, fonte: f.negrito),
         ),
       ),
@@ -609,14 +611,20 @@ class _Montador {
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             _caixaValor(
-              item.temCampanha ? 'Condição especial' : 'Valor por linha',
+              item.temCampanha
+                  ? 'Condição especial'
+                  : 'Valor por ${item.produto.unidade}',
               reais(item.valorFinal),
               [
                 if (item.temCampanha) 'Sem campanha: ${reais(item.valorLinha)}',
                 impostos,
               ].where((x) => x.isNotEmpty).join(' · '),
             ),
-            _caixaValor('Linhas', '${item.linhas}', item.plantadeira),
+            _caixaValor(
+              item.produto.unidades,
+              '${item.linhas}',
+              item.plantadeira,
+            ),
             _caixaValor(
               'Valor total',
               reais(d.total),
@@ -695,7 +703,7 @@ class _Montador {
                 children: [
                   pw.Text(reais(item.total), style: _t(15, fonte: f.titulo)),
                   pw.Text(
-                    '${reais(item.valorFinal)} por linha',
+                    '${reais(item.valorFinal)} por ${item.produto.unidade}',
                     style: _t(8.8, cor: _C.secundario),
                   ),
                   if (item.temCampanha)
@@ -725,9 +733,9 @@ class _Montador {
               _caixaValor('Economia do cliente', reais(d.economia), ''),
             ] else
               _caixaValor(
-                'Linhas',
-                '${d.linhas}',
-                '${d.itens.length} produtos',
+                'Produtos',
+                '${d.itens.length}',
+                d.itens.map((i) => i.produto.nome).toSet().join(', '),
               ),
             _caixaValor(
               'Valor total',
@@ -1205,7 +1213,7 @@ class _Montador {
   // 3. Produto --------------------------------------------------------------
 
   pw.Widget produto(ItemProposta item, {required bool ultimo}) {
-    final itens = item.produto.sistema[item.fornecimento]!;
+    final itens = item.produto.sistema[item.fornecimento] ?? const <String>[];
     final porColuna = (itens.length / 3).ceil();
     final beneficios = item.produto.beneficios;
     return pw.Column(
@@ -1241,84 +1249,103 @@ class _Montador {
           ),
         ),
         pw.SizedBox(height: 16),
-        _rotulo('Benefícios para a fazenda'),
+        // O rótulo vai junto da primeira linha de cartões, nunca sozinho no
+        // pé da página.
         for (var i = 0; i < beneficios.length; i += 2)
-          pw.Padding(
-            padding: const pw.EdgeInsets.only(bottom: 8),
-            child: pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+          pw.Inseparable(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.stretch,
               children: [
-                for (final (j, b) in beneficios.skip(i).take(2).indexed) ...[
-                  if (j > 0) pw.SizedBox(width: 8),
-                  pw.Expanded(child: _cartaoBeneficio(b)),
-                ],
+                if (i == 0) _rotulo('Benefícios para a fazenda'),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(bottom: 8),
+                  child: pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      for (final (j, b)
+                          in beneficios.skip(i).take(2).indexed) ...[
+                        if (j > 0) pw.SizedBox(width: 8),
+                        pw.Expanded(child: _cartaoBeneficio(b)),
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-        pw.SizedBox(height: 10),
-        _rotulo('O sistema é composto por'),
-        pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            for (var col = 0; col < 3; col++) ...[
-              if (col > 0) pw.SizedBox(width: 14),
-              pw.Expanded(
-                child: pw.Column(
-                  children: [
-                    for (final item
-                        in itens.skip(col * porColuna).take(porColuna))
-                      pw.Container(
-                        padding: const pw.EdgeInsets.symmetric(vertical: 3.5),
-                        decoration: const pw.BoxDecoration(
-                          border: pw.Border(
-                            bottom: pw.BorderSide(color: _C.borda, width: 0.5),
+        // Júpiter, Level e Commander ainda sem a lista do sistema.
+        if (itens.isNotEmpty) ...[
+          pw.SizedBox(height: 10),
+          _rotulo('O sistema é composto por'),
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              for (var col = 0; col < 3; col++) ...[
+                if (col > 0) pw.SizedBox(width: 14),
+                pw.Expanded(
+                  child: pw.Column(
+                    children: [
+                      for (final item
+                          in itens.skip(col * porColuna).take(porColuna))
+                        pw.Container(
+                          padding: const pw.EdgeInsets.symmetric(vertical: 3.5),
+                          decoration: const pw.BoxDecoration(
+                            border: pw.Border(
+                              bottom: pw.BorderSide(
+                                color: _C.borda,
+                                width: 0.5,
+                              ),
+                            ),
+                          ),
+                          child: pw.Row(
+                            children: [
+                              _icone(IconeProposta.check, cor: _C.verde, t: 10),
+                              pw.SizedBox(width: 6),
+                              pw.Expanded(child: pw.Text(item, style: _t(9.5))),
+                            ],
                           ),
                         ),
-                        child: pw.Row(
-                          children: [
-                            _icone(IconeProposta.check, cor: _C.verde, t: 10),
-                            pw.SizedBox(width: 6),
-                            pw.Expanded(child: pw.Text(item, style: _t(9.5))),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-        pw.SizedBox(height: 10),
-        pw.Container(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-          decoration: pw.BoxDecoration(
-            color: _C.neutro,
-            borderRadius: pw.BorderRadius.circular(4),
-          ),
-          child: pw.RichText(
-            text: pw.TextSpan(
-              style: _t(8.8),
-              children: [
-                const pw.TextSpan(
-                  text:
-                      'Para o desligamento linha a linha e a taxa variável, o ',
-                ),
-                pw.TextSpan(
-                  text: 'Controlador de Tarefas',
-                  style: _t(8.8, fonte: f.negrito),
-                ),
-                const pw.TextSpan(
-                  text:
-                      ' precisa estar liberado no monitor do trator. A '
-                      'liberação é feita pela concessionária.',
+                    ],
+                  ),
                 ),
               ],
+            ],
+          ),
+        ],
+        // O Controlador de Tarefas vale para corte e taxa variável.
+        if (itens.isNotEmpty || item.produto == ProdutoProposta.commander) ...[
+          pw.SizedBox(height: 10),
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            decoration: pw.BoxDecoration(
+              color: _C.neutro,
+              borderRadius: pw.BorderRadius.circular(4),
+            ),
+            child: pw.RichText(
+              text: pw.TextSpan(
+                style: _t(8.8),
+                children: [
+                  const pw.TextSpan(
+                    text: 'Para o desligamento linha a linha e a taxa variável, o ',
+                  ),
+                  pw.TextSpan(
+                    text: 'Controlador de Tarefas',
+                    style: _t(8.8, fonte: f.negrito),
+                  ),
+                  const pw.TextSpan(
+                    text:
+                        ' precisa estar liberado no monitor do trator. A '
+                        'liberação é feita pela concessionária.',
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        // A solução completa vale para todos: só no último produto.
-        if (ultimo) pw.SizedBox(height: 12),
-        if (ultimo)
+        ],
+        // A solução completa (dosador + motor) só uma vez, no último produto,
+        // e só se a proposta tiver um dosador com motor.
+        if (ultimo && d.itens.any((i) => i.produto.solucaoCompleta)) ...[
+          pw.SizedBox(height: 12),
           pw.Container(
             padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             decoration: pw.BoxDecoration(
@@ -1349,6 +1376,7 @@ class _Montador {
               ],
             ),
           ),
+        ],
       ],
     );
   }
@@ -1366,7 +1394,8 @@ class _Montador {
       null => '',
     };
     return pw.Container(
-      height: 92,
+      // Sem o ROI não há a faixa de valor: cartão mais baixo.
+      height: comRetorno ? 92 : 72,
       padding: const pw.EdgeInsets.all(10),
       decoration: pw.BoxDecoration(
         border: pw.Border.all(color: _C.borda, width: 0.75),
@@ -1649,7 +1678,6 @@ class _Montador {
             ],
           ),
         ),
-        pw.SizedBox(height: 10),
       ],
     );
   }

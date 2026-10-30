@@ -28,8 +28,12 @@ class ItemEdicao {
   String? get erro {
     final nome = produto.nome;
     if (plantadeira.trim().isEmpty) return '$nome: informe a plantadeira.';
-    if (linhasNum <= 0) return '$nome: informe o número de linhas.';
-    if (valorNum <= 0) return '$nome: informe o valor por linha.';
+    if (linhasNum <= 0) {
+      return '$nome: informe o número de ${produto.unidades}.';
+    }
+    if (valorNum <= 0) {
+      return '$nome: informe o valor por ${produto.unidade}.';
+    }
     final campanha = campanhaNum;
     if (valorCampanha.trim().isNotEmpty &&
         (campanha == null || campanha <= 0)) {
@@ -121,7 +125,9 @@ class PropostaEstado extends ChangeNotifier {
   }
 
   double get total => itens.fold(0, (s, i) => s + i.total);
-  int get linhas => itens.fold(0, (s, i) => s + i.linhasNum);
+
+  /// Linhas de plantio (sem somar duas vezes a mesma plantadeira).
+  int get linhas => dados(DateTime(2000)).linhas;
 
   double _pct(String t) => (lerNumero(t) ?? 0) / 100;
   double get entrada => _pct(texto('entrada'));

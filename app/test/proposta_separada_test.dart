@@ -44,6 +44,8 @@ Future<void> _digitar(WidgetTester tester, String rotulo, String texto) async {
 }
 
 void main() {
+  testesNovosProdutos();
+
   test('vários itens, campanha e economia', () {
     final d = dadosExemplo(itens: _itens);
     expect(d.total, 17 * 6500 + 12 * 11900);
@@ -184,5 +186,72 @@ void main() {
     await tester.tap(find.text('Descartar'));
     await tester.pumpAndSettle();
     expect(find.text('abrir'), findsOneWidget);
+  });
+}
+
+void testesNovosProdutos() {
+  test('Commander é por seção e não conta como linha de plantio', () {
+    expect(ProdutoProposta.commander.porLinha, isFalse);
+    expect(ProdutoProposta.commander.unidades, 'seções');
+    final d = dadosExemplo(
+      itens: const [
+        ItemProposta(
+          produto: ProdutoProposta.titanium,
+          fornecimento: Fornecimento.completo,
+          plantadeira: 'Tatu PST',
+          linhas: 17,
+          valorLinha: 6500,
+        ),
+        ItemProposta(
+          produto: ProdutoProposta.jupiter,
+          fornecimento: Fornecimento.completo,
+          plantadeira: 'Tatu PST',
+          linhas: 17,
+          valorLinha: 1500,
+        ),
+        ItemProposta(
+          produto: ProdutoProposta.commander,
+          fornecimento: Fornecimento.completo,
+          plantadeira: 'Tatu PST',
+          linhas: 4,
+          valorLinha: 9000,
+        ),
+        ItemProposta(
+          produto: ProdutoProposta.selenium,
+          fornecimento: Fornecimento.completo,
+          plantadeira: 'Stara Absoluta',
+          linhas: 12,
+          valorLinha: 7300,
+        ),
+      ],
+    );
+    // Titanium e Júpiter na mesma Tatu não somam duas vezes.
+    expect(d.linhas, 17 + 12);
+    expect(d.total, 17 * 6500 + 17 * 1500 + 4 * 9000 + 12 * 7300);
+  });
+
+  testWidgets('PDF com Júpiter, Level e Commander', (tester) async {
+    await tester.runAsync(() async {
+      final recursos = await RecursosPdf.carregar();
+      expect(
+        recursos.imagens.keys,
+        containsAll([
+          ProdutoProposta.jupiter,
+          ProdutoProposta.level,
+          ProdutoProposta.commander,
+        ]),
+      );
+      for (final produto in [
+        ProdutoProposta.jupiter,
+        ProdutoProposta.level,
+        ProdutoProposta.commander,
+      ]) {
+        final bytes = await gerarPropostaPdf(
+          dados: dadosExemplo(produto: produto),
+          recursos: recursos,
+        );
+        expect(_paginas(bytes), inInclusiveRange(2, 3), reason: produto.nome);
+      }
+    });
   });
 }

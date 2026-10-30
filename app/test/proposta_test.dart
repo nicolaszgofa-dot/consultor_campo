@@ -63,7 +63,10 @@ void main() {
         expect(produto.beneficios, hasLength(4), reason: produto.nome);
         expect(produto.caracteristicas, hasLength(6), reason: produto.nome);
         for (final f in produto.fornecimentos.keys) {
-          expect(produto.sistema[f], contains('Frete e instalação'));
+          final sistema = produto.sistema[f] ?? const [];
+          if (sistema.isNotEmpty) {
+            expect(sistema, contains('Frete e instalação'));
+          }
           expect(produto.itemProposta[f], isNotEmpty);
         }
       }
