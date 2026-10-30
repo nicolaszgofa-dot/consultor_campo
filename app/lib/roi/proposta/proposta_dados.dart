@@ -237,7 +237,7 @@ enum ProdutoProposta {
   ),
   neo(
     nome: 'Selenium Neo',
-    imagem: null,
+    imagem: 'assets/configurador/selenium_neo.png',
     fornecimentos: {Fornecimento.completo: 'Dosador com esteira'},
     itemProposta: {Fornecimento.completo: 'dosadores Selenium Neo com esteira'},
     descricao:

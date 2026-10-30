@@ -365,6 +365,27 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('outros produtos aparecem, mas ainda não configuram', (
+    tester,
+  ) async {
+    tela(tester, const Size(1194, 1600));
+    final estado = ConfiguradorEstado();
+    await abrir(tester, estado);
+    await tester.pumpAndSettle();
+
+    expect(find.text('OUTROS PRODUTOS DO PORTFÓLIO'), findsOneWidget);
+    for (final nome in ['Júpiter', 'Selenium Neo', 'Commander', 'Level']) {
+      expect(find.text(nome), findsOneWidget, reason: nome);
+    }
+    expect(find.text('Em breve'), findsNWidgets(4));
+
+    await tester.tap(find.text('Level'));
+    await tester.pump();
+    expect(find.text('Configuração do Level em breve.'), findsOneWidget);
+    expect(estado.indice, 0);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('acima de 60 linhas a tela explica o bloqueio', (tester) async {
     tela(tester, const Size(430, 2400));
     final estado = ConfiguradorEstado()

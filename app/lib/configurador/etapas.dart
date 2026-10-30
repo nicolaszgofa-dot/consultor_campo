@@ -57,6 +57,30 @@ const _descricoes = {
       'Dosador pneumático de sementes com motor elétrico',
 };
 
+/// Produtos do portfólio que ainda não têm configuração: só o cartão.
+const produtosEmBreve = [
+  (
+    'Júpiter',
+    'Dosador volumétrico de adubo',
+    'assets/configurador/jupiter.png',
+  ),
+  (
+    'Selenium Neo',
+    'Dosador pneumático com esteira e dois motores',
+    'assets/configurador/selenium_neo.png',
+  ),
+  (
+    'Commander',
+    'Módulo de comando ISOBUS',
+    'assets/configurador/commander.png',
+  ),
+  (
+    'Level',
+    'Controle de pressão linha a linha',
+    'assets/configurador/level.png',
+  ),
+];
+
 class EtapaTecnologia extends StatelessWidget {
   final ConfiguradorEstado estado;
 
@@ -152,7 +176,93 @@ class EtapaTecnologia extends StatelessWidget {
             ),
           ),
         ],
+        const SizedBox(height: 20),
+        const RotuloSecao('Outros produtos do portfólio'),
+        const SizedBox(height: 8),
+        const _ProdutosEmBreve(),
       ],
+    );
+  }
+}
+
+/// Júpiter, Selenium Neo, Commander e Level: aparecem, mas ainda não
+/// configuram.
+class _ProdutosEmBreve extends StatelessWidget {
+  const _ProdutosEmBreve();
+
+  Widget _cartao(BuildContext context, (String, String, String) produto) {
+    final (nome, descricao, imagem) = produto;
+    return CartaoOpcao(
+      selecionado: false,
+      aoTocar: () => ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(content: Text('Configuração do $nome em breve.')),
+        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 110,
+            child: Center(
+              child: Image.asset(
+                imagem,
+                fit: BoxFit.contain,
+                semanticLabel: nome,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            nome,
+            style: const TextStyle(
+              fontFamily: fonteTitulo,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            descricao,
+            style: const TextStyle(fontSize: 13, color: Cores.textoSecundario),
+          ),
+          const Spacer(),
+          const SizedBox(height: 6),
+          const Etiqueta(
+            'Em breve',
+            fundo: Cores.neutro,
+            cor: Cores.textoSecundario,
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        // Linhas da mesma altura: 4 por linha no tablet, 2 no celular.
+        final colunas = box.maxWidth >= 720 ? 4 : 2;
+        return Column(
+          children: [
+            for (var i = 0; i < produtosEmBreve.length; i += colunas) ...[
+              if (i > 0) const SizedBox(height: 12),
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final (j, p)
+                        in produtosEmBreve.skip(i).take(colunas).indexed) ...[
+                      if (j > 0) const SizedBox(width: 12),
+                      Expanded(child: _cartao(context, p)),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 }

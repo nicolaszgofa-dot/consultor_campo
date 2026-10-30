@@ -186,7 +186,7 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 - Demais regras de **cabeamento**.
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
 - Se algum **tipo de plantadeira** muda outras regras além das seções (cabeamento, chicotes).
-- **Commander:** fora desta versão.
+- **Júpiter, Selenium Neo, Commander e Level:** aparecem na tela de tecnologia em "Outros produtos do portfólio", com foto e "Em breve", mas ainda não configuram (tocar mostra "Configuração do ... em breve"). Fotos em `app/assets/configurador/`, reduzidas de `IMAGENS/PRODUTOS`. A descrição do Commander ("Módulo de comando ISOBUS") precisa ser confirmada.
 - **Adaptação Titanium:** se a marca e o modelo geram itens no resultado. Hoje só aparecem como informação.
 - **Plantadeira fora do catálogo de adaptações:** o que fazer quando a marca ou o modelo não estão na lista.
 
