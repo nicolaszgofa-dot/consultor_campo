@@ -539,6 +539,25 @@ void testesSeleniumNeo() {
     await tester.tap(find.textContaining('pressão positiva'));
     await tester.pump();
     expect(estado.bocalNeo, BocalNeo.pressaoPositiva);
+    expect(estado.bloqueio, 'Informe a velocidade de plantio.');
+
+    // Velocidade e populações escolhem os discos pela tabela.
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Velocidade de plantio'),
+      '8',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'População de soja'),
+      '14',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'População de milho'),
+      '3',
+    );
+    await tester.pump();
+    expect(find.textContaining('Soja: disco 35 furos'), findsOneWidget);
+    expect(find.textContaining('Milho: disco 14 furos'), findsOneWidget);
+    expect(estado.bloqueio, isNull);
 
     estado.avancar();
     expect(estado.marcasAdaptacao, ['John Deere']);
@@ -553,6 +572,9 @@ void testesSeleniumNeo() {
     expect(r.item(Componentes.esteiraNeo)?.quantidade, 24);
     expect(r.item(Componentes.sensorSemente), isNull);
     expect(r.item(Componentes.alternador250), isNotNull);
+    expect(r.item(CulturaNeo.soja.baixa.componente)?.quantidade, 24);
+    expect(r.item(CulturaNeo.milho.baixa.componente)?.quantidade, 24);
+    expect(r.item(Componentes.peneiraSojaNeo)?.quantidade, 24);
     expect(tester.takeException(), isNull);
   });
 

@@ -43,6 +43,11 @@ class ConfiguradorEstado extends ChangeNotifier {
   BocalSelenium? bocalSelenium;
   BocalNeo? bocalNeo;
 
+  /// Selenium Neo: dados que escolhem os discos pela tabela.
+  double? velocidadePlantio;
+  double? populacaoSoja;
+  double? populacaoMilho;
+
   /// Adaptação: primeiro a marca, depois o modelo.
   String? marcaAdaptacao;
   String? modeloAdaptacao;
@@ -80,6 +85,9 @@ class ConfiguradorEstado extends ChangeNotifier {
     bocalTitanium: bocalTitanium,
     bocalSelenium: bocalSelenium,
     bocalNeo: bocalNeo,
+    velocidadePlantio: velocidadePlantio,
+    populacaoSoja: populacaoSoja,
+    populacaoMilho: populacaoMilho,
     kitConversao: kitConversao,
     adaptacao: kitConversao ? null : adaptacao,
   );
@@ -148,7 +156,15 @@ class ConfiguradorEstado extends ChangeNotifier {
     Tecnologia.seleniumEletric =>
       bocalSelenium == null ? 'Escolha o kit bocal de sementes.' : null,
     Tecnologia.seleniumNeo =>
-      bocalNeo == null ? 'Escolha o kit bocal de sementes.' : null,
+      bocalNeo == null
+          ? 'Escolha o kit bocal de sementes.'
+          : velocidadePlantio == null
+          ? 'Informe a velocidade de plantio.'
+          : populacaoSoja == null
+          ? 'Informe a população de soja.'
+          : populacaoMilho == null
+          ? 'Informe a população de milho.'
+          : null,
     null => 'Escolha a tecnologia.',
   };
 
@@ -296,6 +312,25 @@ class ConfiguradorEstado extends ChangeNotifier {
 
   void escolherBocalNeo(BocalNeo b) {
     bocalNeo = b;
+    notifyListeners();
+  }
+
+  /// Velocidade (km/h) e populações (sementes por metro). Nulo ou zero =
+  /// ainda não informado.
+  void definirDadosDosDiscos({
+    double? velocidade,
+    double? soja,
+    double? milho,
+    bool limparVelocidade = false,
+    bool limparSoja = false,
+    bool limparMilho = false,
+  }) {
+    double? valido(double? v) => v == null || v <= 0 ? null : v;
+    if (velocidade != null || limparVelocidade) {
+      velocidadePlantio = valido(velocidade);
+    }
+    if (soja != null || limparSoja) populacaoSoja = valido(soja);
+    if (milho != null || limparMilho) populacaoMilho = valido(milho);
     notifyListeners();
   }
 

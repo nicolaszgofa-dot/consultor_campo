@@ -133,7 +133,19 @@ Regras passadas pelo usuário em 03/11/2026. A montagem segue a do Selenium Elé
   - **Conjunto dosador Selenium Neo**, no lugar do conjunto Selenium Elétric;
   - **Conjunto esteira transportadora Neo**, no lugar do sensor de semente;
   - não há condutor de sementes, porque a esteira faz esse papel.
-- **Subconjuntos disco/anel (Neo 26):** milho 14 furos (baixa velocidade), milho 28 furos (alta velocidade), soja 35 furos (baixa velocidade) e soja 70 furos (alta velocidade). A regra de escolha entre alta e baixa velocidade ainda vai ser definida; até lá, o item fica **pendente** com as quatro opções.
+- **Subconjuntos disco/anel (Neo 26):** sempre um de soja e um de milho por linha. Cada cultura tem um disco de baixa taxa e um de alta taxa:
+
+  | Cultura | Baixa taxa | Alta taxa |
+  |---|---|---|
+  | Soja | 35 furos (20000002332) | 70 furos (20000002333) |
+  | Milho | 14 furos (20000002335) | 28 furos (20000002340) |
+
+  - Na tela de acessórios, o vendedor informa a **velocidade de plantio** (km/h) e as **populações de soja e de milho** (sementes por metro).
+  - O disco sai do **guia de seleção de disco do Selenium Neo** (tabelas em `packages/configurador/lib/src/discos_neo.dart`): linhas de população (soja de 6 a 34 sem/m, de 2 em 2; milho de 1 a 8 sem/m, de 0,5 em 0,5) e colunas de velocidade (2 a 20 km/h).
+  - Entre duas linhas ou duas colunas, vale a de cima: mais sementes e mais velocidade pedem mais do disco.
+  - Quando os dois discos funcionam, entra o preferido da tabela, e o motivo do item avisa.
+  - Fora da faixa de operação, o disco fica **pendente**, pedindo para rever a população ou a velocidade.
+- **Kit peneira soja JD2100 (30000001673):** um por linha, em todo Selenium Neo. Sem a peneira, o desempenho na soja fica comprometido.
 - **Kit bocal de sementes:** o vendedor escolhe entre:
   - gravidade;
   - gravidade com bocal giratório de 3 pol;
@@ -211,7 +223,6 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 - Se algum **tipo de plantadeira** muda outras regras além das seções (cabeamento, chicotes).
 - **Júpiter, Commander e Level:** aparecem na tela de tecnologia em "Outros produtos do portfólio", com foto e "Em breve", mas ainda não configuram (tocar mostra "Configuração do ... em breve"). Fotos em `app/assets/configurador/`, reduzidas de `IMAGENS/PRODUTOS`. A descrição do Commander ("Módulo de comando ISOBUS") precisa ser confirmada.
 - **Selenium Neo:**
-  - regra de escolha dos subconjuntos disco/anel (alta ou baixa velocidade);
   - quantas saídas tem o alternador de 250 A (o cálculo usa 11);
   - limite definitivo de linhas (hoje 55).
 - **Adaptação Titanium:** se a marca e o modelo geram itens no resultado. Hoje só aparecem como informação.

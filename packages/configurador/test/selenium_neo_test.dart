@@ -30,15 +30,14 @@ void main() {
     expect(r.item(Componentes.chicote1)?.quantidade, 4);
   });
 
-  test('discos ficam pendentes com as 4 opções', () {
-    final d = neo(8, [
-      8,
-    ], tipo: TipoPlantadeira.solteira).item(Componentes.discoNeo)!;
-    expect(d.status, StatusItem.pendente);
-    expect(d.quantidade, 8);
-    for (final opcao in Componentes.discosNeo) {
-      expect(d.pendencia, contains(opcao));
+  test('sem velocidade e população os discos ficam pendentes', () {
+    final r = neo(8, [8], tipo: TipoPlantadeira.solteira);
+    for (final c in CulturaNeo.values) {
+      final d = r.item(Componentes.discoNeo(c))!;
+      expect(d.status, StatusItem.pendente);
+      expect(d.quantidade, 8);
     }
+    expect(r.item(Componentes.peneiraSojaNeo)?.quantidade, 8);
   });
 
   test('bocal de pressão positiva vem no dosador: sem item, com aviso', () {

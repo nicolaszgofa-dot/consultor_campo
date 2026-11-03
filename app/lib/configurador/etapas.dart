@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../tema.dart';
 import '../ui/componentes.dart';
+import '../ui/formatos.dart';
 import 'configurador_estado.dart';
 import 'configurador_widgets.dart';
 
@@ -1026,11 +1027,7 @@ class EtapaAcessorios extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Aviso(
-            'Subconjuntos disco/anel do Selenium Neo: a regra de escolha entre '
-            'alta e baixa velocidade ainda vai ser definida. Eles aparecem '
-            'como pendentes no resultado.',
-          ),
+          _DiscosNeo(estado: estado),
         ],
       );
     }
@@ -1069,6 +1066,165 @@ class EtapaAcessorios extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Selenium Neo: velocidade e populações escolhem o disco de soja e de
+/// milho pela tabela da J.Assy.
+class _DiscosNeo extends StatefulWidget {
+  final ConfiguradorEstado estado;
+
+  const _DiscosNeo({required this.estado});
+
+  @override
+  State<_DiscosNeo> createState() => _DiscosNeoState();
+}
+
+class _DiscosNeoState extends State<_DiscosNeo> {
+  late final _velocidade = TextEditingController(
+    text: _texto(widget.estado.velocidadePlantio),
+  );
+  late final _soja = TextEditingController(
+    text: _texto(widget.estado.populacaoSoja),
+  );
+  late final _milho = TextEditingController(
+    text: _texto(widget.estado.populacaoMilho),
+  );
+
+  static String _texto(double? v) =>
+      v == null ? '' : numeroBr(v, v == v.roundToDouble() ? 0 : 1);
+
+  @override
+  void dispose() {
+    _velocidade.dispose();
+    _soja.dispose();
+    _milho.dispose();
+    super.dispose();
+  }
+
+  Widget _campo(
+    TextEditingController c,
+    String rotulo,
+    String unidade,
+    void Function(double?) aoMudar,
+  ) => TextField(
+    controller: c,
+    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+    decoration: InputDecoration(labelText: rotulo, suffixText: unidade),
+    onChanged: (t) => aoMudar(lerNumero(t)),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final e = widget.estado;
+    final campos = [
+      _campo(
+        _velocidade,
+        'Velocidade de plantio',
+        'km/h',
+        (v) =>
+            e.definirDadosDosDiscos(velocidade: v, limparVelocidade: v == null),
+      ),
+      _campo(
+        _soja,
+        'População de soja',
+        'sem/m',
+        (v) => e.definirDadosDosDiscos(soja: v, limparSoja: v == null),
+      ),
+      _campo(
+        _milho,
+        'População de milho',
+        'sem/m',
+        (v) => e.definirDadosDosDiscos(milho: v, limparMilho: v == null),
+      ),
+    ];
+    return _CartaoPergunta(
+      pergunta: 'Qual disco usar?',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Pela tabela de seleção de disco do Selenium Neo: a população '
+            '(sementes por metro) e a velocidade de plantio definem o disco '
+            'de baixa ou de alta taxa.',
+            style: TextStyle(color: Cores.textoSecundario),
+          ),
+          const SizedBox(height: 12),
+          LayoutBuilder(
+            builder: (context, box) => box.maxWidth >= 560
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var i = 0; i < campos.length; i++) ...[
+                        if (i > 0) const SizedBox(width: 12),
+                        Expanded(child: campos[i]),
+                      ],
+                    ],
+                  )
+                : Column(
+                    children: [
+                      for (var i = 0; i < campos.length; i++) ...[
+                        if (i > 0) const SizedBox(height: 12),
+                        campos[i],
+                      ],
+                    ],
+                  ),
+          ),
+          const SizedBox(height: 12),
+          for (final c in CulturaNeo.values)
+            _RecomendacaoDisco(
+              cultura: c,
+              populacao: c == CulturaNeo.soja
+                  ? e.populacaoSoja
+                  : e.populacaoMilho,
+              velocidade: e.velocidadePlantio,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecomendacaoDisco extends StatelessWidget {
+  final CulturaNeo cultura;
+  final double? populacao;
+  final double? velocidade;
+
+  const _RecomendacaoDisco({
+    required this.cultura,
+    required this.populacao,
+    required this.velocidade,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final p = populacao, v = velocidade;
+    final r = p == null || v == null
+        ? null
+        : recomendarDiscoNeo(cultura, populacao: p, velocidade: v);
+    final disco = r?.disco;
+    final (texto, tipo) = r == null
+        ? (
+            '${cultura.nome}: informe a velocidade e a população.',
+            TipoAviso.info,
+          )
+        : disco == null
+        ? (
+            '${cultura.nome}: fora da faixa de operação dos discos. Reveja a '
+                'população ou a velocidade.',
+            TipoAviso.atencao,
+          )
+        : (
+            '${cultura.nome}: disco ${disco.furos} furos '
+                '(${disco.codigo})'
+                '${r.osDoisFuncionam ? ' · os dois discos funcionam, este é o preferido' : ''}.',
+            TipoAviso.ok,
+          );
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Aviso(texto, tipo: tipo),
     );
   }
 }

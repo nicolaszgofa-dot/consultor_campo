@@ -5,6 +5,7 @@
 library;
 
 import 'adaptacoes.dart';
+import 'discos_neo.dart';
 
 enum Tecnologia {
   titaniumEletric('Titanium Elétric'),
@@ -124,6 +125,13 @@ class EntradaConfiguracao {
   /// Selenium Neo: kit bocal de sementes. Ignorado nas demais.
   final BocalNeo? bocalNeo;
 
+  /// Selenium Neo: velocidade de plantio (km/h) e populações de soja e de
+  /// milho (sementes por metro), que escolhem os discos. Nulas = não
+  /// informadas.
+  final double? velocidadePlantio;
+  final double? populacaoSoja;
+  final double? populacaoMilho;
+
   /// Kit conversão para a [tecnologia]: troca o conjunto pelo kit e não
   /// leva discos, reservatório pipoqueira nem bocais.
   final bool kitConversao;
@@ -146,6 +154,9 @@ class EntradaConfiguracao {
     this.bocalTitanium,
     this.bocalSelenium,
     this.bocalNeo,
+    this.velocidadePlantio,
+    this.populacaoSoja,
+    this.populacaoMilho,
     this.kitConversao = false,
     this.adaptacao,
   });
@@ -335,14 +346,12 @@ abstract final class Componentes {
   static const esteiraNeo = 'Conjunto esteira transportadora Neo';
   static const bocalNeo = 'Kit bocal de sementes Selenium Neo';
 
-  /// Os quatro subconjuntos; a regra de alta e baixa velocidade vem depois.
-  static const discoNeo = 'Subconjunto disco/anel Selenium Neo 26';
-  static const discosNeo = [
-    'Subconjunto disco/anel milho 14 furos Neo 26 (milho baixa velocidade)',
-    'Subconjunto disco/anel milho 28 furos Neo 26 (milho alta velocidade)',
-    'Subconjunto disco/anel soja 35 furos Neo 26 (soja baixa velocidade)',
-    'Subconjunto disco/anel soja 70 furos Neo 26 (soja alta velocidade)',
-  ];
+  /// Disco de cada cultura antes de a tabela escolher.
+  static String discoNeo(CulturaNeo c) =>
+      'Subconjunto disco/anel ${c.nome.toLowerCase()} Neo 26';
+
+  /// Peneira de soja: garante o desempenho do Neo na soja.
+  static const peneiraSojaNeo = 'Kit peneira soja JD2100 (30000001673)';
 
   /// Selenium Neo: até 22 linhas o alternador de 100 A; acima, o de 250 A.
   static const alternador100 = 'Alternador hidráulico 100 A';
@@ -795,10 +804,13 @@ class RegrasConfigurador {
         ];
       case Tecnologia.seleniumNeo:
         return [
-          pendente(
-            Componentes.discoNeo,
-            'A regra de escolha entre alta e baixa velocidade ainda vai ser '
-            'definida. Opções: ${Componentes.discosNeo.join('; ')}.',
+          for (final c in CulturaNeo.values) _discoNeo(e, c),
+          ItemConfiguracao(
+            componente: Componentes.peneiraSojaNeo,
+            quantidade: linhas,
+            motivo:
+                'Um por linha ($linhas linhas). Sem a peneira o desempenho '
+                'na soja fica comprometido.',
           ),
           if (e.bocalNeo == null)
             pendente(Componentes.bocalNeo, 'Escolher o kit bocal.')
@@ -807,6 +819,58 @@ class RegrasConfigurador {
         ];
     }
   }
+
+  /// Selenium Neo: disco da [cultura] pela tabela de população e velocidade,
+  /// um por linha. Pendente sem os dados ou fora da faixa dos discos.
+  static ItemConfiguracao _discoNeo(EntradaConfiguracao e, CulturaNeo cultura) {
+    final linhas = e.totalLinhas;
+    final populacao = cultura == CulturaNeo.soja
+        ? e.populacaoSoja
+        : e.populacaoMilho;
+    final velocidade = e.velocidadePlantio;
+    if (populacao == null || velocidade == null) {
+      return ItemConfiguracao(
+        componente: Componentes.discoNeo(cultura),
+        quantidade: linhas,
+        motivo: 'Um por linha ($linhas linhas).',
+        status: StatusItem.pendente,
+        pendencia:
+            'Informar a velocidade de plantio e a população de '
+            '${cultura.nome.toLowerCase()} para escolher o disco '
+            '(${cultura.baixa.furos} ou ${cultura.alta.furos} furos).',
+      );
+    }
+    final r = recomendarDiscoNeo(
+      cultura,
+      populacao: populacao,
+      velocidade: velocidade,
+    );
+    final disco = r.disco;
+    final dados = '${_numero(populacao)} sem/m a ${_numero(velocidade)} km/h';
+    if (disco == null) {
+      return ItemConfiguracao(
+        componente: Componentes.discoNeo(cultura),
+        quantidade: linhas,
+        motivo: 'Um por linha ($linhas linhas).',
+        status: StatusItem.pendente,
+        pendencia:
+            '$dados está fora da faixa de operação dos discos de '
+            '${cultura.nome.toLowerCase()}: rever a população ou a velocidade.',
+      );
+    }
+    return ItemConfiguracao(
+      componente: disco.componente,
+      quantidade: linhas,
+      motivo:
+          'Um por linha ($linhas linhas). Pela tabela de '
+          '${cultura.nome.toLowerCase()}: $dados'
+          '${r.osDoisFuncionam ? '; os dois discos funcionam, este é o preferido' : ''}.',
+    );
+  }
+
+  static String _numero(double v) => v == v.roundToDouble()
+      ? v.toStringAsFixed(0)
+      : v.toString().replaceAll('.', ',');
 
   /// Chicote painel: quantidade recomendada pelas seções e saídas usadas; o
   /// vendedor escolhe quantos de cada comprimento. Sem alternador o padrão é

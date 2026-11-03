@@ -258,7 +258,8 @@ enum ProdutoProposta {
       Fornecimento.completo: [
         'Conjunto dosador Selenium Neo',
         'Conjunto esteira transportadora Neo',
-        'Subconjuntos disco/anel Neo 26',
+        'Subconjuntos disco/anel Neo 26 de soja e de milho',
+        'Kit peneira soja JD2100',
         'Kit bocal de sementes',
         'Alternador hidráulico (100 A até 22 linhas; 250 A acima)',
         'Mangueiras hidráulicas',
