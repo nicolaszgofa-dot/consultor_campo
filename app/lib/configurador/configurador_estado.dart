@@ -48,6 +48,13 @@ class ConfiguradorEstado extends ChangeNotifier {
   double? populacaoSoja;
   double? populacaoMilho;
 
+  /// Selenium Neo com o alternador de 250 A: Level ou Commander no mesmo
+  /// alternador.
+  bool? neoComLevelOuCommander;
+
+  /// Selenium Neo na S-2100 caixa central: caixas de semente da plantadeira.
+  int? caixasSemente;
+
   /// Adaptação: primeiro a marca, depois o modelo.
   String? marcaAdaptacao;
   String? modeloAdaptacao;
@@ -88,6 +95,8 @@ class ConfiguradorEstado extends ChangeNotifier {
     velocidadePlantio: velocidadePlantio,
     populacaoSoja: populacaoSoja,
     populacaoMilho: populacaoMilho,
+    neoComLevelOuCommander: neoComLevelOuCommander,
+    caixasSemente: caixasSemente,
     kitConversao: kitConversao,
     adaptacao: kitConversao ? null : adaptacao,
   );
@@ -135,6 +144,14 @@ class ConfiguradorEstado extends ChangeNotifier {
     EtapaConfigurador.alimentacao =>
       perguntarAlternador && temAlternador == null
           ? 'Responda se a máquina terá alternador hidráulico.'
+          : RegrasConfigurador.perguntarAgregadoNeo(entrada) &&
+                neoComLevelOuCommander == null
+          ? 'Responda se Level ou Commander usam o mesmo alternador.'
+          : (neoComLevelOuCommander ?? false) &&
+                totalLinhas > RegrasConfigurador.linhasMaximasNeoComAgregado
+          ? 'Com Level ou Commander, o alternador de 250 A atende até '
+                '${RegrasConfigurador.linhasMaximasNeoComAgregado} linhas de '
+                'Selenium Neo. Fale com a engenharia.'
           : null,
     EtapaConfigurador.acessorios => _bloqueioAcessorios,
     EtapaConfigurador.adaptacao =>
@@ -142,6 +159,9 @@ class ConfiguradorEstado extends ChangeNotifier {
           ? 'Escolha a marca da plantadeira.'
           : modeloAdaptacao == null
           ? 'Escolha o modelo da plantadeira.'
+          : RegrasConfigurador.usaPeneiraSoja(entrada) &&
+                (caixasSemente ?? 0) < 1
+          ? 'Informe quantas caixas de semente a plantadeira tem.'
           : null,
     EtapaConfigurador.resultado => null,
   };
@@ -307,6 +327,18 @@ class ConfiguradorEstado extends ChangeNotifier {
 
   void escolherBocalSelenium(BocalSelenium b) {
     bocalSelenium = b;
+    notifyListeners();
+  }
+
+  void responderLevelOuCommander(bool sim) {
+    neoComLevelOuCommander = sim;
+    notifyListeners();
+  }
+
+  void mudarCaixasSemente(int delta) {
+    final novo = (caixasSemente ?? 0) + delta;
+    if (novo < 0) return;
+    caixasSemente = novo == 0 ? null : novo;
     notifyListeners();
   }
 

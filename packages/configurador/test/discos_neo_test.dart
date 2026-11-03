@@ -80,7 +80,7 @@ void main() {
     expect(CulturaNeo.milho.alta.codigo, '20000002340');
   });
 
-  test('no resultado: disco de cada cultura e peneira por linha', () {
+  test('no resultado: disco de cada cultura, um por linha', () {
     ResultadoConfiguracao configurar({double? soja, double? milho}) =>
         RegrasConfigurador.configurar(
           EntradaConfiguracao(
@@ -101,7 +101,6 @@ void main() {
     expect(soja35.status, StatusItem.definido);
     expect(soja35.motivo, contains('os dois discos funcionam'));
     expect(r.item(CulturaNeo.milho.baixa.componente)?.quantidade, 20);
-    expect(r.item(Componentes.peneiraSojaNeo)?.quantidade, 20);
 
     final fora = configurar(
       soja: 34,

@@ -145,7 +145,7 @@ Regras passadas pelo usuário em 03/11/2026. A montagem segue a do Selenium Elé
   - Entre duas linhas ou duas colunas, vale a de cima: mais sementes e mais velocidade pedem mais do disco.
   - Quando os dois discos funcionam, entra o preferido da tabela, e o motivo do item avisa.
   - Fora da faixa de operação, o disco fica **pendente**, pedindo para rever a população ou a velocidade.
-- **Kit peneira soja JD2100 (30000001673):** um por linha, em todo Selenium Neo. Sem a peneira, o desempenho na soja fica comprometido.
+- **Kit peneira soja JD2100 (30000001673):** exclusivo da **John Deere S-2100 caixa central (CCS)**: entra quando o tipo é caixa central e a adaptação é S-2100 (linha chapa ou fundida), **um por caixa de semente**. Na tela de adaptação, o vendedor informa quantas caixas a plantadeira tem. Sem a peneira, o desempenho na soja fica comprometido.
 - **Kit bocal de sementes:** o vendedor escolhe entre:
   - gravidade;
   - gravidade com bocal giratório de 3 pol;
@@ -155,8 +155,9 @@ Regras passadas pelo usuário em 03/11/2026. A montagem segue a do Selenium Elé
   - é **sempre** usado, por isso a pergunta "terá alternador?" não aparece;
   - cada saída alimenta **5 linhas**, metade das 10 do Selenium Elétric, porque o Neo tem dois motores por linha;
   - até 22 linhas usa o **Alternador hidráulico 100 A**;
-  - acima de 22 linhas usa o **Alternador hidráulico 250 A**, por enquanto com limite de **55 linhas**. Para o cálculo, o 250 A tem 11 saídas de 5 linhas (a confirmar).
-  - Acima de 55 linhas, a configuração bloqueia e pede validação técnica.
+  - acima de 22 linhas usa o **Alternador hidráulico 250 A**. Ele atende até **56 linhas** quando alimenta só o Selenium Neo, e até **38 linhas** quando Level ou Commander ficam ligados no mesmo alternador. Para o cálculo das saídas, o 250 A tem 12 saídas de 5 linhas (a confirmar).
+  - Com o 250 A, a tela de alimentação pergunta se Level ou Commander vão ligados no mesmo alternador.
+  - Acima do limite (56, ou 38 com Level ou Commander), a configuração bloqueia e pede validação técnica.
 - **Adaptações:** só John Deere: S-2100 linha chapa, S-2100 linha fundida, DB linha chapa e DB linha fundida.
 - **Kit conversão:** o Neo não tem kit conversão.
 
@@ -223,8 +224,8 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 - Se algum **tipo de plantadeira** muda outras regras além das seções (cabeamento, chicotes).
 - **Júpiter, Commander e Level:** aparecem na tela de tecnologia em "Outros produtos do portfólio", com foto e "Em breve", mas ainda não configuram (tocar mostra "Configuração do ... em breve"). Fotos em `app/assets/configurador/`, reduzidas de `IMAGENS/PRODUTOS`. A descrição do Commander ("Módulo de comando ISOBUS") precisa ser confirmada.
 - **Selenium Neo:**
-  - quantas saídas tem o alternador de 250 A (o cálculo usa 11);
-  - limite definitivo de linhas (hoje 55).
+  - quantas saídas tem o alternador de 250 A (o cálculo usa 12);
+  - se Level ou Commander mudam o limite do alternador de 100 A.
 - **Adaptação Titanium:** se a marca e o modelo geram itens no resultado. Hoje só aparecem como informação.
 - **Plantadeira fora do catálogo de adaptações:** o que fazer quando a marca ou o modelo não estão na lista.
 

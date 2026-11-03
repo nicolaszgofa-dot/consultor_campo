@@ -132,6 +132,16 @@ class EntradaConfiguracao {
   final double? populacaoSoja;
   final double? populacaoMilho;
 
+  /// Selenium Neo com o alternador de 250 A: se Level ou Commander ficam
+  /// ligados no mesmo alternador, o que reduz as linhas atendidas. Nulo =
+  /// não respondido.
+  final bool? neoComLevelOuCommander;
+
+  /// Selenium Neo na John Deere S-2100 caixa central (CCS): caixas de
+  /// semente da plantadeira, uma peneira de soja por caixa. Nulo = não
+  /// informado.
+  final int? caixasSemente;
+
   /// Kit conversão para a [tecnologia]: troca o conjunto pelo kit e não
   /// leva discos, reservatório pipoqueira nem bocais.
   final bool kitConversao;
@@ -157,6 +167,8 @@ class EntradaConfiguracao {
     this.velocidadePlantio,
     this.populacaoSoja,
     this.populacaoMilho,
+    this.neoComLevelOuCommander,
+    this.caixasSemente,
     this.kitConversao = false,
     this.adaptacao,
   });
@@ -370,10 +382,27 @@ class RegrasConfigurador {
   static int get capacidadeMaxima => saidasPorAlternador * linhasPorSaida;
 
   /// Selenium Neo: até 22 linhas o alternador de 100 A; acima, o de 250 A,
-  /// por enquanto até 55 linhas (11 saídas de 5 linhas, a confirmar).
+  /// que atende até 56 linhas só de Neo ou 38 com Level ou Commander no
+  /// mesmo alternador. As 12 saídas de 5 linhas do 250 A são a conta para
+  /// as 56 linhas (a confirmar).
   static const linhasNeoAlternador100 = 22;
-  static const linhasMaximasNeo = 55;
-  static const saidasAlternador250 = 11;
+  static const linhasMaximasNeo = 56;
+  static const linhasMaximasNeoComAgregado = 38;
+  static const saidasAlternador250 = 12;
+
+  /// Se pergunta se Level ou Commander usam o mesmo alternador: só no Neo
+  /// com o alternador de 250 A.
+  static bool perguntarAgregadoNeo(EntradaConfiguracao e) =>
+      e.tecnologia == Tecnologia.seleniumNeo &&
+      e.totalLinhas > linhasNeoAlternador100;
+
+  /// Selenium Neo na John Deere S-2100 caixa central (CCS): leva a peneira
+  /// de soja, uma por caixa de semente.
+  static bool usaPeneiraSoja(EntradaConfiguracao e) =>
+      e.tecnologia == Tecnologia.seleniumNeo &&
+      e.tipo == TipoPlantadeira.caixaCentral &&
+      e.adaptacao?.marca == 'John Deere' &&
+      (e.adaptacao?.modelo.startsWith('S-2100') ?? false);
 
   /// Linhas que a tecnologia aceita numa máquina.
   static int capacidade(Tecnologia t) =>
@@ -391,9 +420,11 @@ class RegrasConfigurador {
   static int limiteDoAlternador(EntradaConfiguracao e) =>
       e.tecnologia != Tecnologia.seleniumNeo
       ? capacidadeMaxima
-      : e.totalLinhas > linhasNeoAlternador100
-      ? linhasMaximasNeo
-      : linhasNeoAlternador100;
+      : e.totalLinhas <= linhasNeoAlternador100
+      ? linhasNeoAlternador100
+      : e.neoComLevelOuCommander ?? false
+      ? linhasMaximasNeoComAgregado
+      : linhasMaximasNeo;
 
   /// Nome do alternador no resultado: no Selenium Neo, com a amperagem.
   static String componenteAlternador(EntradaConfiguracao e) =>
@@ -487,6 +518,18 @@ class RegrasConfigurador {
                     'um alternador ($saidasPorAlternador saídas × '
                     '$linhasPorSaida linhas = $capacidadeMaxima). Precisa de '
                     'validação técnica.',
+        ),
+      );
+    }
+    if (e.tecnologia == Tecnologia.seleniumNeo &&
+        (e.neoComLevelOuCommander ?? false) &&
+        e.totalLinhas > linhasMaximasNeoComAgregado) {
+      v.add(
+        Validacao(
+          NivelValidacao.erro,
+          'Com Level ou Commander no mesmo alternador, o de 250 A atende até '
+          '$linhasMaximasNeoComAgregado linhas de Selenium Neo '
+          '(${e.totalLinhas} informadas). Precisa de validação técnica.',
         ),
       );
     }
@@ -805,13 +848,21 @@ class RegrasConfigurador {
       case Tecnologia.seleniumNeo:
         return [
           for (final c in CulturaNeo.values) _discoNeo(e, c),
-          ItemConfiguracao(
-            componente: Componentes.peneiraSojaNeo,
-            quantidade: linhas,
-            motivo:
-                'Um por linha ($linhas linhas). Sem a peneira o desempenho '
-                'na soja fica comprometido.',
-          ),
+          if (usaPeneiraSoja(e))
+            ItemConfiguracao(
+              componente: Componentes.peneiraSojaNeo,
+              quantidade: e.caixasSemente ?? 1,
+              motivo:
+                  'Exclusiva da John Deere S-2100 caixa central (CCS): uma '
+                  'por caixa de semente. Sem a peneira o desempenho na soja '
+                  'fica comprometido.',
+              status: (e.caixasSemente ?? 0) > 0
+                  ? StatusItem.definido
+                  : StatusItem.pendente,
+              pendencia: (e.caixasSemente ?? 0) > 0
+                  ? null
+                  : 'Informar quantas caixas de semente a plantadeira tem.',
+            ),
           if (e.bocalNeo == null)
             pendente(Componentes.bocalNeo, 'Escolher o kit bocal.')
           else if (!e.bocalNeo!.vemNoDosador)

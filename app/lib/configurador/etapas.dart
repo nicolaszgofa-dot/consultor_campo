@@ -775,6 +775,42 @@ class EtapaAlimentacao extends StatelessWidget {
       );
     }
 
+    if (RegrasConfigurador.perguntarAgregadoNeo(entrada)) {
+      filhos.add(
+        CartaoBranco(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Level ou Commander vão ligados no mesmo alternador?',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'O alternador de 250 A atende até '
+                '${RegrasConfigurador.linhasMaximasNeo} linhas só de Selenium '
+                'Neo, ou até ${RegrasConfigurador.linhasMaximasNeoComAgregado} '
+                'com Level ou Commander.',
+                style: const TextStyle(color: Cores.textoSecundario),
+              ),
+              const SizedBox(height: 12),
+              SimNao(
+                valor: estado.neoComLevelOuCommander,
+                aoEscolher: estado.responderLevelOuCommander,
+              ),
+              if ((estado.neoComLevelOuCommander ?? false) &&
+                  estado.totalLinhas >
+                      RegrasConfigurador.linhasMaximasNeoComAgregado) ...[
+                const SizedBox(height: 12),
+                Aviso(estado.bloqueio ?? '', tipo: TipoAviso.erro),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
     if (estado.usaAlternador) {
       final alternador = resultado.item(
         RegrasConfigurador.componenteAlternador(entrada),
@@ -1363,6 +1399,51 @@ class EtapaAdaptacao extends StatelessWidget {
               escolhida: estado.modeloAdaptacao,
               rotulo: (m) => m,
               aoEscolher: estado.escolherModeloAdaptacao,
+            ),
+          ),
+        ],
+        if (RegrasConfigurador.usaPeneiraSoja(estado.entrada)) ...[
+          const SizedBox(height: 12),
+          _CartaoPergunta(
+            pergunta: 'Quantas caixas de semente a plantadeira tem?',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Na S-2100 caixa central (CCS) o Selenium Neo leva o kit '
+                  'peneira soja JD2100, um por caixa de semente.',
+                  style: TextStyle(color: Cores.textoSecundario),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    IconButton.outlined(
+                      tooltip: 'Menos uma caixa',
+                      onPressed: (estado.caixasSemente ?? 0) > 0
+                          ? () => estado.mudarCaixasSemente(-1)
+                          : null,
+                      icon: const Icon(Icons.remove),
+                    ),
+                    SizedBox(
+                      width: 64,
+                      child: Text(
+                        '${estado.caixasSemente ?? 0}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: fonteTitulo,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    IconButton.filled(
+                      tooltip: 'Mais uma caixa',
+                      onPressed: () => estado.mudarCaixasSemente(1),
+                      icon: const Icon(Icons.add),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],

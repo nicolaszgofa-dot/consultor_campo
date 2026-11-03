@@ -533,6 +533,15 @@ void testesSeleniumNeo() {
     expect(find.text('Alternador hidráulico 250 A'), findsOneWidget);
     expect(find.textContaining('até 5 linhas por saída'), findsOneWidget);
 
+    // Acima de 22 linhas pergunta se Level ou Commander usam o alternador.
+    expect(
+      estado.bloqueio,
+      'Responda se Level ou Commander usam o mesmo alternador.',
+    );
+    await tester.tap(find.text('Não'));
+    await tester.pump();
+    expect(estado.neoComLevelOuCommander, isFalse);
+
     estado.avancar();
     await tester.pumpAndSettle();
     expect(estado.etapa, EtapaConfigurador.acessorios);
@@ -574,20 +583,47 @@ void testesSeleniumNeo() {
     expect(r.item(Componentes.alternador250), isNotNull);
     expect(r.item(CulturaNeo.soja.baixa.componente)?.quantidade, 24);
     expect(r.item(CulturaNeo.milho.baixa.componente)?.quantidade, 24);
-    expect(r.item(Componentes.peneiraSojaNeo)?.quantidade, 24);
+    // Solteira: a peneira de soja é só da S-2100 caixa central.
+    expect(r.item(Componentes.peneiraSojaNeo), isNull);
     expect(tester.takeException(), isNull);
   });
 
-  test('Selenium Neo acima de 55 linhas bloqueia', () {
+  test('Selenium Neo: até 56 linhas, ou 38 com Level ou Commander', () {
     final e = ConfiguradorEstado()
       ..escolherTecnologia(Tecnologia.seleniumNeo)
       ..avancar()
       ..escolherTipo(TipoPlantadeira.solteira)
       ..avancar()
-      ..definirLinhas(56);
+      ..definirLinhas(57);
     expect(e.bloqueio, contains('250 A'));
-    e.definirLinhas(55);
+    e
+      ..definirLinhas(40)
+      ..avancar();
+    expect(e.etapa, EtapaConfigurador.alimentacao);
+    e.responderLevelOuCommander(true);
+    expect(e.bloqueio, contains('até 38 linhas'));
+    e.responderLevelOuCommander(false);
     expect(e.bloqueio, isNull);
+  });
+
+  test('Selenium Neo na S-2100 caixa central pede as caixas de semente', () {
+    final e = ConfiguradorEstado()
+      ..escolherTecnologia(Tecnologia.seleniumNeo)
+      ..escolherTipo(TipoPlantadeira.caixaCentral)
+      ..definirLinhas(20)
+      ..escolherMarcaAdaptacao('John Deere')
+      ..escolherModeloAdaptacao('S-2100 linha fundida')
+      ..etapa = EtapaConfigurador.adaptacao;
+    expect(e.bloqueio, 'Informe quantas caixas de semente a plantadeira tem.');
+    e
+      ..mudarCaixasSemente(1)
+      ..mudarCaixasSemente(1);
+    expect(e.bloqueio, isNull);
+    expect(e.resultado.item(Componentes.peneiraSojaNeo)?.quantidade, 2);
+
+    e.escolherModeloAdaptacao('DB linha chapa');
+    expect(e.bloqueio, isNull);
+    expect(e.resultado.item(Componentes.peneiraSojaNeo), isNull);
   });
 
   test('kit conversão não oferece Selenium Neo', () {
