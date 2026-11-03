@@ -253,19 +253,18 @@ enum ProdutoProposta {
       (IconeProposta.monitor, 'Regulagem pelo monitor do trator'),
       (IconeProposta.olho, 'Sensor de sementes na esteira'),
     ],
-    // A confirmar com a engenharia: lista montada a partir das fichas.
+    // Mesmos itens do Configurador.
     sistema: {
       Fornecimento.completo: [
-        'Dosador Selenium Neo',
-        'Esteira condutora de sementes',
-        'Motores do disco e da esteira',
-        'Sensor de sementes na esteira',
-        'Alternador hidráulico',
+        'Conjunto dosador Selenium Neo',
+        'Conjunto esteira transportadora Neo',
+        'Subconjuntos disco/anel Neo 26',
+        'Kit bocal de sementes',
+        'Alternador hidráulico (100 A até 22 linhas; 250 A acima)',
         'Mangueiras hidráulicas',
         'Módulo ECU',
         'Cabo ISOBUS',
-        'Cabos de energia',
-        'Antena de comunicação',
+        'Chicotes de linha e chicote painel',
         'Sensor de levante',
         'Frete e instalação',
       ],

@@ -8,11 +8,23 @@ import 'adaptacoes.dart';
 
 enum Tecnologia {
   titaniumEletric('Titanium Elétric'),
-  seleniumEletric('Selenium Elétric');
+  seleniumEletric('Selenium Elétric'),
+
+  /// Dois motores por linha (disco e esteira): metade das linhas por saída
+  /// do alternador, que é sempre usado. Sem kit conversão.
+  seleniumNeo('Selenium Neo', linhasPorSaida: 5, temKitConversao: false);
 
   final String nome;
 
-  const Tecnologia(this.nome);
+  /// Linhas que cada saída do alternador alimenta.
+  final int linhasPorSaida;
+  final bool temKitConversao;
+
+  const Tecnologia(
+    this.nome, {
+    this.linhasPorSaida = 10,
+    this.temKitConversao = true,
+  });
 }
 
 enum TipoPlantadeira {
@@ -50,6 +62,24 @@ enum BocalSelenium {
   final String nome;
 
   const BocalSelenium(this.nome);
+}
+
+/// Kit bocal de sementes (Selenium Neo). O de pressão positiva já vem no
+/// conjunto dosador: não entra como item à parte.
+enum BocalNeo {
+  gravidade('Kit bocal de sementes Selenium Neo gravidade'),
+  giratorio30(
+    'Kit bocal de sementes Selenium Neo gravidade bocal girat. 3 pol',
+  ),
+  pressaoPositiva(
+    'Kit bocal de sementes Selenium Neo pressão positiva',
+    vemNoDosador: true,
+  );
+
+  final String nome;
+  final bool vemNoDosador;
+
+  const BocalNeo(this.nome, {this.vemNoDosador = false});
 }
 
 /// Comprimentos disponíveis, em metros.
@@ -91,6 +121,9 @@ class EntradaConfiguracao {
   /// Selenium Elétric: kit bocal de sementes. Ignorado no Titanium.
   final BocalSelenium? bocalSelenium;
 
+  /// Selenium Neo: kit bocal de sementes. Ignorado nas demais.
+  final BocalNeo? bocalNeo;
+
   /// Kit conversão para a [tecnologia]: troca o conjunto pelo kit e não
   /// leva discos, reservatório pipoqueira nem bocais.
   final bool kitConversao;
@@ -112,6 +145,7 @@ class EntradaConfiguracao {
     this.reservatorioPipoqueira,
     this.bocalTitanium,
     this.bocalSelenium,
+    this.bocalNeo,
     this.kitConversao = false,
     this.adaptacao,
   });
@@ -254,12 +288,16 @@ class ResultadoConfiguracao {
 }
 
 abstract final class Componentes {
-  static String conjunto(Tecnologia t) => 'Conjunto ${t.nome}';
+  static String conjunto(Tecnologia t) => switch (t) {
+    Tecnologia.seleniumNeo => 'Conjunto dosador Selenium Neo',
+    _ => 'Conjunto ${t.nome}',
+  };
 
   static String kitConversao(Tecnologia t) => switch (t) {
     Tecnologia.titaniumEletric => 'Kit conversão Titanium Elétric',
     Tecnologia.seleniumEletric =>
       'Kit conversão Selenium G3 p/ Selenium Elétric',
+    Tecnologia.seleniumNeo => throw ArgumentError('Selenium Neo não tem kit'),
   };
   static const ecu = 'Conjunto ECU';
   static const sensorLevante = 'Sensor de levante';
@@ -292,6 +330,23 @@ abstract final class Componentes {
 
   /// Condutor de sementes do Selenium antes de escolher a adaptação.
   static const condutorSelenium = 'Condutor de sementes';
+
+  // Selenium Neo.
+  static const esteiraNeo = 'Conjunto esteira transportadora Neo';
+  static const bocalNeo = 'Kit bocal de sementes Selenium Neo';
+
+  /// Os quatro subconjuntos; a regra de alta e baixa velocidade vem depois.
+  static const discoNeo = 'Subconjunto disco/anel Selenium Neo 26';
+  static const discosNeo = [
+    'Subconjunto disco/anel milho 14 furos Neo 26 (milho baixa velocidade)',
+    'Subconjunto disco/anel milho 28 furos Neo 26 (milho alta velocidade)',
+    'Subconjunto disco/anel soja 35 furos Neo 26 (soja baixa velocidade)',
+    'Subconjunto disco/anel soja 70 furos Neo 26 (soja alta velocidade)',
+  ];
+
+  /// Selenium Neo: até 22 linhas o alternador de 100 A; acima, o de 250 A.
+  static const alternador100 = 'Alternador hidráulico 100 A';
+  static const alternador250 = 'Alternador hidráulico 250 A';
 }
 
 class RegrasConfigurador {
@@ -305,18 +360,62 @@ class RegrasConfigurador {
 
   static int get capacidadeMaxima => saidasPorAlternador * linhasPorSaida;
 
-  /// Alternador é obrigatório a partir de 13 linhas e em toda máquina com
-  /// seções separadas: máquina sem alternador é, na prática, solteira.
-  static bool alternadorObrigatorio(int linhas, TipoPlantadeira tipo) =>
-      tipo.secoesSeparadas || linhas > linhasSemAlternadorObrigatorio;
+  /// Selenium Neo: até 22 linhas o alternador de 100 A; acima, o de 250 A,
+  /// por enquanto até 55 linhas (11 saídas de 5 linhas, a confirmar).
+  static const linhasNeoAlternador100 = 22;
+  static const linhasMaximasNeo = 55;
+  static const saidasAlternador250 = 11;
 
-  /// Só na solteira de até 12 linhas o vendedor responde se haverá
-  /// alternador.
-  static bool perguntarAlternador(int linhas, TipoPlantadeira tipo) =>
-      linhas > 0 && !alternadorObrigatorio(linhas, tipo);
+  /// Linhas que a tecnologia aceita numa máquina.
+  static int capacidade(Tecnologia t) =>
+      t == Tecnologia.seleniumNeo ? linhasMaximasNeo : capacidadeMaxima;
+
+  /// Saídas do alternador usado na máquina.
+  static int saidasDoAlternador(EntradaConfiguracao e) =>
+      e.tecnologia == Tecnologia.seleniumNeo &&
+          e.totalLinhas > linhasNeoAlternador100
+      ? saidasAlternador250
+      : saidasPorAlternador;
+
+  /// Linhas que o alternador usado atende: no Selenium Neo, 22 no de 100 A
+  /// e 55 no de 250 A.
+  static int limiteDoAlternador(EntradaConfiguracao e) =>
+      e.tecnologia != Tecnologia.seleniumNeo
+      ? capacidadeMaxima
+      : e.totalLinhas > linhasNeoAlternador100
+      ? linhasMaximasNeo
+      : linhasNeoAlternador100;
+
+  /// Nome do alternador no resultado: no Selenium Neo, com a amperagem.
+  static String componenteAlternador(EntradaConfiguracao e) =>
+      e.tecnologia != Tecnologia.seleniumNeo
+      ? Componentes.alternador
+      : e.totalLinhas > linhasNeoAlternador100
+      ? Componentes.alternador250
+      : Componentes.alternador100;
+
+  /// Alternador é obrigatório a partir de 13 linhas e em toda máquina com
+  /// seções separadas: máquina sem alternador é, na prática, solteira. No
+  /// Selenium Neo ele é sempre usado.
+  static bool alternadorObrigatorio(
+    int linhas,
+    TipoPlantadeira tipo, [
+    Tecnologia? tecnologia,
+  ]) =>
+      tecnologia == Tecnologia.seleniumNeo ||
+      tipo.secoesSeparadas ||
+      linhas > linhasSemAlternadorObrigatorio;
+
+  /// Só na solteira de até 12 linhas (fora o Selenium Neo) o vendedor
+  /// responde se haverá alternador.
+  static bool perguntarAlternador(
+    int linhas,
+    TipoPlantadeira tipo, [
+    Tecnologia? tecnologia,
+  ]) => linhas > 0 && !alternadorObrigatorio(linhas, tipo, tecnologia);
 
   static bool usaAlternador(EntradaConfiguracao e) =>
-      alternadorObrigatorio(e.totalLinhas, e.tipo) ||
+      alternadorObrigatorio(e.totalLinhas, e.tipo, e.tecnologia) ||
       (e.temAlternador ?? false);
 
   /// Chicotes de 4 e de 1 linha de uma seção. Cada seção é montada como se
@@ -367,13 +466,18 @@ class RegrasConfigurador {
       );
       return v;
     }
-    if (e.totalLinhas > capacidadeMaxima) {
+    if (e.totalLinhas > capacidade(e.tecnologia)) {
       v.add(
         Validacao(
           NivelValidacao.erro,
-          'Máquina com ${e.totalLinhas} linhas passa da capacidade de um '
-          'alternador ($saidasPorAlternador saídas × $linhasPorSaida linhas = '
-          '$capacidadeMaxima). Precisa de validação técnica.',
+          e.tecnologia == Tecnologia.seleniumNeo
+              ? 'Selenium Neo com ${e.totalLinhas} linhas passa do limite de '
+                    '$linhasMaximasNeo linhas do alternador de 250 A. Precisa '
+                    'de validação técnica.'
+              : 'Máquina com ${e.totalLinhas} linhas passa da capacidade de '
+                    'um alternador ($saidasPorAlternador saídas × '
+                    '$linhasPorSaida linhas = $capacidadeMaxima). Precisa de '
+                    'validação técnica.',
         ),
       );
     }
@@ -401,7 +505,8 @@ class RegrasConfigurador {
         );
       }
     }
-    if (perguntarAlternador(e.totalLinhas, e.tipo) && e.temAlternador == null) {
+    if (perguntarAlternador(e.totalLinhas, e.tipo, e.tecnologia) &&
+        e.temAlternador == null) {
       v.add(
         const Validacao(
           NivelValidacao.erro,
@@ -459,16 +564,22 @@ class RegrasConfigurador {
     return v;
   }
 
-  /// Distribui as linhas pelas saídas do alternador. Nula se não couber.
-  static DistribuicaoSaidas? distribuirSaidas(List<int> linhasPorSecao) {
+  /// Distribui as linhas pelas saídas do alternador, [porSaida] linhas em
+  /// cada uma de [saidas] saídas. Nula se não couber.
+  static DistribuicaoSaidas? distribuirSaidas(
+    List<int> linhasPorSecao, {
+    int porSaida = linhasPorSaida,
+    int saidas = saidasPorAlternador,
+  }) {
     final total = linhasPorSecao.fold(0, (s, n) => s + n);
-    if (total < 1 || total > capacidadeMaxima) return null;
+    if (total < 1 || total > porSaida * saidas) return null;
+    List<int> dividir(int linhas) => _dividir(linhas, porSaida);
 
     // 1. Sem misturar seções.
     final porSecao = <SaidaAlternador>[];
     var inicio = 1;
     for (var s = 0; s < linhasPorSecao.length; s++) {
-      for (final tamanho in _dividir(linhasPorSecao[s])) {
+      for (final tamanho in dividir(linhasPorSecao[s])) {
         porSecao.add(
           SaidaAlternador(
             numero: porSecao.length + 1,
@@ -481,7 +592,7 @@ class RegrasConfigurador {
         inicio += tamanho;
       }
     }
-    if (porSecao.length <= saidasPorAlternador) {
+    if (porSecao.length <= saidas) {
       return DistribuicaoSaidas(
         modo: ModoDistribuicao.porSecao,
         saidas: porSecao,
@@ -500,7 +611,7 @@ class RegrasConfigurador {
 
     final global = <SaidaAlternador>[];
     inicio = 1;
-    for (final tamanho in _dividir(total)) {
+    for (final tamanho in dividir(total)) {
       final fim = inicio + tamanho - 1;
       final secoes = [
         for (var s = secaoDaLinha(inicio); s <= secaoDaLinha(fim); s++) s,
@@ -524,9 +635,10 @@ class RegrasConfigurador {
     return DistribuicaoSaidas(modo: ModoDistribuicao.global, saidas: global);
   }
 
-  /// Divide [linhas] no menor número de conjuntos de até 10, equilibrados.
-  static List<int> _dividir(int linhas) {
-    final conjuntos = (linhas / linhasPorSaida).ceil();
+  /// Divide [linhas] no menor número de conjuntos de até [porSaida],
+  /// equilibrados.
+  static List<int> _dividir(int linhas, int porSaida) {
+    final conjuntos = (linhas / porSaida).ceil();
     final base = linhas ~/ conjuntos;
     final sobra = linhas % conjuntos;
     return [for (var i = 0; i < conjuntos; i++) base + (i < sobra ? 1 : 0)];
@@ -681,6 +793,18 @@ class RegrasConfigurador {
           else
             item(e.bocalSelenium!.nome),
         ];
+      case Tecnologia.seleniumNeo:
+        return [
+          pendente(
+            Componentes.discoNeo,
+            'A regra de escolha entre alta e baixa velocidade ainda vai ser '
+            'definida. Opções: ${Componentes.discosNeo.join('; ')}.',
+          ),
+          if (e.bocalNeo == null)
+            pendente(Componentes.bocalNeo, 'Escolher o kit bocal.')
+          else if (!e.bocalNeo!.vemNoDosador)
+            item(e.bocalNeo!.nome),
+        ];
     }
   }
 
@@ -738,8 +862,13 @@ class RegrasConfigurador {
     final alternador = usaAlternador(e);
     final bloqueada = validacoes.any((v) => v.bloqueia);
     final distribuicao = alternador && !bloqueada
-        ? distribuirSaidas(e.secoes)
+        ? distribuirSaidas(
+            e.secoes,
+            porSaida: e.tecnologia.linhasPorSaida,
+            saidas: saidasDoAlternador(e),
+          )
         : null;
+    final neo = e.tecnologia == Tecnologia.seleniumNeo;
 
     // Chicotes de linha por seção, nunca pelo total da máquina.
     final secoes = bloqueada ? <int>[] : e.secoes;
@@ -781,9 +910,10 @@ class RegrasConfigurador {
         quantidade: 1,
         motivo: 'Obrigatório em toda configuração.',
       ),
+      // No Selenium Neo a esteira transportadora entra no lugar do sensor.
       if (linhas > 0)
         ItemConfiguracao(
-          componente: Componentes.sensorSemente,
+          componente: neo ? Componentes.esteiraNeo : Componentes.sensorSemente,
           quantidade: linhas,
           motivo: 'Um por linha ($linhas linhas).',
         ),
@@ -800,9 +930,15 @@ class RegrasConfigurador {
       ),
       if (alternador) ...[
         ItemConfiguracao(
-          componente: Componentes.alternador,
+          componente: componenteAlternador(e),
           quantidade: 1,
-          motivo: e.tipo.secoesSeparadas
+          motivo: neo
+              ? linhas > linhasNeoAlternador100
+                    ? 'Selenium Neo acima de $linhasNeoAlternador100 linhas usa '
+                          'o de 250 A.'
+                    : 'Sempre usado no Selenium Neo; até '
+                          '$linhasNeoAlternador100 linhas, o de 100 A.'
+              : e.tipo.secoesSeparadas
               ? 'Obrigatório em ${e.tipo.nome.toLowerCase()}.'
               : alternadorObrigatorio(linhas, e.tipo)
               ? 'Obrigatório a partir de 13 linhas.'
@@ -843,6 +979,15 @@ class RegrasConfigurador {
     ];
 
     if (_avisoCondutorOriginal(e) case final info?) validacoes.add(info);
+    if (neo && (e.bocalNeo?.vemNoDosador ?? false)) {
+      validacoes.add(
+        const Validacao(
+          NivelValidacao.info,
+          'O kit bocal de pressão positiva já vem no conjunto dosador '
+          'Selenium Neo: não entra como item à parte.',
+        ),
+      );
+    }
 
     final painel = itens.lastOrNull;
     if (painel != null &&

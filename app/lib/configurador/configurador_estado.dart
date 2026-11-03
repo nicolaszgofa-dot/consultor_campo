@@ -41,6 +41,7 @@ class ConfiguradorEstado extends ChangeNotifier {
   bool? reservatorioPipoqueira;
   BocalTitanium? bocalTitanium;
   BocalSelenium? bocalSelenium;
+  BocalNeo? bocalNeo;
 
   /// Adaptação: primeiro a marca, depois o modelo.
   String? marcaAdaptacao;
@@ -78,14 +79,18 @@ class ConfiguradorEstado extends ChangeNotifier {
     reservatorioPipoqueira: reservatorioPipoqueira,
     bocalTitanium: bocalTitanium,
     bocalSelenium: bocalSelenium,
+    bocalNeo: bocalNeo,
     kitConversao: kitConversao,
     adaptacao: kitConversao ? null : adaptacao,
   );
 
   ResultadoConfiguracao get resultado => RegrasConfigurador.configurar(entrada);
 
-  bool get perguntarAlternador =>
-      RegrasConfigurador.perguntarAlternador(totalLinhas, entrada.tipo);
+  bool get perguntarAlternador => RegrasConfigurador.perguntarAlternador(
+    totalLinhas,
+    entrada.tipo,
+    entrada.tecnologia,
+  );
 
   bool get usaAlternador => RegrasConfigurador.usaAlternador(entrada);
 
@@ -110,10 +115,13 @@ class ConfiguradorEstado extends ChangeNotifier {
     EtapaConfigurador.linhas =>
       totalLinhas < 1
           ? 'Informe o número de linhas.'
-          : totalLinhas > RegrasConfigurador.capacidadeMaxima
-          ? 'Acima de ${RegrasConfigurador.capacidadeMaxima} linhas passa da '
-                'capacidade de um alternador (6 saídas × 10 linhas). '
-                'Fale com a engenharia.'
+          : totalLinhas > capacidade
+          ? tecnologia == Tecnologia.seleniumNeo
+                ? 'Acima de $capacidade linhas de Selenium Neo passa do '
+                      'alternador de 250 A. Fale com a engenharia.'
+                : 'Acima de $capacidade linhas passa da capacidade de um '
+                      'alternador (6 saídas × 10 linhas). Fale com a '
+                      'engenharia.'
           : null,
     EtapaConfigurador.secoes => _bloqueioSecoes,
     EtapaConfigurador.alimentacao =>
@@ -139,8 +147,14 @@ class ConfiguradorEstado extends ChangeNotifier {
           : null,
     Tecnologia.seleniumEletric =>
       bocalSelenium == null ? 'Escolha o kit bocal de sementes.' : null,
+    Tecnologia.seleniumNeo =>
+      bocalNeo == null ? 'Escolha o kit bocal de sementes.' : null,
     null => 'Escolha a tecnologia.',
   };
+
+  /// Linhas que a tecnologia escolhida aceita.
+  int get capacidade =>
+      RegrasConfigurador.capacidade(tecnologia ?? Tecnologia.titaniumEletric);
 
   String? get _bloqueioSecoes {
     if (secoes.isEmpty) return 'Informe as seções da máquina.';
@@ -277,6 +291,11 @@ class ConfiguradorEstado extends ChangeNotifier {
 
   void escolherBocalSelenium(BocalSelenium b) {
     bocalSelenium = b;
+    notifyListeners();
+  }
+
+  void escolherBocalNeo(BocalNeo b) {
+    bocalNeo = b;
     notifyListeners();
   }
 

@@ -46,6 +46,7 @@ ConfiguradorEstado autotransportavel55() {
 }
 
 void main() {
+  testesSeleniumNeo();
   group('estado', () {
     test('a solteira pula a etapa de seções', () {
       final e = ConfiguradorEstado();
@@ -353,7 +354,9 @@ void main() {
     final continuar = find.widgetWithText(FilledButton, 'Continuar');
     expect(tester.widget<FilledButton>(continuar).onPressed, isNull);
 
-    // Segundo "Titanium Elétric" é o da lista do kit.
+    // Segundo "Titanium Elétric" é o da lista do kit, abaixo dos cartões.
+    await tester.ensureVisible(find.text('Titanium Elétric').last);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Titanium Elétric').last);
     await tester.pump();
     expect(estado.kitConversao, isTrue);
@@ -374,10 +377,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('OUTROS PRODUTOS DO PORTFÓLIO'), findsOneWidget);
-    for (final nome in ['Júpiter', 'Selenium Neo', 'Commander', 'Level']) {
+    for (final nome in ['Júpiter', 'Commander', 'Level']) {
       expect(find.text(nome), findsOneWidget, reason: nome);
     }
-    expect(find.text('Em breve'), findsNWidgets(4));
+    expect(find.text('Em breve'), findsNWidgets(3));
 
     await tester.tap(find.text('Level'));
     await tester.pump();
@@ -501,5 +504,71 @@ void main() {
     );
     expect(find.text('Saída 6'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+}
+
+void testesSeleniumNeo() {
+  testWidgets('Selenium Neo: tecnologia, acessórios e resultado', (
+    tester,
+  ) async {
+    tela(tester, const Size(1194, 2400));
+    final estado = ConfiguradorEstado();
+    await abrir(tester, estado);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Selenium Neo'));
+    await tester.pump();
+    expect(estado.tecnologia, Tecnologia.seleniumNeo);
+
+    estado
+      ..avancar()
+      ..escolherTipo(TipoPlantadeira.solteira)
+      ..avancar()
+      ..definirLinhas(24)
+      ..avancar();
+    // Solteira pula seções; no Neo o alternador é sempre usado.
+    expect(estado.etapa, EtapaConfigurador.alimentacao);
+    expect(estado.perguntarAlternador, isFalse);
+    await tester.pumpAndSettle();
+    expect(find.text('Alternador hidráulico 250 A'), findsOneWidget);
+    expect(find.textContaining('até 5 linhas por saída'), findsOneWidget);
+
+    estado.avancar();
+    await tester.pumpAndSettle();
+    expect(estado.etapa, EtapaConfigurador.acessorios);
+    await tester.tap(find.textContaining('pressão positiva'));
+    await tester.pump();
+    expect(estado.bocalNeo, BocalNeo.pressaoPositiva);
+
+    estado.avancar();
+    expect(estado.marcasAdaptacao, ['John Deere']);
+    expect(estado.modelosAdaptacao, isEmpty);
+    estado
+      ..escolherMarcaAdaptacao('John Deere')
+      ..escolherModeloAdaptacao('DB linha chapa');
+    expect(estado.bloqueio, isNull);
+
+    final r = estado.resultado;
+    expect(r.item('Conjunto dosador Selenium Neo')?.quantidade, 24);
+    expect(r.item(Componentes.esteiraNeo)?.quantidade, 24);
+    expect(r.item(Componentes.sensorSemente), isNull);
+    expect(r.item(Componentes.alternador250), isNotNull);
+    expect(tester.takeException(), isNull);
+  });
+
+  test('Selenium Neo acima de 55 linhas bloqueia', () {
+    final e = ConfiguradorEstado()
+      ..escolherTecnologia(Tecnologia.seleniumNeo)
+      ..avancar()
+      ..escolherTipo(TipoPlantadeira.solteira)
+      ..avancar()
+      ..definirLinhas(56);
+    expect(e.bloqueio, contains('250 A'));
+    e.definirLinhas(55);
+    expect(e.bloqueio, isNull);
+  });
+
+  test('kit conversão não oferece Selenium Neo', () {
+    expect(Tecnologia.seleniumNeo.temKitConversao, isFalse);
   });
 }

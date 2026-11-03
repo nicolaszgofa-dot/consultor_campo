@@ -125,6 +125,29 @@ Enquanto a pergunta da pipoqueira, o bocal do Titanium ou o kit bocal do Seleniu
 - Selenium: não pergunta o kit bocal de sementes.
 - Os demais itens (ECU, sensores, cabos, alternador, chicotes) seguem as mesmas regras.
 
+## Selenium Neo
+
+Regras passadas pelo usuário em 03/11/2026. A montagem segue a do Selenium Elétric, com estas diferenças:
+
+- **Itens por linha:**
+  - **Conjunto dosador Selenium Neo**, no lugar do conjunto Selenium Elétric;
+  - **Conjunto esteira transportadora Neo**, no lugar do sensor de semente;
+  - não há condutor de sementes, porque a esteira faz esse papel.
+- **Subconjuntos disco/anel (Neo 26):** milho 14 furos (baixa velocidade), milho 28 furos (alta velocidade), soja 35 furos (baixa velocidade) e soja 70 furos (alta velocidade). A regra de escolha entre alta e baixa velocidade ainda vai ser definida; até lá, o item fica **pendente** com as quatro opções.
+- **Kit bocal de sementes:** o vendedor escolhe entre:
+  - gravidade;
+  - gravidade com bocal giratório de 3 pol;
+  - pressão positiva. Esse já vem no conjunto dosador: não entra como item à parte, e o resultado mostra um aviso informativo.
+- **Chicotes:** os mesmos do Selenium Elétric. Chicotes de 4 e de 1 linha por seção e chicote painel.
+- **Alternador:**
+  - é **sempre** usado, por isso a pergunta "terá alternador?" não aparece;
+  - cada saída alimenta **5 linhas**, metade das 10 do Selenium Elétric, porque o Neo tem dois motores por linha;
+  - até 22 linhas usa o **Alternador hidráulico 100 A**;
+  - acima de 22 linhas usa o **Alternador hidráulico 250 A**, por enquanto com limite de **55 linhas**. Para o cálculo, o 250 A tem 11 saídas de 5 linhas (a confirmar).
+  - Acima de 55 linhas, a configuração bloqueia e pede validação técnica.
+- **Adaptações:** só John Deere: S-2100 linha chapa, S-2100 linha fundida, DB linha chapa e DB linha fundida.
+- **Kit conversão:** o Neo não tem kit conversão.
+
 ## Adaptação
 
 Depois das etapas da máquina, o vendedor escolhe a **marca** da plantadeira e, em seguida, o **modelo**, entre as adaptações da tecnologia escolhida. Só vale para Titanium Elétric e Selenium Elétric; o kit conversão não tem essa etapa.
@@ -186,7 +209,11 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 - Demais regras de **cabeamento**.
 - Se uma saída do alternador **pode** atender linhas de duas seções (ver exemplo acima).
 - Se algum **tipo de plantadeira** muda outras regras além das seções (cabeamento, chicotes).
-- **Júpiter, Selenium Neo, Commander e Level:** aparecem na tela de tecnologia em "Outros produtos do portfólio", com foto e "Em breve", mas ainda não configuram (tocar mostra "Configuração do ... em breve"). Fotos em `app/assets/configurador/`, reduzidas de `IMAGENS/PRODUTOS`. A descrição do Commander ("Módulo de comando ISOBUS") precisa ser confirmada.
+- **Júpiter, Commander e Level:** aparecem na tela de tecnologia em "Outros produtos do portfólio", com foto e "Em breve", mas ainda não configuram (tocar mostra "Configuração do ... em breve"). Fotos em `app/assets/configurador/`, reduzidas de `IMAGENS/PRODUTOS`. A descrição do Commander ("Módulo de comando ISOBUS") precisa ser confirmada.
+- **Selenium Neo:**
+  - regra de escolha dos subconjuntos disco/anel (alta ou baixa velocidade);
+  - quantas saídas tem o alternador de 250 A (o cálculo usa 11);
+  - limite definitivo de linhas (hoje 55).
 - **Adaptação Titanium:** se a marca e o modelo geram itens no resultado. Hoje só aparecem como informação.
 - **Plantadeira fora do catálogo de adaptações:** o que fazer quando a marca ou o modelo não estão na lista.
 

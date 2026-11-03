@@ -42,7 +42,6 @@ Decisão de 28/10/2026: nada é registrado nem salvo até existir um servidor. I
 
 ## Pendências
 
-- Confirmar com a engenharia a lista "O sistema é composto por" do Selenium Neo, montada a partir das fichas.
 - Lista "O sistema é composto por" de Júpiter, Level e Commander: por decisão do usuário, ainda fora do PDF.
 - Confirmar se o Level é cobrado por linha.
 - Próxima etapa: anexo da avaliação de plantio; entrada pelo Configurador.

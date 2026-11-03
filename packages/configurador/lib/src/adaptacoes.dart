@@ -51,6 +51,15 @@ const adaptacoes = <Tecnologia, Map<String, List<String>>>{
     'Tatu Marchesan': ['USAP (antiga)', 'USAP S-0120 (nova)', 'SFIL'],
     'Vence Tudo': ['Vence Tudo'],
   },
+  // Selenium Neo: só John Deere por enquanto.
+  Tecnologia.seleniumNeo: {
+    'John Deere': [
+      'S-2100 linha chapa',
+      'S-2100 linha fundida',
+      'DB linha chapa',
+      'DB linha fundida',
+    ],
+  },
   Tecnologia.seleniumEletric: {
     'AGCO': [
       'Pantográfica – Chassi novo (cx. única)',

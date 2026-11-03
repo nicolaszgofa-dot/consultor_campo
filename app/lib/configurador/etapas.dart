@@ -49,12 +49,14 @@ class _LadoALado extends StatelessWidget {
 const _imagens = {
   Tecnologia.titaniumEletric: 'assets/configurador/titanium_eletric.webp',
   Tecnologia.seleniumEletric: 'assets/configurador/selenium_eletric.webp',
+  Tecnologia.seleniumNeo: 'assets/configurador/selenium_neo.png',
 };
 
 const _descricoes = {
   Tecnologia.titaniumEletric: 'Dosador mecânico de sementes com motor elétrico',
   Tecnologia.seleniumEletric:
       'Dosador pneumático de sementes com motor elétrico',
+  Tecnologia.seleniumNeo: 'Dosador pneumático com esteira e dois motores',
 };
 
 /// Produtos do portfólio que ainda não têm configuração: só o cartão.
@@ -63,11 +65,6 @@ const produtosEmBreve = [
     'Júpiter',
     'Dosador volumétrico de adubo',
     'assets/configurador/jupiter.png',
-  ),
-  (
-    'Selenium Neo',
-    'Dosador pneumático com esteira e dois motores',
-    'assets/configurador/selenium_neo.png',
   ),
   (
     'Commander',
@@ -169,7 +166,10 @@ class EtapaTecnologia extends StatelessWidget {
           _CartaoPergunta(
             pergunta: 'O kit conversão é para qual tecnologia?',
             child: _ListaOpcoes<Tecnologia>(
-              opcoes: Tecnologia.values,
+              opcoes: [
+                for (final t in Tecnologia.values)
+                  if (t.temKitConversao) t,
+              ],
               escolhida: estado.tecnologia,
               rotulo: (t) => t.nome,
               aoEscolher: estado.escolherTecnologiaDoKit,
@@ -185,8 +185,7 @@ class EtapaTecnologia extends StatelessWidget {
   }
 }
 
-/// Júpiter, Selenium Neo, Commander e Level: aparecem, mas ainda não
-/// configuram.
+/// Júpiter, Commander e Level: aparecem, mas ainda não configuram.
 class _ProdutosEmBreve extends StatelessWidget {
   const _ProdutosEmBreve();
 
@@ -368,9 +367,7 @@ class _EtapaLinhasState extends State<EtapaLinhas> {
     final estado = widget.estado;
     final total = estado.totalLinhas;
     // Só o bloqueio acima da capacidade aparece; as regras ficam no motor.
-    final erro = total > RegrasConfigurador.capacidadeMaxima
-        ? estado.bloqueio
-        : null;
+    final erro = total > estado.capacidade ? estado.bloqueio : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -778,7 +775,11 @@ class EtapaAlimentacao extends StatelessWidget {
     }
 
     if (estado.usaAlternador) {
-      final alternador = resultado.item(Componentes.alternador);
+      final alternador = resultado.item(
+        RegrasConfigurador.componenteAlternador(entrada),
+      );
+      final porSaida = entrada.tecnologia.linhasPorSaida;
+      final saidas = RegrasConfigurador.saidasDoAlternador(entrada);
       filhos.add(
         CartaoBranco(
           child: Row(
@@ -797,17 +798,18 @@ class EtapaAlimentacao extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Alternador hidráulico',
-                      style: TextStyle(
+                    Text(
+                      RegrasConfigurador.componenteAlternador(entrada),
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     Text(
-                      '${alternador?.motivo ?? ''} 6 saídas, até 10 linhas '
-                      'por saída: ${estado.totalLinhas} de '
-                      '${RegrasConfigurador.capacidadeMaxima} linhas usadas.',
+                      '${alternador?.motivo ?? ''} $saidas saídas, até '
+                      '$porSaida linhas por saída: ${estado.totalLinhas} de '
+                      '${RegrasConfigurador.limiteDoAlternador(entrada)} '
+                      'linhas usadas.',
                       style: const TextStyle(color: Cores.textoSecundario),
                     ),
                   ],
@@ -855,7 +857,12 @@ class EtapaAlimentacao extends StatelessWidget {
               ),
       );
       if (distribuicao != null) {
-        filhos.add(_MapaSaidas(distribuicao: distribuicao));
+        filhos.add(
+          _MapaSaidas(
+            distribuicao: distribuicao,
+            porSaida: entrada.tecnologia.linhasPorSaida,
+          ),
+        );
       }
     }
 
@@ -874,7 +881,10 @@ class EtapaAlimentacao extends StatelessWidget {
 class _MapaSaidas extends StatelessWidget {
   final DistribuicaoSaidas distribuicao;
 
-  const _MapaSaidas({required this.distribuicao});
+  /// Vagas de cada saída: 10 linhas, ou 5 no Selenium Neo.
+  final int porSaida;
+
+  const _MapaSaidas({required this.distribuicao, required this.porSaida});
 
   @override
   Widget build(BuildContext context) {
@@ -943,7 +953,7 @@ class _MapaSaidas extends StatelessWidget {
                         child: ExcludeSemantics(
                           child: Row(
                             children: [
-                              for (var k = 0; k < 10; k++) ...[
+                              for (var k = 0; k < porSaida; k++) ...[
                                 if (k > 0) const SizedBox(width: 3),
                                 Expanded(
                                   child: Container(
@@ -1000,6 +1010,30 @@ class EtapaAcessorios extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (estado.tecnologia == Tecnologia.seleniumNeo) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _CartaoPergunta(
+            pergunta: 'Qual kit bocal de sementes?',
+            child: _ListaOpcoes<BocalNeo>(
+              opcoes: BocalNeo.values,
+              escolhida: estado.bocalNeo,
+              rotulo: (b) => b.vemNoDosador
+                  ? '${b.nome} (já vem no conjunto dosador)'
+                  : b.nome,
+              aoEscolher: estado.escolherBocalNeo,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Aviso(
+            'Subconjuntos disco/anel do Selenium Neo: a regra de escolha entre '
+            'alta e baixa velocidade ainda vai ser definida. Eles aparecem '
+            'como pendentes no resultado.',
+          ),
+        ],
+      );
+    }
     if (estado.tecnologia == Tecnologia.seleniumEletric) {
       return _CartaoPergunta(
         pergunta: 'Qual kit bocal de sementes?',
