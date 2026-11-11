@@ -321,7 +321,7 @@ const _dosadorTitanium = ConjuntoPecas(
     Peca('30000000718', 'Visor', Rect.fromLTRB(603, 429, 717, 451)),
     Peca(
       '30000000717',
-      'Poliflow (peças marcadas com * no desenho)',
+      'Kit Poliflow com 4 peças (as marcadas com * no desenho)',
       Rect.fromLTRB(111, 477, 226, 499),
     ),
     Peca('30000000715', 'Escovaflex', Rect.fromLTRB(620, 532, 734, 554)),
