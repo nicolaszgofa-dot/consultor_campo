@@ -105,8 +105,8 @@ class _PecasPageState extends State<PecasPage> {
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 24),
           child: Text(
-            'Nenhuma peça encontrada. Por enquanto só o Selenium Elétric '
-            'tem o catálogo cadastrado.',
+            'Nenhuma peça encontrada. Por enquanto só o Selenium Elétric e o '
+            'Titanium Elétric têm o catálogo cadastrado.',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16, color: Cores.textoSecundario),
           ),

@@ -30,6 +30,8 @@ void main() {
     );
     expect(buscarPecas('roseta milho').length, 2);
     expect(buscarPecas('FEIJAO').length, 2);
+    expect(buscarPecas('escovaflex').single.produto.nome, 'Titanium Elétric');
+    expect(buscarPecas('motor doga').length, 3);
     expect(buscarPecas('   '), isEmpty);
     expect(buscarPecas('inexistente'), isEmpty);
   });
@@ -54,7 +56,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(theme: temaConsultor(), home: const PecasPage()),
     );
-    expect(find.text('Em breve'), findsNWidgets(5));
+    expect(find.text('Em breve'), findsNWidgets(4));
 
     await tester.tap(find.text('Selenium Elétric'));
     await tester.pumpAndSettle();
@@ -100,7 +102,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(theme: temaConsultor(), home: const PecasPage()),
     );
-    await tester.enterText(find.byType(TextField), 'visor');
+    await tester.enterText(find.byType(TextField), 'kit visor');
     await tester.pump();
     expect(find.text('1 PEÇA ENCONTRADA'), findsOneWidget);
     await tester.tap(find.text('Kit visor Selenium'));

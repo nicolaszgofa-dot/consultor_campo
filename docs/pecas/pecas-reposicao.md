@@ -4,11 +4,15 @@ Aba da tela inicial para achar o código de uma peça pela vista explodida de ca
 
 ## Navegação
 
-1. **Produtos:** os mesmos do configurador. Só o **Selenium Elétric** tem catálogo por enquanto; os outros aparecem como "Em breve".
+1. **Produtos:** os mesmos do configurador. Por enquanto têm catálogo o **Selenium Elétric** e o **Titanium Elétric**; os outros aparecem como "Em breve".
 2. **Conjuntos do produto:** cada um com a miniatura da vista explodida.
-   - Corpo do dosador: 18 peças.
-   - Disco, condutores e tampa: 22 peças.
-   - Motorização Elétric: 4 peças.
+   - Selenium Elétric:
+     - Corpo do dosador: 18 peças;
+     - Disco, condutores e tampa: 22 peças;
+     - Motorização Elétric: 4 peças.
+   - Titanium Elétric:
+     - Dosador Titanium: 10 peças (página 7 do manual do Titanium);
+     - Motorização Elétric: motor e driver, 2 peças (página 4 do manual do Titanium Elétric).
 3. **Vista explodida e lista de peças:**
    - Tocar num código no desenho destaca a peça e leva a lista até ela.
    - Tocar numa peça da lista destaca o código no desenho e aproxima nele.
@@ -38,3 +42,5 @@ Os dados ficam em `app/lib/pecas/pecas_dados.dart`, e as imagens em `app/assets/
 - `20000000639` ("Condutor de semente Selenium retrabalhado") tem o mesmo final de `30000000639`.
 
 O app mostra esses códigos como estão no desenho.
+
+No Titanium, o Poliflow (`30000000717`) vem marcado com `*` no manual, nas quatro peças amarelas. O app mostra só a descrição "peças marcadas com * no desenho", porque o manual não diz o que o asterisco significa.

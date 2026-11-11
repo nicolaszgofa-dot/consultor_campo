@@ -306,16 +306,67 @@ const _motorEletric = ConjuntoPecas(
   ],
 );
 
-/// Produtos na ordem do configurador. Só o Selenium Elétric tem catálogo.
+// Titanium: página 7 do manual do Titanium (jan.) e página 4 do manual do
+// Titanium Elétric (rev. fev/12). Posições tiradas do texto do PDF.
+const _dosadorTitanium = ConjuntoPecas(
+  titulo: 'Dosador Titanium',
+  resumo: 'Limitador, pescoço, visor, base, Poliflow, Escovaflex e antipulo',
+  imagem: 'assets/pecas/titanium_dosador.png',
+  largura: 803,
+  altura: 1006,
+  pecas: [
+    Peca('30000000661', 'Limitador de peso', Rect.fromLTRB(638, 18, 752, 40)),
+    Peca('30000000719', 'Protetor do visor', Rect.fromLTRB(632, 112, 746, 134)),
+    Peca('30000000710', 'Pescoço', Rect.fromLTRB(612, 322, 727, 344)),
+    Peca('30000000718', 'Visor', Rect.fromLTRB(603, 429, 717, 451)),
+    Peca(
+      '30000000717',
+      'Poliflow (peças marcadas com * no desenho)',
+      Rect.fromLTRB(111, 477, 226, 499),
+    ),
+    Peca('30000000715', 'Escovaflex', Rect.fromLTRB(620, 532, 734, 554)),
+    Peca('30000000714', 'Trava da base', Rect.fromLTRB(669, 641, 784, 663)),
+    Peca('30000000716', 'Antipulo', Rect.fromLTRB(555, 742, 670, 764)),
+    Peca(
+      '30000000712',
+      'Kit adaptador de centro',
+      Rect.fromLTRB(528, 816, 642, 838),
+    ),
+    Peca('30000000709', 'Base Titanium', Rect.fromLTRB(12, 773, 126, 795)),
+  ],
+);
+
+const _motorTitanium = ConjuntoPecas(
+  titulo: 'Motorização Elétric',
+  resumo: 'Motor e driver do Titanium Elétric',
+  imagem: 'assets/pecas/titanium_eletric_motor.png',
+  largura: 803,
+  altura: 702,
+  pecas: [
+    Peca(
+      '30000000356',
+      'Kit motor Doga 45 RPM cabeado',
+      Rect.fromLTRB(33, 498, 202, 529),
+    ),
+    Peca(
+      '30000000543',
+      'Kit subconjunto driver Titanium Elétric Ativa',
+      Rect.fromLTRB(494, 616, 663, 647),
+    ),
+  ],
+);
+
+/// Produtos na ordem do configurador. Os sem conjuntos aparecem "Em breve".
 final produtosPecas = <ProdutoPecas>[
   ProdutoPecas(
     nome: 'Selenium Elétric',
     icone: 'assets/configurador/selenium_eletric.webp',
     conjuntos: [_corpoDosador, _discoCondutores, _motorEletric],
   ),
-  const ProdutoPecas(
+  ProdutoPecas(
     nome: 'Titanium Elétric',
     icone: 'assets/configurador/titanium_eletric.webp',
+    conjuntos: [_dosadorTitanium, _motorTitanium],
   ),
   const ProdutoPecas(
     nome: 'Selenium Neo',
