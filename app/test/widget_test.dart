@@ -41,7 +41,7 @@ Future<void> abrirLinhas(WidgetTester tester, AvaliacaoEstado estado) async {
 }
 
 void main() {
-  testWidgets('menu inicial com as oito funcionalidades', (tester) async {
+  testWidgets('menu inicial com as funcionalidades', (tester) async {
     telaAlta(tester);
     await tester.pumpWidget(const ConsultorCampoApp());
 
@@ -50,6 +50,7 @@ void main() {
       'Configurador',
       'ROI',
       'Inteligência de mercado',
+      'Peças de reposição',
       'Playbook',
       'Conceito',
       'Material técnico',

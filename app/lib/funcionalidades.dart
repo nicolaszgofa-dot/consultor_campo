@@ -4,6 +4,7 @@ import 'avaliacao/avaliacao_hub_page.dart';
 import 'conceito/conceito_page.dart';
 import 'configurador/configurador_page.dart';
 import 'inteligencia/inteligencia_page.dart';
+import 'pecas/pecas_page.dart';
 import 'proposta/propostas_page.dart';
 import 'roi/roi_page.dart';
 
@@ -56,6 +57,12 @@ final funcionalidades = <Funcionalidade>[
     descricao: 'Cotações, concorrência e preços encontrados no campo',
     icone: Icons.insights,
     tela: () => const InteligenciaPage(),
+  ),
+  Funcionalidade(
+    titulo: 'Peças de reposição',
+    descricao: 'Vista explodida e códigos das peças de cada produto',
+    icone: Icons.handyman_outlined,
+    tela: () => const PecasPage(),
   ),
   const Funcionalidade(
     titulo: 'Playbook',
