@@ -105,6 +105,20 @@ void main() {
     });
   });
 
+  Future<void> escolherLinha(WidgetTester tester, LinhaProduto l) async {
+    await tester.tap(find.byType(DropdownButtonFormField<LinhaProduto>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('${l.nome} · ${l.jassy}').last);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> escolherConcorrente(WidgetTester tester, Concorrente c) async {
+    await tester.tap(find.byType(DropdownButtonFormField<Concorrente>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(c.nome).last);
+    await tester.pumpAndSettle();
+  }
+
   for (final tamanho in const [Size(1194, 3000), Size(390, 5000)]) {
     testWidgets('fichas de todas as linhas abrem sem erro em $tamanho', (
       tester,
@@ -112,18 +126,32 @@ void main() {
       tela(tester, tamanho);
       await abrir(tester, const ConcorrenciaView());
       for (final l in linhasProduto) {
-        await tester.tap(find.text(l.nome));
-        await tester.pumpAndSettle();
+        await escolherLinha(tester, l);
         expect(find.textContaining(l.tese), findsOneWidget, reason: l.nome);
         for (final c in l.concorrentes) {
-          await tester.tap(find.text(c.nome));
-          await tester.pumpAndSettle();
+          await escolherConcorrente(tester, c);
           expect(find.text(c.produto), findsOneWidget);
+          expect(
+            find.text('Onde ${c.nome} ataca'.toUpperCase()),
+            findsOneWidget,
+          );
         }
-        await tester.tap(find.text('Ficha técnica'));
+        // Abas internas.
+        await tester.tap(find.text('Objeções'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Perguntas'));
+        await tester.pumpAndSettle();
+        expect(find.text(l.perguntas.first), findsOneWidget);
+        await tester.tap(find.text('Provas'));
+        await tester.pumpAndSettle();
+        expect(find.text(l.apoio), findsOneWidget);
+        await tester.tap(find.text('Nós × eles'));
+        await tester.pumpAndSettle();
+        // Ficha técnica em tela própria.
+        await tester.tap(find.text('Ver ficha técnica · ${l.nome}'));
         await tester.pumpAndSettle();
         expect(find.text(l.criterios.first.$2), findsOneWidget);
-        await tester.tap(find.text('Ficha de batalha'));
+        tester.state<NavigatorState>(find.byType(Navigator).first).pop();
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: l.nome);
       }
@@ -135,15 +163,25 @@ void main() {
   ) async {
     tela(tester, const Size(1194, 3000));
     await abrir(tester, const ConcorrenciaView());
-    await tester.tap(find.text('Motorização elétrica'));
-    await tester.pumpAndSettle();
+    final motorizacao = linhasProduto.firstWhere(
+      (l) => l.nome == 'Motorização elétrica',
+    );
+    await escolherLinha(tester, motorizacao);
     expect(find.textContaining('dosador + motor'), findsOneWidget);
-    await tester.tap(find.text('Orion'));
+    await escolherConcorrente(
+      tester,
+      motorizacao.concorrentes.firstWhere((c) => c.nome == 'Orion'),
+    );
+    await tester.tap(find.text('Objeções'));
     await tester.pumpAndSettle();
+    // Fechada mostra só a objeção; ao tocar, abre a resposta.
+    expect(find.text('Confirmar com a engenharia J.Assy'), findsNothing);
     expect(
       find.text('“A Orion promete 14% de produtividade.”'),
       findsOneWidget,
     );
+    await tester.tap(find.text('“A Orion compensa a curva. E a J.Assy?”'));
+    await tester.pumpAndSettle();
     expect(find.text('Confirmar com a engenharia J.Assy'), findsOneWidget);
   });
 
