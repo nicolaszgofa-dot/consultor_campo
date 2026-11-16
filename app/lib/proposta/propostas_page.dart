@@ -70,14 +70,13 @@ class PropostasPage extends StatelessWidget {
           'proposta é gerada, compartilhada e descartada.',
           tipo: TipoAviso.atencao,
         ),
-        Row(
-          children: [
-            const Expanded(child: RotuloSecao('Histórico (exemplo)')),
-            Wrap(
-              spacing: 6,
-              children: [for (final s in SituacaoProposta.values) _Situacao(s)],
-            ),
-          ],
+        // Título em cima e situações embaixo: lado a lado, no celular as
+        // etiquetas espremiam o título até uma letra por linha.
+        const RotuloSecao('Histórico (exemplo)'),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [for (final s in SituacaoProposta.values) _Situacao(s)],
         ),
         Opacity(
           opacity: 0.6,
