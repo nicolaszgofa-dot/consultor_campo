@@ -33,6 +33,7 @@ abstract final class _C {
   static const atencaoClaro = PdfColor.fromInt(0xFFFBF1E1);
   static const neutro = PdfColor.fromInt(0xFFF4F5F5);
   static const borda = PdfColor.fromInt(0xFFDCDFE1);
+  static const cinza = PdfColor.fromInt(0xFFA2A8AD);
 }
 
 const _meses = [
@@ -352,8 +353,9 @@ class _Montador {
     pw.Widget linha(ItemConfiguracao i, int n) {
       final pendente = i.status == StatusItem.pendente;
       final comprimento = comprimentoDoItem(i);
+      final (:nome, :codigo) = nomeECodigo(i.componente);
       return pw.Container(
-        padding: const pw.EdgeInsets.symmetric(vertical: 3.5, horizontal: 8),
+        padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         decoration: pw.BoxDecoration(
           color: pendente ? _C.atencaoClaro : null,
           border: const pw.Border(
@@ -361,7 +363,7 @@ class _Montador {
           ),
         ),
         child: pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
           children: [
             pw.SizedBox(
               width: 18,
@@ -371,20 +373,27 @@ class _Montador {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  celula(i.componente),
-                  pw.Text(i.motivo, style: t(8, cor: _C.secundario)),
+                  celula(nome),
                   if (pendente && i.pendencia != null)
                     pw.Text(
                       i.pendencia!,
                       style: t(8, fonte: f.semi, cor: _C.atencao),
                     ),
-                  if (i.observacao != null)
-                    pw.Text(i.observacao!, style: t(8, cor: _C.secundario)),
                 ],
               ),
             ),
             pw.SizedBox(
-              width: 90,
+              width: 78,
+              child: pw.Text(
+                codigo ?? '–',
+                textAlign: pw.TextAlign.right,
+                style: codigo == null
+                    ? t(9.5, cor: _C.cinza)
+                    : t(9.5, fonte: f.semi, cor: _C.verdeTexto),
+              ),
+            ),
+            pw.SizedBox(
+              width: 84,
               child: pw.Text(
                 pendente && comprimento.isEmpty ? 'a definir' : comprimento,
                 textAlign: pw.TextAlign.right,
@@ -392,7 +401,7 @@ class _Montador {
               ),
             ),
             pw.SizedBox(
-              width: 46,
+              width: 40,
               child: pw.Text(
                 '${i.quantidade}',
                 textAlign: pw.TextAlign.right,
@@ -416,11 +425,15 @@ class _Montador {
           pw.SizedBox(width: 18, child: celula('#', cabecalho: true)),
           pw.Expanded(child: celula('ITEM', cabecalho: true)),
           pw.SizedBox(
-            width: 90,
+            width: 78,
+            child: celula('CÓDIGO', cabecalho: true, direita: true),
+          ),
+          pw.SizedBox(
+            width: 84,
             child: celula('COMPRIMENTO', cabecalho: true, direita: true),
           ),
           pw.SizedBox(
-            width: 46,
+            width: 40,
             child: celula('QTD.', cabecalho: true, direita: true),
           ),
         ],

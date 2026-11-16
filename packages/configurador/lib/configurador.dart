@@ -2,5 +2,6 @@
 library;
 
 export 'src/adaptacoes.dart';
+export 'src/codigos.dart';
 export 'src/discos_neo.dart';
 export 'src/regras.dart';

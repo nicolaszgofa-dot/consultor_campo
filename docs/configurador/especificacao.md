@@ -273,7 +273,8 @@ Gerado no fim do configurador pelo botão **Gerar relatório**, que só fica ati
 
 - Antes do PDF, o app pede cliente, cidade ou fazenda e consultor. Os três são opcionais e nada fica salvo.
 - **Resumo da máquina:** plantadeira, linhas por seção, adaptação, alimentação, kit de conversão e, no Neo, a velocidade e as populações usadas na escolha dos discos.
-- **Lista de itens:** item, motivo, comprimento (ou a mistura de comprimentos do chicote painel) e quantidade.
+- **Lista de itens:** item, código J.Assy, comprimento (ou a mistura de comprimentos do chicote painel) e quantidade. Os motivos ficam só na tela do app.
+  - O código vem do fim do nome do item (condutores, discos do Neo, peneira) ou do catálogo de peças (bocais do Selenium). Os itens sem código conhecido aparecem com "–".
 - **Saídas do alternador:** faixa com as linhas de cada saída, separada por seção, e a legenda com as linhas.
 - **Observações:** os avisos e informações da configuração.
 - O PDF não tem preço. O rodapé pede para conferir com a engenharia J.Assy antes de fechar o pedido.

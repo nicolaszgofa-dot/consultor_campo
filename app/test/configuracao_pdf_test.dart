@@ -23,8 +23,12 @@ ResultadoConfiguracao exemploSelenium() => RegrasConfigurador.configurar(
     comprimentoMangueiras: 9,
     chicotesPainel: const {4: 2, 9: 4},
     bocalSelenium: BocalSelenium.gravidade,
-    kitConversao: true,
-    adaptacao: _primeira(Tecnologia.seleniumEletric),
+    kitConversao: false,
+    // Adaptação com condutor retrabalhado, para o código aparecer.
+    adaptacao: const Adaptacao(
+      'John Deere',
+      'S-2100 SN abaixo de 99.999 (linha chapa)',
+    ),
   ),
 );
 
@@ -80,7 +84,7 @@ void main() {
     expect(resumo['Tecnologia'], 'Selenium Elétric');
     expect(resumo['Linhas'], '36 em 3 seções (12 + 12 + 12)');
     expect(resumo['Alimentação'], 'Alternador hidráulico, na frente');
-    expect(resumo['Kit de conversão'], 'Sim');
+    expect(resumo['Kit de conversão'], 'Não');
     expect(resumo.containsKey('Adaptação'), isTrue);
 
     final neo = Map.fromEntries(
