@@ -5,17 +5,23 @@ import 'regras.dart';
 final Map<String, String> _codigos = {
   Componentes.kitConversao(Tecnologia.titaniumEletric): '30000000357',
   Componentes.kitConversao(Tecnologia.seleniumEletric): '30000000492',
+  // Neo: pressão positiva usa o conjunto padrão; gravidade, o conjunto gravidade.
   Componentes.conjunto(Tecnologia.seleniumNeo): '30000001356',
+  Componentes.conjuntoNeoGravidade: '30000001562',
   Componentes.esteiraNeo: '30000001347',
   BocalNeo.gravidade.nome: '30000001122',
   BocalNeo.giratorio30.nome: '30000001701',
   Componentes.sensorSemente: '30000001634',
   Componentes.caboBateria: '30000000523',
-  // O alternador do Titanium e do Selenium é o mesmo de 250 A.
+  // Mesmo alternador em todas as tecnologias, inclusive o 100 A e o 250 A do Neo.
+  Componentes.alternador100: '30000001346',
   Componentes.alternador250: '30000001346',
   Componentes.conjunto(Tecnologia.seleniumEletric): '30000000697',
-  // "Conjunto Titanium com kit montagem caixa de semente".
   Componentes.conjunto(Tecnologia.titaniumEletric): '30000000804',
+  // Reservatório pipoqueira já com o bocal.
+  Componentes.reservatorioComBocal(BocalTitanium.pol25): '30000000750',
+  Componentes.reservatorioComBocal(BocalTitanium.pol30): '30000000751',
+  Componentes.reservatorioComBocal(BocalTitanium.pol25e30): '30000000759',
   Componentes.discoSojaSelenium: '20000000597',
   Componentes.discoMilhoSelenium: '20000000573',
   Componentes.discoMilhoTitanium: '30000000256',
@@ -55,13 +61,6 @@ final Map<String, Map<int, String>> _codigosPorComprimento = {
     12: '30000000647',
     15: '30000000648',
   },
-};
-
-/// Reservatório pipoqueira: o código é do reservatório já com o bocal.
-const Map<BocalTitanium, String> _pipoqueira = {
-  BocalTitanium.pol25: '30000000750',
-  BocalTitanium.pol30: '30000000751',
-  BocalTitanium.pol25e30: '30000000759',
 };
 
 // Código no fim do nome: "Condutor ... - 20000000608" ou "Disco ... (20000002332)".
@@ -112,27 +111,11 @@ class LinhaPedido {
 }
 
 /// Itens da configuração como linhas de pedido: o item com vários
-/// comprimentos vira uma linha por comprimento (cada um tem código próprio), e
-/// o reservatório pipoqueira sai junto com o bocal escolhido.
+/// comprimentos vira uma linha por comprimento (cada um tem código próprio).
 List<LinhaPedido> linhasDoPedido(ResultadoConfiguracao r) {
-  final bocal = r.entrada.bocalTitanium;
-  final pipoqueiraComBocal =
-      bocal != null && r.item(Componentes.reservatorioPipoqueira) != null;
   final linhas = <LinhaPedido>[];
   for (final i in r.itens) {
     final pendente = i.status == StatusItem.pendente;
-    if (pipoqueiraComBocal && i.componente == bocal.nome) continue;
-    if (pipoqueiraComBocal &&
-        i.componente == Componentes.reservatorioPipoqueira) {
-      linhas.add(
-        LinhaPedido(
-          nome: '${i.componente} ${bocal.nome.toLowerCase()}',
-          codigo: _pipoqueira[bocal],
-          quantidade: i.quantidade,
-        ),
-      );
-      continue;
-    }
     final mistura =
         i.quantidadesPorComprimento.entries.where((e) => e.value > 0).toList()
           ..sort((a, b) => a.key.compareTo(b.key));

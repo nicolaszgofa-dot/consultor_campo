@@ -58,7 +58,7 @@ O motor de regras é Dart puro, sem tela, com testes. Cada regra pendente aparec
 | Elemento | Regra |
 |---|---|
 | Tecnologias | Titanium Elétric e Selenium Elétric usam os mesmos componentes de instalação |
-| Conjunto da tecnologia | 1 por linha (Conjunto Titanium Elétric ou Conjunto Selenium Elétric) |
+| Conjunto da tecnologia | 1 por linha. Titanium Elétric: conjunto Titanium com kit montagem caixa de semente **e** kit conversão Titanium Elétric, os dois por linha. Selenium Elétric: conjunto Selenium Elétric. No modo kit conversão, só o kit. |
 | Discos e acessórios do dosador | dependem da tecnologia, 1 por linha; ver "Itens de cada tecnologia" abaixo |
 | Conjunto ECU | 1, obrigatório; é um conjunto único com diversos componentes |
 | Sensor de levante | 1 unidade, obrigatório |
@@ -100,10 +100,10 @@ Todos com quantidade igual ao número de linhas da configuração.
 **Titanium Elétric**
 - Conjunto disco/anéis Titanium milho 28 furos (obrigatório).
 - Conjunto disco/anéis Titanium soja 90 furos (obrigatório).
-- Reservatório de sementes pipoqueira: o vendedor responde se terá. Se sim, escolhe o bocal:
-  - Bocal 2,5 pol;
-  - Bocal 3,0 pol;
-  - Bocal 2,5 + 3,0 pol.
+- Reservatório de sementes pipoqueira: o vendedor responde se terá. Se sim, escolhe o bocal. O reservatório e o bocal são **um item só**:
+  - Reservatório de sementes pipoqueira bocal 2,5 pol;
+  - Reservatório de sementes pipoqueira bocal 3,0 pol;
+  - Reservatório de sementes pipoqueira bocal 2,5 + 3,0 pol.
 
 **Selenium Elétric**
 - Subconjunto disco/anel soja 40 furos Selenium V23 (obrigatório).
@@ -130,7 +130,9 @@ Enquanto a pergunta da pipoqueira, o bocal do Titanium ou o kit bocal do Seleniu
 Regras passadas pelo usuário em 03/11/2026. A montagem segue a do Selenium Elétric, com estas diferenças:
 
 - **Itens por linha:**
-  - **Conjunto dosador Selenium Neo**, no lugar do conjunto Selenium Elétric;
+  - conjunto dosador do Neo, no lugar do conjunto Selenium Elétric. O bocal escolhido define o conjunto:
+    - bocal gravidade ou gravidade giratório 3 pol: **Conjunto dosador Selenium Neo gravidade** (`30000001562`);
+    - bocal pressão positiva: **Conjunto dosador Selenium Neo** (`30000001356`);
   - **Conjunto esteira transportadora Neo**, no lugar do sensor de semente;
   - não há condutor de sementes, porque a esteira faz esse papel.
 - **Subconjuntos disco/anel (Neo 26):** sempre um de soja e um de milho por linha. Cada cultura tem um disco de baixa taxa e um de alta taxa:
@@ -255,7 +257,7 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 | Solteira, 55 linhas | 6 saídas (10, 9, 9, 9, 9, 9), sem aviso de mistura |
 | Caixa central ou tandem sem seções | erro: informar as seções |
 | Titanium, 45 linhas, sem pipoqueira | 45 discos de milho 28 furos e 45 de soja 90 furos; sem reservatório |
-| Titanium com pipoqueira e bocal 2,5 + 3,0 pol | reservatório e bocal, 1 por linha |
+| Titanium com pipoqueira e bocal 2,5 + 3,0 pol | reservatório de sementes pipoqueira bocal 2,5 + 3,0 pol, 1 por linha |
 | Titanium sem responder a pipoqueira | reservatório pendente |
 | Selenium, 30 linhas, kit engate rápido | 30 discos de soja 40 furos, 30 de milho e 30 kits bocal engate rápido |
 | Selenium sem kit bocal escolhido | kit bocal pendente |
@@ -276,10 +278,9 @@ Gerado no fim do configurador pelo botão **Gerar relatório**, que só fica ati
 - **Lista de itens:** item, código J.Assy, comprimento (ou a mistura de comprimentos do chicote painel) e quantidade. Os motivos ficam só na tela do app.
   - Os códigos ficam em `packages/configurador/lib/src/codigos.dart`, com os valores passados pela engenharia. Condutores, discos do Neo e peneira já trazem o código no nome.
   - Cabo ISOBUS, mangueiras e chicote painel têm um código por comprimento. Por isso o chicote painel com tamanhos misturados vira uma linha por comprimento.
-  - O reservatório pipoqueira sai numa linha só com o bocal escolhido, porque o código é do conjunto (2,5 pol `30000000750`, 3,0 pol `30000000751`, 2,5 + 3,0 pol `30000000759`).
+  - Reservatório pipoqueira com bocal: 2,5 pol `30000000750`, 3,0 pol `30000000751`, 2,5 + 3,0 pol `30000000759`.
   - A ECU do Selenium Neo tem código próprio (`30000000057`); nas outras tecnologias é `30000000052`.
-  - O alternador do Titanium e do Selenium é o mesmo de 250 A (`30000001346`).
-  - Sem código ainda, aparece com "–": alternador hidráulico 100 A do Neo.
+  - Alternador hidráulico: o mesmo código (`30000001346`) em todas as tecnologias, inclusive o 100 A e o 250 A do Neo.
   - O bocal de pressão positiva do Neo vem no dosador, por isso não entra na lista.
 - **Saídas do alternador:** faixa com as linhas de cada saída, separada por seção, e a legenda com as linhas.
 - **Observações:** os avisos e informações da configuração.

@@ -311,10 +311,19 @@ class ResultadoConfiguracao {
 }
 
 abstract final class Componentes {
-  static String conjunto(Tecnologia t) => switch (t) {
-    Tecnologia.seleniumNeo => 'Conjunto dosador Selenium Neo',
-    _ => 'Conjunto ${t.nome}',
+  /// Conjunto dosador de cada tecnologia. No Neo, o bocal define o conjunto:
+  /// gravidade (com ou sem giratório) ou pressão positiva.
+  static String conjunto(Tecnologia t, {BocalNeo? bocalNeo}) => switch (t) {
+    Tecnologia.titaniumEletric =>
+      'Conjunto Titanium com kit montagem caixa de semente',
+    Tecnologia.seleniumEletric => 'Conjunto Selenium Elétric',
+    Tecnologia.seleniumNeo =>
+      bocalNeo == null || bocalNeo.vemNoDosador
+          ? 'Conjunto dosador Selenium Neo'
+          : conjuntoNeoGravidade,
   };
+
+  static const conjuntoNeoGravidade = 'Conjunto dosador Selenium Neo gravidade';
 
   static String kitConversao(Tecnologia t) => switch (t) {
     Tecnologia.titaniumEletric => 'Kit conversão Titanium Elétric',
@@ -340,8 +349,9 @@ abstract final class Componentes {
       'Conjunto disco/anéis Titanium soja 90 furos';
   static const reservatorioPipoqueira = 'Reservatório de sementes pipoqueira';
 
-  /// Bocal do reservatório pipoqueira antes de o vendedor escolher.
-  static const bocalPipoqueira = 'Bocal do reservatório pipoqueira';
+  /// Reservatório pipoqueira já com o bocal escolhido: é um item só.
+  static String reservatorioComBocal(BocalTitanium b) =>
+      '$reservatorioPipoqueira ${b.nome.toLowerCase()}';
 
   // Selenium Elétric.
   static const discoSojaSelenium =
@@ -824,17 +834,15 @@ class RegrasConfigurador {
               Componentes.reservatorioPipoqueira,
               'Responder se terá reservatório de sementes pipoqueira.',
             )
-          else if (e.reservatorioPipoqueira!) ...[
-            item(Componentes.reservatorioPipoqueira),
+          else if (e.reservatorioPipoqueira!)
             if (e.bocalTitanium == null)
               pendente(
-                Componentes.bocalPipoqueira,
-                'Escolher o bocal: '
+                Componentes.reservatorioPipoqueira,
+                'Escolher o bocal do reservatório: '
                 '${BocalTitanium.values.map((b) => b.nome).join(', ')}.',
               )
             else
-              item(e.bocalTitanium!.nome),
-          ],
+              item(Componentes.reservatorioComBocal(e.bocalTitanium!)),
         ];
       case Tecnologia.seleniumEletric:
         return [
@@ -869,6 +877,44 @@ class RegrasConfigurador {
             item(e.bocalNeo!.nome),
         ];
     }
+  }
+
+  /// Conjunto da tecnologia, um por linha. O Titanium Elétric novo é o
+  /// conjunto Titanium mais o kit conversão: os dois entram juntos.
+  static List<ItemConfiguracao> _conjuntos(EntradaConfiguracao e) {
+    final linhas = e.totalLinhas;
+    final porLinha = 'Um por linha ($linhas linhas).';
+    ItemConfiguracao item(String componente, [String? motivo]) =>
+        ItemConfiguracao(
+          componente: componente,
+          quantidade: linhas,
+          motivo: motivo ?? porLinha,
+        );
+    if (e.kitConversao) return [item(Componentes.kitConversao(e.tecnologia))];
+    return switch (e.tecnologia) {
+      Tecnologia.titaniumEletric => [
+        item(
+          Componentes.conjunto(Tecnologia.titaniumEletric),
+          '$porLinha Forma o Titanium Elétric junto com o kit conversão.',
+        ),
+        item(
+          Componentes.kitConversao(Tecnologia.titaniumEletric),
+          '$porLinha Vai junto com o conjunto Titanium.',
+        ),
+      ],
+      Tecnologia.seleniumNeo => [
+        item(
+          Componentes.conjunto(Tecnologia.seleniumNeo, bocalNeo: e.bocalNeo),
+          e.bocalNeo == null
+              ? '$porLinha O bocal escolhido define o conjunto: gravidade '
+                    'ou pressão positiva.'
+              : porLinha,
+        ),
+      ],
+      Tecnologia.seleniumEletric => [
+        item(Componentes.conjunto(Tecnologia.seleniumEletric)),
+      ],
+    };
   }
 
   /// Selenium Neo: disco da [cultura] pela tabela de população e velocidade,
@@ -1005,14 +1051,7 @@ class RegrasConfigurador {
     final pergunta = perguntaAlternadorNaFrente(e);
 
     final itens = <ItemConfiguracao>[
-      if (linhas > 0)
-        ItemConfiguracao(
-          componente: e.kitConversao
-              ? Componentes.kitConversao(e.tecnologia)
-              : Componentes.conjunto(e.tecnologia),
-          quantidade: linhas,
-          motivo: 'Um por linha ($linhas linhas).',
-        ),
+      if (linhas > 0) ..._conjuntos(e),
       if (linhas > 0) ..._itensDaTecnologia(e),
       if (linhas > 0) ?_condutorSelenium(e),
       const ItemConfiguracao(

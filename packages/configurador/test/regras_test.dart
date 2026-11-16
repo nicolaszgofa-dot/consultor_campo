@@ -37,7 +37,6 @@ const itensDaTecnologia = {
   Componentes.discoMilhoTitanium,
   Componentes.discoSojaTitanium,
   Componentes.reservatorioPipoqueira,
-  Componentes.bocalPipoqueira,
   Componentes.discoSojaSelenium,
   Componentes.discoMilhoSelenium,
   Componentes.bocalSelenium,
@@ -98,7 +97,20 @@ void main() {
           alternador: false,
           tipo: TipoPlantadeira.solteira,
         ),
-        'Conjunto Titanium Elétric',
+        Componentes.conjunto(Tecnologia.titaniumEletric),
+      ),
+      8,
+    );
+    // O Titanium Elétric novo leva também o kit conversão, um por linha.
+    expect(
+      qtd(
+        configurar(
+          8,
+          const [],
+          alternador: false,
+          tipo: TipoPlantadeira.solteira,
+        ),
+        Componentes.kitConversao(Tecnologia.titaniumEletric),
       ),
       8,
     );
@@ -509,9 +521,17 @@ void main() {
       21,
       13,
     ], tecnologia: Tecnologia.seleniumEletric);
-    // Fora o conjunto, os discos e os bocais, que são de cada tecnologia.
+    // Fora o conjunto (no Titanium, conjunto + kit conversão), os discos e
+    // os bocais, que são de cada tecnologia.
     Iterable<(String, int)> instalacao(ResultadoConfiguracao r) => r.itens
-        .skip(1)
+        .where(
+          (i) => !Tecnologia.values.any(
+            (t) =>
+                i.componente == Componentes.conjunto(t) ||
+                (t.temKitConversao &&
+                    i.componente == Componentes.kitConversao(t)),
+          ),
+        )
         .where((i) => !itensDaTecnologia.contains(i.componente))
         .where((i) => !i.componente.startsWith('Condutor de sementes'))
         .where((i) => !BocalTitanium.values.any((b) => b.nome == i.componente))
@@ -539,13 +559,12 @@ void main() {
       expect(p.pendencia, contains('pipoqueira'));
     });
 
-    test('Titanium com pipoqueira: reservatório e bocal por linha', () {
+    test('Titanium com pipoqueira: reservatório com bocal, um por linha', () {
       final semBocal = configurar(45, [17, 17, 11], pipoqueira: true);
-      expect(qtd(semBocal, Componentes.reservatorioPipoqueira), 45);
-      expect(
-        semBocal.item(Componentes.bocalPipoqueira)!.status,
-        StatusItem.pendente,
-      );
+      final pendente = semBocal.item(Componentes.reservatorioPipoqueira)!;
+      expect(pendente.quantidade, 45);
+      expect(pendente.status, StatusItem.pendente);
+      expect(pendente.pendencia, contains('bocal'));
       for (final b in BocalTitanium.values) {
         final r = configurar(
           45,
@@ -553,8 +572,10 @@ void main() {
           pipoqueira: true,
           bocalTitanium: b,
         );
-        expect(qtd(r, b.nome), 45, reason: b.nome);
-        expect(r.item(Componentes.bocalPipoqueira), isNull);
+        // Reservatório e bocal viram um item só.
+        expect(qtd(r, Componentes.reservatorioComBocal(b)), 45, reason: b.nome);
+        expect(r.item(b.nome), isNull);
+        expect(r.item(Componentes.reservatorioPipoqueira), isNull);
       }
     });
 
@@ -603,7 +624,7 @@ void testesKitConversao() {
     test('Titanium: kit no lugar do conjunto, sem discos nem pipoqueira', () {
       final r = kit(Tecnologia.titaniumEletric);
       expect(qtd(r, 'Kit conversão Titanium Elétric'), 30);
-      expect(r.item('Conjunto Titanium Elétric'), isNull);
+      expect(r.item(Componentes.conjunto(Tecnologia.titaniumEletric)), isNull);
       for (final c in itensDaTecnologia) {
         expect(r.item(c), isNull, reason: c);
       }

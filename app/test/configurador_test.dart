@@ -327,8 +327,21 @@ void main() {
     expect(find.text(Componentes.chicotePainel), findsOneWidget);
     expect(find.text(Componentes.alternador), findsNothing);
     expect(find.text(Componentes.discoMilhoTitanium), findsOneWidget);
-    expect(find.text(Componentes.reservatorioPipoqueira), findsOneWidget);
-    expect(find.text(BocalTitanium.pol30.nome), findsOneWidget);
+    // Reservatório e bocal viram um item só.
+    expect(
+      find.text(Componentes.reservatorioComBocal(BocalTitanium.pol30)),
+      findsOneWidget,
+    );
+    expect(find.text(BocalTitanium.pol30.nome), findsNothing);
+    // Titanium Elétric novo: conjunto Titanium e kit conversão juntos.
+    expect(
+      find.text(Componentes.conjunto(Tecnologia.titaniumEletric)),
+      findsOneWidget,
+    );
+    expect(
+      find.text(Componentes.kitConversao(Tecnologia.titaniumEletric)),
+      findsOneWidget,
+    );
     expect(find.text('1 pendentes'), findsOneWidget);
 
     // Escolher o comprimento do ISOBUS fecha a última pendência.

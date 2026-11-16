@@ -45,7 +45,6 @@ ResultadoConfiguracao exemploTitanium() => RegrasConfigurador.configurar(
     chicotesPainel: const {9: 2, 14: 2},
     reservatorioPipoqueira: true,
     bocalTitanium: BocalTitanium.pol25e30,
-    kitConversao: true,
     adaptacao: _primeira(Tecnologia.titaniumEletric),
   ),
 );

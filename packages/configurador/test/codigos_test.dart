@@ -26,7 +26,7 @@ void main() {
     expect(nomeECodigo(Componentes.ecu).codigo, '30000000052');
     expect(nomeECodigo(Componentes.sensorSemente).codigo, '30000001634');
     expect(nomeECodigo(Componentes.alternador250).codigo, '30000001346');
-    expect(nomeECodigo(Componentes.alternador100).codigo, isNull);
+    expect(nomeECodigo(Componentes.alternador100).codigo, '30000001346');
     // A ECU do Neo tem código próprio.
     expect(
       nomeECodigo(Componentes.ecu, tecnologia: Tecnologia.seleniumNeo).codigo,

@@ -26,7 +26,9 @@ ResultadoConfiguracao neo(
 void main() {
   test('conjunto dosador e esteira no lugar do conjunto e do sensor', () {
     final r = neo(12, [6, 6], bocal: BocalNeo.gravidade);
-    expect(r.item('Conjunto dosador Selenium Neo')?.quantidade, 12);
+    // Bocal de gravidade: conjunto dosador gravidade.
+    expect(r.item(Componentes.conjuntoNeoGravidade)?.quantidade, 12);
+    expect(r.item('Conjunto dosador Selenium Neo'), isNull);
     expect(r.item(Componentes.esteiraNeo)?.quantidade, 12);
     expect(r.item(Componentes.sensorSemente), isNull);
     expect(r.item(Componentes.condutorSelenium), isNull);
@@ -184,5 +186,18 @@ void main() {
     );
     expect(r.item(Componentes.alternador), isNotNull);
     expect(r.distribuicao!.saidas, hasLength(3));
+  });
+
+  test('o bocal define o conjunto dosador do Neo', () {
+    String conjunto(BocalNeo? b) =>
+        neo(12, [6, 6], bocal: b).itens.first.componente;
+    expect(conjunto(BocalNeo.gravidade), Componentes.conjuntoNeoGravidade);
+    expect(conjunto(BocalNeo.giratorio30), Componentes.conjuntoNeoGravidade);
+    expect(conjunto(BocalNeo.pressaoPositiva), 'Conjunto dosador Selenium Neo');
+    expect(nomeECodigo(Componentes.conjuntoNeoGravidade).codigo, '30000001562');
+    expect(
+      nomeECodigo(conjunto(BocalNeo.pressaoPositiva)).codigo,
+      '30000001356',
+    );
   });
 }
