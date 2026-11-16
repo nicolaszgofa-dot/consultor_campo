@@ -375,8 +375,9 @@ abstract final class Componentes {
   /// Peneira de soja: garante o desempenho do Neo na soja.
   static const peneiraSojaNeo = 'Kit peneira soja JD2100 (30000001673)';
 
-  /// Selenium Neo: até 22 linhas o alternador de 100 A; acima, o de 250 A.
-  static const alternador100 = 'Alternador hidráulico 100 A';
+  /// Selenium Neo: até 22 linhas o alternador de 100 A, que é o mesmo
+  /// alternador hidráulico das outras tecnologias; acima, o de 250 A.
+  static const alternador100 = alternador;
   static const alternador250 = 'Alternador hidráulico 250 A';
 }
 

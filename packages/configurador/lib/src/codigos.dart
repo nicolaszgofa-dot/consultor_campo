@@ -13,8 +13,8 @@ final Map<String, String> _codigos = {
   BocalNeo.giratorio30.nome: '30000001701',
   Componentes.sensorSemente: '30000001634',
   Componentes.caboBateria: '30000000523',
-  // Mesmo alternador em todas as tecnologias, inclusive o 100 A e o 250 A do Neo.
-  Componentes.alternador100: '30000001346',
+  // Código do 250 A como passado pela engenharia: igual ao do alternador
+  // hidráulico (100 A).
   Componentes.alternador250: '30000001346',
   Componentes.conjunto(Tecnologia.seleniumEletric): '30000000697',
   Componentes.conjunto(Tecnologia.titaniumEletric): '30000000804',

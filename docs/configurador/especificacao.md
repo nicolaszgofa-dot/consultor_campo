@@ -156,7 +156,7 @@ Regras passadas pelo usuário em 03/11/2026. A montagem segue a do Selenium Elé
 - **Alternador:**
   - é **sempre** usado, por isso a pergunta "terá alternador?" não aparece;
   - cada saída alimenta **5 linhas**, metade das 10 do Selenium Elétric, porque o Neo tem dois motores por linha;
-  - até 22 linhas usa o **Alternador hidráulico 100 A**;
+  - até 22 linhas usa o **Alternador hidráulico** (100 A), o mesmo das outras tecnologias;
   - acima de 22 linhas usa o **Alternador hidráulico 250 A**. Ele atende até **56 linhas** quando alimenta só o Selenium Neo, e até **38 linhas** quando Level ou Commander ficam ligados no mesmo alternador. Para o cálculo das saídas, o 250 A tem 12 saídas de 5 linhas (a confirmar).
   - Com o 250 A, a tela de alimentação pergunta se Level ou Commander vão ligados no mesmo alternador.
   - Acima do limite (56, ou 38 com Level ou Commander), a configuração bloqueia e pede validação técnica.
@@ -281,7 +281,7 @@ Gerado no fim do configurador pelo botão **Gerar relatório**, que só fica ati
   - Cabo ISOBUS, mangueiras e chicote painel têm um código por comprimento. Por isso o chicote painel com tamanhos misturados vira uma linha por comprimento.
   - Reservatório pipoqueira com bocal: 2,5 pol `30000000750`, 3,0 pol `30000000751`, 2,5 + 3,0 pol `30000000759`.
   - A ECU do Selenium Neo tem código próprio (`30000000057`); nas outras tecnologias é `30000000052`.
-  - Alternador hidráulico: o mesmo código (`30000001346`) em todas as tecnologias, inclusive o 100 A e o 250 A do Neo.
+  - Alternador hidráulico (100 A, usado em todas as tecnologias) e Alternador hidráulico 250 A (Neo acima de 22 linhas): os dois com `30000001346`, como passado pela engenharia.
   - O bocal de pressão positiva do Neo vem no dosador, por isso não entra na lista.
 - **Saídas do alternador:** faixa com as linhas de cada saída, separada por seção, e a legenda com as linhas.
 - **Observações:** os avisos e informações da configuração.
