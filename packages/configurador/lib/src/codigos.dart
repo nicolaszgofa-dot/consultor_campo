@@ -4,6 +4,15 @@ import 'regras.dart';
 // Selenium, conferidos com o catálogo de peças.
 final Map<String, String> _codigos = {
   Componentes.kitConversao(Tecnologia.titaniumEletric): '30000000357',
+  Componentes.kitConversao(Tecnologia.seleniumEletric): '30000000492',
+  Componentes.conjunto(Tecnologia.seleniumNeo): '30000001356',
+  Componentes.esteiraNeo: '30000001347',
+  BocalNeo.gravidade.nome: '30000001122',
+  BocalNeo.giratorio30.nome: '30000001701',
+  Componentes.sensorSemente: '30000001634',
+  Componentes.caboBateria: '30000000523',
+  // O alternador do Titanium e do Selenium é o mesmo de 250 A.
+  Componentes.alternador250: '30000001346',
   Componentes.conjunto(Tecnologia.seleniumEletric): '30000000697',
   // "Conjunto Titanium com kit montagem caixa de semente".
   Componentes.conjunto(Tecnologia.titaniumEletric): '30000000804',
@@ -20,6 +29,11 @@ final Map<String, String> _codigos = {
   BocalSelenium.giratorio25.nome: '30000000591',
   BocalSelenium.giratorio30.nome: '30000000573',
   BocalSelenium.engateRapido.nome: '30000000360',
+};
+
+/// Itens com código diferente conforme a tecnologia.
+const Map<Tecnologia, Map<String, String>> _porTecnologia = {
+  Tecnologia.seleniumNeo: {Componentes.ecu: '30000000057'},
 };
 
 /// Itens vendidos por tamanho: um código por comprimento (metros).
@@ -54,10 +68,12 @@ const Map<BocalTitanium, String> _pipoqueira = {
 final _codigoNoNome = RegExp(r'\s*(?:[-–]\s*|\()(\d{11})\)?\s*$');
 
 /// Nome do item e código J.Assy, quando conhecido. O código que vem no fim do
-/// nome sai do nome; nos itens por tamanho, depende do [comprimento].
+/// nome sai do nome; nos itens por tamanho, depende do [comprimento], e
+/// alguns mudam com a [tecnologia] (a ECU do Neo).
 ({String nome, String? codigo}) nomeECodigo(
   String componente, {
   int? comprimento,
+  Tecnologia? tecnologia,
 }) {
   final m = _codigoNoNome.firstMatch(componente);
   if (m != null) {
@@ -70,7 +86,8 @@ final _codigoNoNome = RegExp(r'\s*(?:[-–]\s*|\()(\d{11})\)?\s*$');
       codigo: comprimento == null ? null : porTamanho[comprimento],
     );
   }
-  return (nome: componente, codigo: _codigos[componente]);
+  final daTecnologia = _porTecnologia[tecnologia]?[componente];
+  return (nome: componente, codigo: daTecnologia ?? _codigos[componente]);
 }
 
 /// Uma linha do pedido, com código e comprimento já resolvidos.
@@ -121,7 +138,11 @@ List<LinhaPedido> linhasDoPedido(ResultadoConfiguracao r) {
           ..sort((a, b) => a.key.compareTo(b.key));
     if (mistura.isNotEmpty && !pendente) {
       for (final e in mistura) {
-        final nc = nomeECodigo(i.componente, comprimento: e.key);
+        final nc = nomeECodigo(
+          i.componente,
+          comprimento: e.key,
+          tecnologia: r.entrada.tecnologia,
+        );
         linhas.add(
           LinhaPedido(
             nome: nc.nome,
@@ -133,7 +154,11 @@ List<LinhaPedido> linhasDoPedido(ResultadoConfiguracao r) {
       }
       continue;
     }
-    final nc = nomeECodigo(i.componente, comprimento: i.comprimento);
+    final nc = nomeECodigo(
+      i.componente,
+      comprimento: i.comprimento,
+      tecnologia: r.entrada.tecnologia,
+    );
     linhas.add(
       LinhaPedido(
         nome: nc.nome,

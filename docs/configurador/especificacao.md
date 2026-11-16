@@ -277,7 +277,10 @@ Gerado no fim do configurador pelo botão **Gerar relatório**, que só fica ati
   - Os códigos ficam em `packages/configurador/lib/src/codigos.dart`, com os valores passados pela engenharia. Condutores, discos do Neo e peneira já trazem o código no nome.
   - Cabo ISOBUS, mangueiras e chicote painel têm um código por comprimento. Por isso o chicote painel com tamanhos misturados vira uma linha por comprimento.
   - O reservatório pipoqueira sai numa linha só com o bocal escolhido, porque o código é do conjunto (2,5 pol `30000000750`, 3,0 pol `30000000751`, 2,5 + 3,0 pol `30000000759`).
-  - Sem código ainda, aparecem com "–": kit conversão Selenium G3 p/ Selenium Elétric, sensor de semente, cabo de alimentação direto da bateria, alternadores 100 A e 250 A do Neo, conjunto dosador, esteira e bocais do Neo.
+  - A ECU do Selenium Neo tem código próprio (`30000000057`); nas outras tecnologias é `30000000052`.
+  - O alternador do Titanium e do Selenium é o mesmo de 250 A (`30000001346`).
+  - Sem código ainda, aparece com "–": alternador hidráulico 100 A do Neo.
+  - O bocal de pressão positiva do Neo vem no dosador, por isso não entra na lista.
 - **Saídas do alternador:** faixa com as linhas de cada saída, separada por seção, e a legenda com as linhas.
 - **Observações:** os avisos e informações da configuração.
 - O PDF não tem preço. O rodapé pede para conferir com a engenharia J.Assy antes de fechar o pedido.

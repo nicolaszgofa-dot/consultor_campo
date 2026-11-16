@@ -24,8 +24,21 @@ void main() {
     expect(nomeECodigo(BocalSelenium.gravidade.nome).codigo, '30000000681');
     expect(nomeECodigo(BocalSelenium.engateRapido.nome).codigo, '30000000360');
     expect(nomeECodigo(Componentes.ecu).codigo, '30000000052');
-    expect(nomeECodigo(Componentes.sensorSemente).codigo, isNull);
+    expect(nomeECodigo(Componentes.sensorSemente).codigo, '30000001634');
+    expect(nomeECodigo(Componentes.alternador250).codigo, '30000001346');
     expect(nomeECodigo(Componentes.alternador100).codigo, isNull);
+    // A ECU do Neo tem código próprio.
+    expect(
+      nomeECodigo(Componentes.ecu, tecnologia: Tecnologia.seleniumNeo).codigo,
+      '30000000057',
+    );
+    expect(
+      nomeECodigo(
+        Componentes.ecu,
+        tecnologia: Tecnologia.titaniumEletric,
+      ).codigo,
+      '30000000052',
+    );
     expect(
       nomeECodigo(Componentes.caboIsobus, comprimento: 14).codigo,
       '30000000947',
