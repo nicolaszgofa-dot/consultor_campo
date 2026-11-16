@@ -266,3 +266,14 @@ O cabo ISOBUS e as mangueiras do alternador saem de pontos próximos, por isso o
 | Selenium, 20 linhas, adaptação Horsch · Maestro Duo 36.50 | 20 condutores de sementes retrabalhados JD1 - 20000000608 |
 | Selenium, 20 linhas, adaptação CNH · S-2200 Easy Riser | sem item de condutor; aviso: usa o condutor de sementes original da plantadeira |
 | Selenium sem adaptação | condutor de sementes pendente |
+
+## Relatório em PDF
+
+Gerado no fim do configurador pelo botão **Gerar relatório**, que só fica ativo quando não há item pendente.
+
+- Antes do PDF, o app pede cliente, cidade ou fazenda e consultor. Os três são opcionais e nada fica salvo.
+- **Resumo da máquina:** plantadeira, linhas por seção, adaptação, alimentação, kit de conversão e, no Neo, a velocidade e as populações usadas na escolha dos discos.
+- **Lista de itens:** item, motivo, comprimento (ou a mistura de comprimentos do chicote painel) e quantidade.
+- **Saídas do alternador:** faixa com as linhas de cada saída, separada por seção, e a legenda com as linhas.
+- **Observações:** os avisos e informações da configuração.
+- O PDF não tem preço. O rodapé pede para conferir com a engenharia J.Assy antes de fechar o pedido.

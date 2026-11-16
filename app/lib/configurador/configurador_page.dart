@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../tema.dart';
 import '../ui/componentes.dart';
+import 'configuracao_pdf_page.dart';
 import 'configurador_estado.dart';
 import 'etapas.dart';
 import 'resultado_etapa.dart';
@@ -224,13 +225,7 @@ class _Rodape extends StatelessWidget {
       principal = FilledButton.icon(
         onPressed: pendentes > 0
             ? null
-            : () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'O relatório em PDF chega na próxima versão do app.',
-                  ),
-                ),
-              ),
+            : () => abrirPdfConfiguracao(context, estado.resultado),
         icon: const Icon(Icons.description_outlined),
         label: Text(
           pendentes > 0 ? '$pendentes pendentes' : 'Gerar relatório',

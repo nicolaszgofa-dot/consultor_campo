@@ -1,0 +1,122 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:configurador/configurador.dart';
+import 'package:consultor_campo/configurador/configuracao_pdf.dart';
+import 'package:consultor_campo/roi/proposta/proposta_pdf.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+Adaptacao _primeira(Tecnologia t) {
+  final marca = adaptacoes[t]!.entries.first;
+  return Adaptacao(marca.key, marca.value.first);
+}
+
+ResultadoConfiguracao exemploSelenium() => RegrasConfigurador.configurar(
+  EntradaConfiguracao(
+    tecnologia: Tecnologia.seleniumEletric,
+    tipo: TipoPlantadeira.autotransportavel,
+    totalLinhas: 36,
+    linhasPorSecao: const [12, 12, 12],
+    temAlternador: true,
+    alternadorNaFrente: true,
+    comprimentoIsobus: 11,
+    comprimentoMangueiras: 9,
+    chicotesPainel: const {4: 2, 9: 4},
+    bocalSelenium: BocalSelenium.gravidade,
+    kitConversao: true,
+    adaptacao: _primeira(Tecnologia.seleniumEletric),
+  ),
+);
+
+ResultadoConfiguracao exemploNeo() => RegrasConfigurador.configurar(
+  EntradaConfiguracao(
+    tecnologia: Tecnologia.seleniumNeo,
+    tipo: TipoPlantadeira.solteira,
+    totalLinhas: 20,
+    linhasPorSecao: const [20],
+    bocalNeo: BocalNeo.gravidade,
+    comprimentoIsobus: 5,
+    comprimentoMangueiras: 6,
+    chicotesPainel: const {4: 4},
+    velocidadePlantio: 8,
+    populacaoSoja: 14,
+    populacaoMilho: 3.2,
+    adaptacao: _primeira(Tecnologia.seleniumNeo),
+  ),
+);
+
+int _paginas(List<int> bytes) =>
+    RegExp(r'/Type\s*/Page\b').allMatches(latin1.decode(bytes)).length;
+
+void main() {
+  test('comprimento do item: mistura, único ou vazio', () {
+    const misto = ItemConfiguracao(
+      componente: 'Chicote painel',
+      quantidade: 3,
+      motivo: '',
+      quantidadesPorComprimento: {9: 2, 4: 1, 14: 0},
+    );
+    expect(comprimentoDoItem(misto), '1× 4 m · 2× 9 m');
+    const unico = ItemConfiguracao(
+      componente: 'Cabo ISOBUS',
+      quantidade: 1,
+      motivo: '',
+      comprimento: 11,
+    );
+    expect(comprimentoDoItem(unico), '11 m');
+    const semTamanho = ItemConfiguracao(
+      componente: 'ECU',
+      quantidade: 1,
+      motivo: '',
+    );
+    expect(comprimentoDoItem(semTamanho), isEmpty);
+  });
+
+  test('resumo da máquina traz seções, adaptação e alimentação', () {
+    final resumo = Map.fromEntries(
+      resumoDaMaquina(exemploSelenium().entrada)
+          .map((p) => MapEntry(p.$1, p.$2)),
+    );
+    expect(resumo['Tecnologia'], 'Selenium Elétric');
+    expect(resumo['Linhas'], '36 em 3 seções (12 + 12 + 12)');
+    expect(resumo['Alimentação'], 'Alternador hidráulico, na frente');
+    expect(resumo['Kit de conversão'], 'Sim');
+    expect(resumo.containsKey('Adaptação'), isTrue);
+
+    final neo = Map.fromEntries(
+      resumoDaMaquina(exemploNeo().entrada).map((p) => MapEntry(p.$1, p.$2)),
+    );
+    expect(neo['Linhas'], '20');
+    expect(neo.containsKey('Kit de conversão'), isFalse);
+    expect(neo['Velocidade de plantio'], '8,0 km/h');
+  });
+
+  testWidgets('gera o PDF da configuração', (tester) async {
+    await tester.runAsync(() async {
+      final recursos = await RecursosPdf.carregar();
+      for (final (nome, r) in [
+        ('selenium', exemploSelenium()),
+        ('neo', exemploNeo()),
+      ]) {
+        final bytes = await gerarConfiguracaoPdf(
+          resultado: r,
+          recursos: recursos,
+          identificacao: const IdentificacaoConfiguracao(
+            cliente: 'Fazenda Boa Vista',
+            local: 'Rio Verde, GO',
+            consultor: 'Consultor J.Assy',
+          ),
+          data: DateTime(2026, 11, 15),
+        );
+        expect(latin1.decode(bytes.take(4).toList()), '%PDF');
+        expect(r.pendentes, isEmpty, reason: nome);
+        expect(_paginas(bytes), 1, reason: nome);
+        // Para ver o exemplo: PDF_SAIDA=<pasta> flutter test ...
+        final saida = Platform.environment['PDF_SAIDA'];
+        if (saida != null) {
+          File('$saida/configuracao_$nome.pdf').writeAsBytesSync(bytes);
+        }
+      }
+    });
+  });
+}
