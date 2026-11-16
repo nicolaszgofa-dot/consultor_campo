@@ -59,18 +59,6 @@ ProdutoProposta _produto(Tecnologia t) => switch (t) {
   Tecnologia.seleniumNeo => ProdutoProposta.neo,
 };
 
-/// Comprimento ou mistura de comprimentos de um item ("2× 4 m · 1× 9 m").
-String comprimentoDoItem(ItemConfiguracao i) {
-  final mistura =
-      i.quantidadesPorComprimento.entries.where((e) => e.value > 0).toList()
-        ..sort((a, b) => a.key.compareTo(b.key));
-  if (mistura.isNotEmpty) {
-    return mistura.map((e) => '${e.value}× ${e.key} m').join(' · ');
-  }
-  if (i.comprimento != null) return '${i.comprimento} m';
-  return '';
-}
-
 /// Resumo da máquina em pares rótulo → valor, na ordem do PDF.
 List<(String, String)> resumoDaMaquina(EntradaConfiguracao e) {
   final secoes = e.secoes;
@@ -268,7 +256,7 @@ class _Montador {
                   ),
                   pw.SizedBox(height: 4),
                   pw.Text(
-                    '${r.itens.length} itens na lista'
+                    '${linhasDoPedido(r).length} itens na lista'
                     '${pendentes > 0 ? ' · $pendentes pendentes' : ''}',
                     style: t(10, cor: _C.secundario),
                   ),
@@ -350,12 +338,15 @@ class _Montador {
           : t(10, fonte: f.semi),
     );
 
-    pw.Widget linha(ItemConfiguracao i, int n) {
-      final pendente = i.status == StatusItem.pendente;
-      final comprimento = comprimentoDoItem(i);
-      final (:nome, :codigo) = nomeECodigo(i.componente);
+    final pedido = linhasDoPedido(r);
+
+    pw.Widget linha(LinhaPedido i, int n) {
+      final pendente = i.pendente;
+      final comprimento = i.comprimento == null ? '' : '${i.comprimento} m';
+      final nome = i.nome;
+      final codigo = i.codigo;
       return pw.Container(
-        padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        padding: const pw.EdgeInsets.symmetric(vertical: 4.5, horizontal: 8),
         decoration: pw.BoxDecoration(
           color: pendente ? _C.atencaoClaro : null,
           border: const pw.Border(
@@ -446,11 +437,11 @@ class _Montador {
           children: [
             _rotulo('Lista de itens'),
             cabecalho,
-            if (r.itens.isNotEmpty) linha(r.itens.first, 1),
+            if (pedido.isNotEmpty) linha(pedido.first, 1),
           ],
         ),
       ),
-      for (final (n, i) in r.itens.indexed.skip(1)) linha(i, n + 1),
+      for (final (n, i) in pedido.indexed.skip(1)) linha(i, n + 1),
     ];
   }
 

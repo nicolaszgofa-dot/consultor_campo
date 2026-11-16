@@ -274,7 +274,10 @@ Gerado no fim do configurador pelo botão **Gerar relatório**, que só fica ati
 - Antes do PDF, o app pede cliente, cidade ou fazenda e consultor. Os três são opcionais e nada fica salvo.
 - **Resumo da máquina:** plantadeira, linhas por seção, adaptação, alimentação, kit de conversão e, no Neo, a velocidade e as populações usadas na escolha dos discos.
 - **Lista de itens:** item, código J.Assy, comprimento (ou a mistura de comprimentos do chicote painel) e quantidade. Os motivos ficam só na tela do app.
-  - O código vem do fim do nome do item (condutores, discos do Neo, peneira) ou do catálogo de peças (bocais do Selenium). Os itens sem código conhecido aparecem com "–".
+  - Os códigos ficam em `packages/configurador/lib/src/codigos.dart`, com os valores passados pela engenharia. Condutores, discos do Neo e peneira já trazem o código no nome.
+  - Cabo ISOBUS, mangueiras e chicote painel têm um código por comprimento. Por isso o chicote painel com tamanhos misturados vira uma linha por comprimento.
+  - O reservatório pipoqueira sai numa linha só com o bocal escolhido, porque o código é do conjunto (2,5 pol `30000000750`, 3,0 pol `30000000751`, 2,5 + 3,0 pol `30000000759`).
+  - Sem código ainda, aparecem com "–": kit conversão Selenium G3 p/ Selenium Elétric, sensor de semente, cabo de alimentação direto da bateria, alternadores 100 A e 250 A do Neo, conjunto dosador, esteira e bocais do Neo.
 - **Saídas do alternador:** faixa com as linhas de cada saída, separada por seção, e a legenda com as linhas.
 - **Observações:** os avisos e informações da configuração.
 - O PDF não tem preço. O rodapé pede para conferir com a engenharia J.Assy antes de fechar o pedido.

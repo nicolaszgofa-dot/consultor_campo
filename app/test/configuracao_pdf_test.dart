@@ -32,6 +32,24 @@ ResultadoConfiguracao exemploSelenium() => RegrasConfigurador.configurar(
   ),
 );
 
+ResultadoConfiguracao exemploTitanium() => RegrasConfigurador.configurar(
+  EntradaConfiguracao(
+    tecnologia: Tecnologia.titaniumEletric,
+    tipo: TipoPlantadeira.caixaCentral,
+    totalLinhas: 26,
+    linhasPorSecao: const [13, 13],
+    temAlternador: true,
+    alternadorNaFrente: false,
+    comprimentoIsobus: 14,
+    comprimentoMangueiras: 12,
+    chicotesPainel: const {9: 2, 14: 2},
+    reservatorioPipoqueira: true,
+    bocalTitanium: BocalTitanium.pol25e30,
+    kitConversao: true,
+    adaptacao: _primeira(Tecnologia.titaniumEletric),
+  ),
+);
+
 ResultadoConfiguracao exemploNeo() => RegrasConfigurador.configurar(
   EntradaConfiguracao(
     tecnologia: Tecnologia.seleniumNeo,
@@ -53,29 +71,6 @@ int _paginas(List<int> bytes) =>
     RegExp(r'/Type\s*/Page\b').allMatches(latin1.decode(bytes)).length;
 
 void main() {
-  test('comprimento do item: mistura, único ou vazio', () {
-    const misto = ItemConfiguracao(
-      componente: 'Chicote painel',
-      quantidade: 3,
-      motivo: '',
-      quantidadesPorComprimento: {9: 2, 4: 1, 14: 0},
-    );
-    expect(comprimentoDoItem(misto), '1× 4 m · 2× 9 m');
-    const unico = ItemConfiguracao(
-      componente: 'Cabo ISOBUS',
-      quantidade: 1,
-      motivo: '',
-      comprimento: 11,
-    );
-    expect(comprimentoDoItem(unico), '11 m');
-    const semTamanho = ItemConfiguracao(
-      componente: 'ECU',
-      quantidade: 1,
-      motivo: '',
-    );
-    expect(comprimentoDoItem(semTamanho), isEmpty);
-  });
-
   test('resumo da máquina traz seções, adaptação e alimentação', () {
     final resumo = Map.fromEntries(
       resumoDaMaquina(exemploSelenium().entrada)
@@ -101,6 +96,7 @@ void main() {
       for (final (nome, r) in [
         ('selenium', exemploSelenium()),
         ('neo', exemploNeo()),
+        ('titanium', exemploTitanium()),
       ]) {
         final bytes = await gerarConfiguracaoPdf(
           resultado: r,
@@ -113,13 +109,13 @@ void main() {
           data: DateTime(2026, 11, 15),
         );
         expect(latin1.decode(bytes.take(4).toList()), '%PDF');
-        expect(r.pendentes, isEmpty, reason: nome);
-        expect(_paginas(bytes), 1, reason: nome);
         // Para ver o exemplo: PDF_SAIDA=<pasta> flutter test ...
         final saida = Platform.environment['PDF_SAIDA'];
         if (saida != null) {
           File('$saida/configuracao_$nome.pdf').writeAsBytesSync(bytes);
         }
+        expect(r.pendentes, isEmpty, reason: nome);
+        expect(_paginas(bytes), inInclusiveRange(1, 2), reason: nome);
       }
     });
   });
