@@ -68,7 +68,7 @@ List<(String, String)> resumoDaMaquina(EntradaConfiguracao e) {
     (
       'Linhas',
       secoes.length > 1
-          ? '${e.totalLinhas} em ${secoes.length} seções (${secoes.join(' + ')})'
+          ? '${e.totalLinhas} (${secoes.join(' + ')})'
           : '${e.totalLinhas}',
     ),
     if (e.adaptacao case final a?) ('Adaptação', '${a.marca} · ${a.modelo}'),
@@ -76,7 +76,7 @@ List<(String, String)> resumoDaMaquina(EntradaConfiguracao e) {
       (
         'Alimentação',
         e.temAlternador!
-            ? 'Alternador hidráulico'
+            ? 'Alternador'
                   '${e.alternadorNaFrente == null
                       ? ''
                       : e.alternadorNaFrente!
@@ -87,12 +87,37 @@ List<(String, String)> resumoDaMaquina(EntradaConfiguracao e) {
     if (e.tecnologia.temKitConversao)
       ('Kit de conversão', e.kitConversao ? 'Sim' : 'Não'),
     if (e.velocidadePlantio != null)
-      ('Velocidade de plantio', '${numeroBr(e.velocidadePlantio!, 1)} km/h'),
+      ('Velocidade', '${numeroBr(e.velocidadePlantio!, 1)} km/h'),
     if (e.populacaoSoja != null)
-      ('População de soja', '${numeroBr(e.populacaoSoja!, 1)} sementes/m'),
+      ('População soja', '${numeroBr(e.populacaoSoja!, 1)} sementes/m'),
     if (e.populacaoMilho != null)
-      ('População de milho', '${numeroBr(e.populacaoMilho!, 1)} sementes/m'),
+      ('População milho', '${numeroBr(e.populacaoMilho!, 1)} sementes/m'),
   ];
+}
+
+/// O que a adaptação muda na instalação, em uma frase; nula quando nada muda.
+String? detalheDaAdaptacao(EntradaConfiguracao e) {
+  final a = e.adaptacao;
+  if (a == null) return null;
+  switch (e.tecnologia) {
+    case Tecnologia.seleniumEletric:
+      final c = condutoresSelenium[a.marca]?[a.modelo];
+      if (c == null) return null;
+      if (c == condutorOriginal) {
+        return 'Mantém o condutor de sementes original da plantadeira.';
+      }
+      final (:nome, :codigo) = nomeECodigo(c);
+      final minusculo = nome[0].toLowerCase() + nome.substring(1);
+      return 'Leva o $minusculo'
+          '${codigo == null ? '' : ' ($codigo)'}, um por linha.';
+    case Tecnologia.seleniumNeo:
+      return RegrasConfigurador.usaPeneiraSoja(e)
+          ? 'Caixa central: leva o kit peneira soja JD2100, um por caixa de '
+                'semente.'
+          : null;
+    case Tecnologia.titaniumEletric:
+      return null;
+  }
 }
 
 /// PDF com a configuração gerada: resumo da máquina, lista de itens,
@@ -102,12 +127,14 @@ Future<Uint8List> gerarConfiguracaoPdf({
   required RecursosPdf recursos,
   IdentificacaoConfiguracao identificacao = const IdentificacaoConfiguracao(),
   DateTime? data,
+  Uint8List? logoMarca,
 }) {
   final m = _Montador(
     resultado,
     recursos,
     identificacao,
     data ?? DateTime.now(),
+    logoMarca,
   );
   final tecnologia = resultado.entrada.tecnologia.nome;
   final doc = pw.Document(
@@ -154,7 +181,10 @@ class _Montador {
   final IdentificacaoConfiguracao id;
   final DateTime data;
 
-  _Montador(this.r, this.f, this.id, this.data);
+  /// Logo da marca da adaptação (PNG ou JPG), quando houver.
+  final Uint8List? logoMarca;
+
+  _Montador(this.r, this.f, this.id, this.data, this.logoMarca);
 
   EntradaConfiguracao get e => r.entrada;
 
@@ -234,8 +264,11 @@ class _Montador {
       if (id.cliente.isNotEmpty) ('Cliente', id.cliente),
       if (id.consultor.isNotEmpty) ('Consultor', id.consultor),
     ];
-    // A tecnologia já está no título.
-    final resumo = resumoDaMaquina(e).skip(1).toList();
+    // A tecnologia já está no título e a adaptação tem quadro próprio.
+    final resumo = [
+      for (final p in resumoDaMaquina(e).skip(1))
+        if (p.$1 != 'Adaptação') p,
+    ];
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
@@ -293,11 +326,11 @@ class _Montador {
             borderRadius: pw.BorderRadius.circular(8),
           ),
           child: pw.Wrap(
-            spacing: 18,
+            spacing: 12,
             children: [
               for (final (rotulo, valor) in resumo)
                 pw.SizedBox(
-                  width: 150,
+                  width: 115,
                   child: pw.Padding(
                     padding: const pw.EdgeInsets.only(bottom: 8),
                     child: pw.Column(
@@ -320,7 +353,63 @@ class _Montador {
             ],
           ),
         ),
+        if (e.adaptacao case final a?) ...[
+          pw.SizedBox(height: 8),
+          _adaptacao(a),
+        ],
       ],
+    );
+  }
+
+  /// Quadro da adaptação: logo da marca, modelo e o que muda na instalação.
+  pw.Widget _adaptacao(Adaptacao a) {
+    final detalhe = detalheDaAdaptacao(e);
+    final logo = logoMarca;
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+      decoration: pw.BoxDecoration(
+        color: _C.verdeClaro,
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Row(
+        children: [
+          if (logo != null) ...[
+            pw.Container(
+              width: 74,
+              height: 34,
+              padding: const pw.EdgeInsets.all(4),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.white,
+                borderRadius: pw.BorderRadius.circular(5),
+              ),
+              child: pw.Image(pw.MemoryImage(logo), fit: pw.BoxFit.contain),
+            ),
+            pw.SizedBox(width: 12),
+          ],
+          pw.Expanded(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'ADAPTAÇÃO',
+                  style: t(
+                    7,
+                    fonte: f.negrito,
+                    cor: _C.verdeTexto,
+                    espaco: 0.5,
+                  ),
+                ),
+                pw.Text(
+                  '${a.marca} · ${a.modelo}',
+                  style: t(11, fonte: f.semi),
+                ),
+                if (detalhe != null)
+                  pw.Text(detalhe, style: t(8.5, cor: _C.verdeTexto)),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

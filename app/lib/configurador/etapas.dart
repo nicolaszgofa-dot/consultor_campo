@@ -7,6 +7,7 @@ import '../ui/componentes.dart';
 import '../ui/formatos.dart';
 import 'configurador_estado.dart';
 import 'configurador_widgets.dart';
+import 'marcas.dart';
 
 /// Coloca os filhos lado a lado quando há largura; senão, um embaixo do outro.
 class _LadoALado extends StatelessWidget {
@@ -1451,27 +1452,6 @@ class EtapaAdaptacao extends StatelessWidget {
     );
   }
 }
-
-/// Logo de cada marca de plantadeira. Marca sem logo mostra só o nome.
-const logosMarcas = {
-  'AGCO': 'assets/marcas/agco.webp',
-  'Baldan': 'assets/marcas/baldan.webp',
-  'CNH': 'assets/marcas/cnh.png',
-  'Fankhauser': 'assets/marcas/fankhauser.png',
-  'Genius': 'assets/marcas/genius.jpg',
-  'Horsch': 'assets/marcas/horsch.png',
-  'Imasa': 'assets/marcas/imasa.png',
-  'Jacto': 'assets/marcas/jacto.png',
-  'John Deere': 'assets/marcas/john_deere.png',
-  'Jumil': 'assets/marcas/jumil.jpg',
-  'KF': 'assets/marcas/kf.jpg',
-  'Kuhn': 'assets/marcas/kuhn.jpg',
-  'Planticenter': 'assets/marcas/planticenter.png',
-  'Semeato': 'assets/marcas/semeato.jpg',
-  'Stara': 'assets/marcas/stara.png',
-  'Tatu Marchesan': 'assets/marcas/tatu_marchesan.png',
-  'Vence Tudo': 'assets/marcas/vence_tudo.png',
-};
 
 class _BotaoMarca extends StatelessWidget {
   final String texto;

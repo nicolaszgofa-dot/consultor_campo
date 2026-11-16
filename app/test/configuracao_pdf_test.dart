@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:configurador/configurador.dart';
 import 'package:consultor_campo/configurador/configuracao_pdf.dart';
+import 'package:consultor_campo/configurador/configuracao_pdf_page.dart';
 import 'package:consultor_campo/roi/proposta/proposta_pdf.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -76,8 +77,8 @@ void main() {
           .map((p) => MapEntry(p.$1, p.$2)),
     );
     expect(resumo['Tecnologia'], 'Selenium Elétric');
-    expect(resumo['Linhas'], '36 em 3 seções (12 + 12 + 12)');
-    expect(resumo['Alimentação'], 'Alternador hidráulico, na frente');
+    expect(resumo['Linhas'], '36 (12 + 12 + 12)');
+    expect(resumo['Alimentação'], 'Alternador, na frente');
     expect(resumo['Kit de conversão'], 'Não');
     expect(resumo.containsKey('Adaptação'), isTrue);
 
@@ -86,7 +87,7 @@ void main() {
     );
     expect(neo['Linhas'], '20');
     expect(neo.containsKey('Kit de conversão'), isFalse);
-    expect(neo['Velocidade de plantio'], '8,0 km/h');
+    expect(neo['Velocidade'], '8,0 km/h');
   });
 
   testWidgets('gera o PDF da configuração', (tester) async {
@@ -106,6 +107,7 @@ void main() {
             consultor: 'Consultor J.Assy',
           ),
           data: DateTime(2026, 11, 15),
+          logoMarca: await carregarLogoMarca(r.entrada.adaptacao!.marca),
         );
         expect(latin1.decode(bytes.take(4).toList()), '%PDF');
         // Para ver o exemplo: PDF_SAIDA=<pasta> flutter test ...
@@ -117,5 +119,23 @@ void main() {
         expect(_paginas(bytes), inInclusiveRange(1, 2), reason: nome);
       }
     });
+  });
+
+  test('detalhe da adaptação: condutor, original ou peneira', () {
+    expect(
+      detalheDaAdaptacao(exemploSelenium().entrada),
+      'Leva o condutor de sementes retrabalhado JD1 (20000000608), um por linha.',
+    );
+    final original = RegrasConfigurador.configurar(
+      const EntradaConfiguracao(
+        tecnologia: Tecnologia.seleniumEletric,
+        tipo: TipoPlantadeira.solteira,
+        totalLinhas: 12,
+        linhasPorSecao: [12],
+        adaptacao: Adaptacao('Stara', 'Princesa'),
+      ),
+    );
+    expect(detalheDaAdaptacao(original.entrada), contains('original'));
+    expect(detalheDaAdaptacao(exemploTitanium().entrada), isNull);
   });
 }

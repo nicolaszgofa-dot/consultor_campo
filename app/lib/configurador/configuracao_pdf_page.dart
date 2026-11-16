@@ -1,9 +1,29 @@
+import 'dart:ui' as ui;
+
 import 'package:configurador/configurador.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:printing/printing.dart';
 
 import '../roi/proposta/proposta_pdf.dart';
 import 'configuracao_pdf.dart';
+import 'marcas.dart';
+
+/// Logo da marca em PNG para o PDF (o PDF não lê WebP). Nulo sem logo.
+Future<Uint8List?> carregarLogoMarca(
+  String marca, [
+  AssetBundle? bundle,
+]) async {
+  final caminho = logosMarcas[marca];
+  if (caminho == null) return null;
+  final bytes = (await (bundle ?? rootBundle).load(caminho)).buffer
+      .asUint8List();
+  final codec = await ui.instantiateImageCodec(bytes, targetWidth: 300);
+  final quadro = await codec.getNextFrame();
+  final png = await quadro.image.toByteData(format: ui.ImageByteFormat.png);
+  quadro.image.dispose();
+  return png?.buffer.asUint8List();
+}
 
 /// Pede a identificação (opcional) e abre a prévia do PDF da configuração.
 Future<void> abrirPdfConfiguracao(
@@ -123,11 +143,15 @@ class PreviaConfiguracaoPdf extends StatelessWidget {
         canChangeOrientation: false,
         canDebug: false,
         pdfFileName: 'Configuracao_JAssy_$nome.pdf',
-        build: (_) async => gerarConfiguracaoPdf(
-          resultado: resultado,
-          identificacao: id,
-          recursos: await RecursosPdf.carregar(),
-        ),
+        build: (_) async {
+          final marca = resultado.entrada.adaptacao?.marca;
+          return gerarConfiguracaoPdf(
+            resultado: resultado,
+            identificacao: id,
+            recursos: await RecursosPdf.carregar(),
+            logoMarca: marca == null ? null : await carregarLogoMarca(marca),
+          );
+        },
       ),
     );
   }

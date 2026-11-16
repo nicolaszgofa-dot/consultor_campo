@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:configurador/configurador.dart';
 import 'package:consultor_campo/configurador/configurador_estado.dart';
 import 'package:consultor_campo/configurador/configurador_page.dart';
-import 'package:consultor_campo/configurador/etapas.dart';
+import 'package:consultor_campo/configurador/marcas.dart';
 import 'package:consultor_campo/main.dart';
 import 'package:consultor_campo/tema.dart';
 import 'package:flutter/material.dart';
