@@ -5,6 +5,7 @@ import '../emergencia/avaliacao_emergencia.dart';
 import '../emergencia/emergencia_aba.dart';
 import '../tema.dart';
 import '../ui/componentes.dart';
+import 'avaliacao_rapida_page.dart';
 import 'identificacao_page.dart';
 
 /// Avaliação de plantio com três abas: plantio (trena), fertilizante e
@@ -90,6 +91,11 @@ class AvaliacaoHubPage extends StatelessWidget {
                         'Recomendado: 5 linhas de 10 m.',
                     botao: 'Nova avaliação de plantio',
                     tela: IdentificacaoPage(),
+                    botaoRapido: 'Avaliação rápida (1 linha)',
+                    telaRapida: AvaliacaoRapidaPage(),
+                    textoRapido:
+                        'CV, aceitáveis, falhas e duplas de uma linha, na '
+                        'hora, sem identificação.',
                   ),
                   const _AbaApresentacao(
                     icone: Icons.scale_outlined,
@@ -118,12 +124,20 @@ class _AbaApresentacao extends StatelessWidget {
   final String botao;
   final Widget tela;
 
+  /// Atalho opcional para uma versão rápida da avaliação.
+  final String? botaoRapido;
+  final Widget? telaRapida;
+  final String? textoRapido;
+
   const _AbaApresentacao({
     required this.icone,
     required this.titulo,
     required this.texto,
     required this.botao,
     required this.tela,
+    this.botaoRapido,
+    this.telaRapida,
+    this.textoRapido,
   });
 
   @override
@@ -178,6 +192,40 @@ class _AbaApresentacao extends StatelessWidget {
                       .push(MaterialPageRoute(builder: (_) => tela)),
               child: Text(botao),
             ),
+            if (botaoRapido != null && telaRapida != null) ...[
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: () =>
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (_) => telaRapida!)),
+                icon: const Icon(Icons.bolt),
+                label: Text(botaoRapido!),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(64, 52),
+                  foregroundColor: Cores.verdeTexto,
+                  side: const BorderSide(color: Cores.verde),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (textoRapido != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    textoRapido!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Cores.textoSecundario,
+                    ),
+                  ),
+                ),
+            ],
           ],
         ),
       ),

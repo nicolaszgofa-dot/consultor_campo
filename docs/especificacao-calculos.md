@@ -30,6 +30,16 @@ Regras do módulo `avaliacao_plantio`. Cada linha das tabelas de casos tem um te
 | P5 | 20 · 50 | DV 7,07, CV 28,3% |
 | P6 | 10 · 35 · 75 | 33,3% de cada classe, DV 15,00, CV 60,0% |
 
+## Avaliação rápida (uma linha)
+
+Atalho na aba Plantio da Avaliação de plantio, para uma leitura rápida no campo. Fica numa tela só, sem identificação, sem perda e sem salvar. Código: `app/lib/avaliacao/avaliacao_rapida_page.dart`.
+
+- **Entradas:** sementes por metro (opcional) e as leituras acumuladas da trena de uma linha.
+- **CV:** mesma regra da plantabilidade (desvio padrão amostral ÷ média). Aparece a partir de 2 espaçamentos e não precisa das sementes por metro.
+- **Aceitáveis, falhas e duplas:** mesmas faixas da plantabilidade (0,5 e 1,5 × ideal). Só aparecem com as sementes por metro, porque o ideal sai delas.
+- **CV sem classe:** o CV não é classificado, pelo mesmo motivo da avaliação completa (ver `docs/base-conhecimento/plantabilidade.md`).
+- **Testes:** casos P1, P3 e P6 em `app/test/avaliacao_rapida_test.dart`.
+
 ## Fertilizante
 
 **Entradas:** dose desejada (kg/ha), espaçamento entre linhas (m), distância de coleta (m), número de linhas e gramas coletadas por linha.
