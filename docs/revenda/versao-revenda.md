@@ -6,7 +6,7 @@ Versão do app para as revendas parceiras. O código é o mesmo do app da equipe
 
 | | Equipe (JA Campo) | Revenda (JA Campo Revenda) |
 |---|---|---|
-| Avaliação de plantio, Configurador, ROI, Proposta comercial, Conceito | sim | sim |
+| Avaliação de plantio, Configurador, ROI, Proposta comercial, Conceito, Simulador Elétric | sim | sim |
 | Peças de reposição | lista para copiar | **Pedido de peças** |
 | Inteligência de mercado, Playbook, Material técnico, Relatórios | sim | não |
 | Assistência e garantia | não | sim |

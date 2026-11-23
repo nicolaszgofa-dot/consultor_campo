@@ -9,6 +9,7 @@ import 'pecas/pecas_page.dart';
 import 'perfil.dart';
 import 'proposta/propostas_page.dart';
 import 'roi/roi_page.dart';
+import 'simulador/simulador_page.dart';
 import 'ui/icones_modulos.dart';
 
 class Funcionalidade {
@@ -85,6 +86,12 @@ List<Funcionalidade> funcionalidadesEquipe() => [
     icone: IconeModulo.conceito,
     tela: () => const ConceitoPage(),
   ),
+  Funcionalidade(
+    titulo: 'Simulador Elétric',
+    descricao: 'Telas do sistema no monitor ISOBUS do trator',
+    icone: IconeModulo.simulador,
+    tela: () => const SimuladorPage(),
+  ),
   const Funcionalidade(
     titulo: 'Material técnico',
     descricao: 'Catálogos, manuais e fichas técnicas',
@@ -152,5 +159,11 @@ List<Funcionalidade> funcionalidadesRevenda() => [
     descricao: 'Conceitos técnicos por trás das tecnologias J.Assy',
     icone: IconeModulo.conceito,
     tela: () => const ConceitoPage(),
+  ),
+  Funcionalidade(
+    titulo: 'Simulador Elétric',
+    descricao: 'Telas do sistema no monitor ISOBUS do trator',
+    icone: IconeModulo.simulador,
+    tela: () => const SimuladorPage(),
   ),
 ];

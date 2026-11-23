@@ -24,6 +24,9 @@ enum IconeModulo {
   assistencia,
   regulagem,
   treinamento,
+
+  // Equipe e revenda.
+  simulador,
 }
 
 class IconeDoModulo extends StatelessWidget {
@@ -314,6 +317,24 @@ class _PintorIcone extends CustomPainter {
         canvas.drawPath(base, linha);
         reta(const [Offset(40, 20), Offset(40, 32)], linhaDestaque);
         canvas.drawCircle(const Offset(40, 35), 3.5, cheioDestaque);
+
+      case IconeModulo.simulador:
+        // Monitor do trator com o botão de play em destaque.
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            const Rect.fromLTWH(5, 8, 38, 27),
+            const Radius.circular(4),
+          ),
+          linha,
+        );
+        reta(const [Offset(24, 35), Offset(24, 42)]);
+        reta(const [Offset(15, 42), Offset(33, 42)]);
+        final play = Path()
+          ..moveTo(20, 15)
+          ..lineTo(31, 21.5)
+          ..lineTo(20, 28)
+          ..close();
+        canvas.drawPath(play, cheioDestaque);
     }
   }
 
