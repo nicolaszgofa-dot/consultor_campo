@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'em_breve_page.dart';
 import 'funcionalidades.dart';
+import 'perfil.dart';
 import 'tema.dart';
 import 'ui/icones_modulos.dart';
 import 'ui/simbolo.dart';
@@ -83,7 +84,7 @@ class _Cabecalho extends StatelessWidget {
                       const SimboloJACampo(tamanho: 34),
                       const SizedBox(width: 10),
                       const Text(
-                        'JA Campo',
+                        nomeApp,
                         style: TextStyle(
                           fontFamily: fonteTitulo,
                           color: Cores.branco,

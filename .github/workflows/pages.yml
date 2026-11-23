@@ -35,6 +35,10 @@ jobs:
         run: |
           flutter pub get
           flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+          # App das revendas parceiras em /revenda/, com o próprio nome.
+          flutter build web --release --dart-define=PERFIL=revenda --base-href "/${{ github.event.repository.name }}/revenda/" --output "$PWD/build/web_revenda"
+          sed -i "s/JA Campo/JA Campo Revenda/g" build/web_revenda/index.html build/web_revenda/manifest.json
+          mv build/web_revenda build/web/revenda
 
       - uses: actions/upload-pages-artifact@v3
         with:

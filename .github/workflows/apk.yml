@@ -2,7 +2,8 @@ name: APK Android
 
 # Gera o APK de instalação do app (assinado com a chave de depuração: serve
 # para instalar direto no celular, não para a Play Store). O arquivo fica em
-# "Artifacts" na página da execução.
+# "Artifacts" na página da execução. Saem dois APKs: o da equipe (JA Campo)
+# e o das revendas parceiras (JA Campo Revenda, PERFIL=revenda).
 on:
   push:
     branches: [main]
@@ -18,8 +19,13 @@ env:
 
 jobs:
   apk:
-    name: Gerar APK
+    name: Gerar APK (${{ matrix.perfil }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        perfil: [equipe, revenda]
+    env:
+      PERFIL: ${{ matrix.perfil }}
     steps:
       - uses: actions/checkout@v4
 
@@ -38,14 +44,15 @@ jobs:
         working-directory: app
         run: |
           flutter pub get
-          flutter build apk --release
+          flutter build apk --release --dart-define=PERFIL=$PERFIL
 
       - name: Nome do arquivo
         id: nome
         working-directory: app
         run: |
           versao=$(grep '^version:' pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)
-          echo "arquivo=consultor-campo-$versao-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          sufixo=$([ "$PERFIL" = revenda ] && echo "-revenda" || echo "")
+          echo "arquivo=ja-campo$sufixo-$versao-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v4
         with:

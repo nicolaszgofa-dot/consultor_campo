@@ -10,14 +10,17 @@ import 'pecas_dados.dart';
 class PecasPage extends StatefulWidget {
   final List<ProdutoPecas>? produtos;
 
-  const PecasPage({super.key, this.produtos});
+  /// App da revenda: a lista vira um pedido de reposição para a J.Assy.
+  final bool modoPedido;
+
+  const PecasPage({super.key, this.produtos, this.modoPedido = false});
 
   @override
   State<PecasPage> createState() => _PecasPageState();
 }
 
 class _PecasPageState extends State<PecasPage> {
-  final _lista = ListaPecas();
+  late final _lista = ListaPecas(pedido: widget.modoPedido);
   final _busca = TextEditingController();
 
   List<ProdutoPecas> get _produtos => widget.produtos ?? produtosPecas;
@@ -50,7 +53,11 @@ class _PecasPageState extends State<PecasPage> {
       bottomNavigationBar: BarraListaPecas(lista: _lista),
       body: Column(
         children: [
-          const CabecalhoFluxo(titulo: 'Peças de reposição'),
+          CabecalhoFluxo(
+            titulo: widget.modoPedido
+                ? 'Pedido de peças'
+                : 'Peças de reposição',
+          ),
           Expanded(
             child: Center(
               child: ConstrainedBox(
@@ -783,7 +790,8 @@ class BarraListaPecas extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        n == 1 ? '1 peça na lista' : '$n peças na lista',
+                        '${n == 1 ? '1 peça' : '$n peças'} '
+                        '${lista.pedido ? 'no pedido' : 'na lista'}',
                         style: const TextStyle(
                           color: Cores.branco,
                           fontSize: 17,
@@ -791,9 +799,9 @@ class BarraListaPecas extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Text(
-                      'Ver lista',
-                      style: TextStyle(
+                    Text(
+                      lista.pedido ? 'Ver pedido' : 'Ver lista',
+                      style: const TextStyle(
                         color: Cores.verdeVivo,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -833,22 +841,28 @@ Future<void> mostrarListaPecas(BuildContext context, ListaPecas lista) {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 4),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
                 child: Text(
-                  'Lista de peças',
-                  style: TextStyle(
+                  lista.pedido ? 'Pedido de peças' : 'Lista de peças',
+                  style: const TextStyle(
                     fontFamily: fonteTitulo,
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                 child: Text(
-                  'A lista não fica salva: copie e mande antes de sair.',
-                  style: TextStyle(fontSize: 14, color: Cores.textoSecundario),
+                  lista.pedido
+                      ? 'O pedido não fica salvo: copie e envie à J.Assy antes '
+                            'de sair.'
+                      : 'A lista não fica salva: copie e mande antes de sair.',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Cores.textoSecundario,
+                  ),
                 ),
               ),
               Flexible(
@@ -917,15 +931,32 @@ Future<void> mostrarListaPecas(BuildContext context, ListaPecas lista) {
                     const Spacer(),
                     FilledButton.icon(
                       icon: const Icon(Icons.copy),
-                      label: const Text('Copiar lista'),
-                      onPressed: () {
-                        Clipboard.setData(
-                          ClipboardData(text: lista.comoTexto()),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                      label: Text(
+                        lista.pedido ? 'Copiar pedido' : 'Copiar lista',
+                      ),
+                      onPressed: () async {
+                        final mensageiro = ScaffoldMessenger.of(context);
+                        String texto;
+                        if (lista.pedido) {
+                          final dados = await _pedirDadosDoPedido(context);
+                          if (dados == null) return;
+                          texto = lista.comoPedido(
+                            revenda: dados.revenda,
+                            cidade: dados.cidade,
+                            observacao: dados.observacao,
+                          );
+                        } else {
+                          texto = lista.comoTexto();
+                        }
+                        await Clipboard.setData(ClipboardData(text: texto));
+                        mensageiro.showSnackBar(
+                          SnackBar(
                             content: Text(
-                              'Lista copiada. Cole no WhatsApp ou no e-mail.',
+                              lista.pedido
+                                  ? 'Pedido copiado. Envie à J.Assy pelo '
+                                        'WhatsApp ou e-mail.'
+                                  : 'Lista copiada. Cole no WhatsApp ou no '
+                                        'e-mail.',
                             ),
                           ),
                         );
@@ -938,6 +969,76 @@ Future<void> mostrarListaPecas(BuildContext context, ListaPecas lista) {
           ),
         );
       },
+    ),
+  );
+}
+
+/// Quem faz o pedido. A revenda é obrigatória; nada fica salvo.
+Future<({String revenda, String cidade, String observacao})?>
+_pedirDadosDoPedido(BuildContext context) {
+  final revenda = TextEditingController();
+  final cidade = TextEditingController();
+  final observacao = TextEditingController();
+  String? erro;
+  return showDialog<({String revenda, String cidade, String observacao})>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: const Text('Dados do pedido'),
+        content: SizedBox(
+          width: 420,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: revenda,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  labelText: 'Revenda',
+                  errorText: erro,
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: cidade,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Cidade – UF'),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: observacao,
+                minLines: 1,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Observação (opcional)',
+                  hintText: 'Nº do pedido de compra, urgência, frete…',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (revenda.text.trim().isEmpty) {
+                setState(() => erro = 'Informe a revenda.');
+                return;
+              }
+              Navigator.of(context).pop((
+                revenda: revenda.text.trim(),
+                cidade: cidade.text.trim(),
+                observacao: observacao.text.trim(),
+              ));
+            },
+            child: const Text('Copiar pedido'),
+          ),
+        ],
+      ),
     ),
   );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'home_page.dart';
+import 'perfil.dart';
 import 'tema.dart';
 
 void main() {
@@ -13,7 +14,7 @@ class ConsultorCampoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'JA Campo',
+      title: nomeApp,
       debugShowCheckedModeBanner: false,
       theme: temaConsultor(),
       home: const HomePage(),

@@ -13,6 +13,11 @@ class ItemLista {
 /// Lista de peças montada na hora para mandar ao cliente ou à fábrica.
 /// Fica só na memória: some ao sair da tela (não há servidor ainda).
 class ListaPecas extends ChangeNotifier {
+  /// No app da revenda a lista vira um pedido de reposição para a J.Assy.
+  final bool pedido;
+
+  ListaPecas({this.pedido = false});
+
   final _itens = <String, ItemLista>{};
 
   List<ItemLista> get itens => List.unmodifiable(_itens.values);
@@ -53,9 +58,26 @@ class ListaPecas extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Texto do pedido da revenda: quem pede, total e as peças.
+  String comoPedido({
+    required String revenda,
+    String cidade = '',
+    String observacao = '',
+  }) {
+    final b = StringBuffer('Pedido de peças de reposição J.Assy\n')
+      ..write('Revenda: $revenda\n');
+    if (cidade.isNotEmpty) b.write('Cidade: $cidade\n');
+    b.write('Total: $totalPecas ${totalPecas == 1 ? 'peça' : 'peças'}\n');
+    if (observacao.isNotEmpty) b.write('Observação: $observacao\n');
+    return (b.toString() + _itensComoTexto()).trimRight();
+  }
+
   /// Texto para colar no WhatsApp ou no e-mail.
-  String comoTexto() {
-    final b = StringBuffer('Peças de reposição J.Assy\n');
+  String comoTexto() =>
+      ('Peças de reposição J.Assy\n${_itensComoTexto()}').trimRight();
+
+  String _itensComoTexto() {
+    final b = StringBuffer();
     final produtos = {for (final i in _itens.values) i.produto};
     for (final produto in produtos) {
       b.write('\n$produto\n');

@@ -18,6 +18,12 @@ enum IconeModulo {
   conceito,
   materialTecnico,
   relatorios,
+
+  // Só no app da revenda.
+  pedido,
+  assistencia,
+  regulagem,
+  treinamento,
 }
 
 class IconeDoModulo extends StatelessWidget {
@@ -239,6 +245,75 @@ class _PintorIcone extends CustomPainter {
             ..strokeWidth = 4
             ..strokeCap = StrokeCap.round,
         );
+
+      case IconeModulo.pedido:
+        // Caixa de peças com a etiqueta do pedido em destaque.
+        reta(const [
+          Offset(6, 16),
+          Offset(24, 8),
+          Offset(42, 16),
+          Offset(42, 36),
+          Offset(24, 44),
+          Offset(6, 36),
+          Offset(6, 16),
+        ]);
+        reta(const [Offset(6, 16), Offset(24, 24), Offset(42, 16)]);
+        reta(const [Offset(24, 24), Offset(24, 44)]);
+        reta(const [Offset(15, 12), Offset(33, 20)]);
+        canvas.drawCircle(const Offset(34, 31), 4.5, cheioDestaque);
+
+      case IconeModulo.assistencia:
+        // Escudo (garantia) com uma chave de boca (assistência).
+        final escudo = Path()
+          ..moveTo(24, 4)
+          ..lineTo(41, 10)
+          ..lineTo(41, 22)
+          ..cubicTo(41, 33, 33, 40, 24, 44)
+          ..cubicTo(15, 40, 7, 33, 7, 22)
+          ..lineTo(7, 10)
+          ..close();
+        canvas.drawPath(escudo, linha);
+        reta(const [Offset(17, 31), Offset(26, 22)], linhaDestaque);
+        canvas.drawCircle(const Offset(29, 19), 5, linhaDestaque);
+        canvas.drawCircle(const Offset(31.5, 16.5), 2.2, branco);
+
+      case IconeModulo.regulagem:
+        // Mostrador com ponteiro: regular até o ponto certo.
+        canvas.drawArc(
+          const Rect.fromLTWH(5, 9, 38, 38),
+          math.pi,
+          math.pi,
+          false,
+          linha,
+        );
+        for (final a in const [1.15, 1.5, 1.85]) {
+          final ang = a * math.pi;
+          reta([
+            Offset(24 + 15 * math.cos(ang), 28 + 15 * math.sin(ang)),
+            Offset(24 + 19 * math.cos(ang), 28 + 19 * math.sin(ang)),
+          ]);
+        }
+        reta(const [Offset(24, 28), Offset(34, 17)], linhaDestaque);
+        canvas.drawCircle(const Offset(24, 28), 4, cheioDestaque);
+        reta(const [Offset(10, 38), Offset(38, 38)]);
+
+      case IconeModulo.treinamento:
+        // Capelo de formatura com a borla em destaque.
+        reta(const [
+          Offset(4, 18),
+          Offset(24, 9),
+          Offset(44, 18),
+          Offset(24, 27),
+          Offset(4, 18),
+        ]);
+        final base = Path()
+          ..moveTo(12, 22)
+          ..lineTo(12, 33)
+          ..cubicTo(17, 38, 31, 38, 36, 33)
+          ..lineTo(36, 22);
+        canvas.drawPath(base, linha);
+        reta(const [Offset(40, 20), Offset(40, 32)], linhaDestaque);
+        canvas.drawCircle(const Offset(40, 35), 3.5, cheioDestaque);
     }
   }
 

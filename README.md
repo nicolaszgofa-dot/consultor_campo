@@ -40,6 +40,7 @@ flutter test
 | `docs/roi/` | Especificação do ROI, a partir da planilha da J.Assy |
 | `docs/proposta/` | Proposta comercial (card próprio): etapas, PDF e o que não é salvo |
 | `docs/pecas/` | Peças de reposição: vista explodida, busca e lista de peças |
+| `docs/revenda/` | JA Campo Revenda: versão do app para revendas parceiras |
 | `docs/especificacao-calculos.md` | Regras de cálculo e casos de validação |
 | `docs/base-conhecimento/` | Base técnica com fontes: plantabilidade, estande, CV, singularização, perdas e emergência |
 | `docs/prototipo-web/` | Protótipo HTML das calculadoras (sem Flutter) |

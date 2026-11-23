@@ -4,6 +4,10 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// App da revenda: PERFIL=revenda no ambiente (CI) gera outro pacote e outro
+// nome, para instalar ao lado do app da equipe.
+val revenda = System.getenv("PERFIL") == "revenda"
+
 android {
     namespace = "com.consultorcampo.consultor_campo"
     compileSdk = flutter.compileSdkVersion
@@ -16,7 +20,8 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.consultorcampo.consultor_campo"
+        applicationId = "com.consultorcampo.consultor_campo" + if (revenda) ".revenda" else ""
+        manifestPlaceholders["nomeApp"] = if (revenda) "JA Campo Revenda" else "JA Campo"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
