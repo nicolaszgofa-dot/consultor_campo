@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'em_breve_page.dart';
 import 'funcionalidades.dart';
 import 'tema.dart';
+import 'ui/icones_modulos.dart';
+import 'ui/simbolo.dart';
 
 /// Tela inicial: todas as funcionalidades em cartões do mesmo tamanho.
 class HomePage extends StatelessWidget {
@@ -78,23 +80,15 @@ class _Cabecalho extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: Cores.verde,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.eco, color: Cores.verdeEscuro),
-                      ),
+                      const SimboloJACampo(tamanho: 34),
                       const SizedBox(width: 10),
                       const Text(
-                        'CONSULTOR DE CAMPO',
+                        'JA Campo',
                         style: TextStyle(
-                          color: Cores.cinza,
-                          fontSize: 15,
+                          fontFamily: fonteTitulo,
+                          color: Cores.branco,
+                          fontSize: 22,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 0.6,
                         ),
                       ),
                     ],
@@ -146,11 +140,10 @@ class _CartaoFuncionalidade extends StatelessWidget {
         color: f.emBreve ? Cores.neutro : Cores.verdeClaro,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Icon(
-        f.icone,
-        size: 30,
-        color: f.emBreve ? Cores.cinzaEscuro : Cores.verdeTexto,
-      ),
+      alignment: Alignment.center,
+      child: f.emBreve
+          ? IconeDoModulo.apagado(f.icone)
+          : IconeDoModulo(f.icone),
     );
     final etiqueta = f.emBreve ? const _EmBreve() : const SizedBox.shrink();
     final titulo = Text(

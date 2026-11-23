@@ -2,7 +2,7 @@
     <!-- Cotações e prévia do PDF buscam dados na internet. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="Consultor de Campo"
+        android:label="JA Campo"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

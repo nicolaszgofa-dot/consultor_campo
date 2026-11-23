@@ -247,7 +247,7 @@ class _Montador {
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
         pw.Text(
-          'Gerada pelo configurador do Consultor de Campo. Confira com a '
+          'Gerada pelo configurador do JA Campo. Confira com a '
           'engenharia J.Assy antes de fechar o pedido.',
           style: t(7.5, cor: _C.secundario),
         ),

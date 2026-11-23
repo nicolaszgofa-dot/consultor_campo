@@ -7,11 +7,12 @@ import 'inteligencia/inteligencia_page.dart';
 import 'pecas/pecas_page.dart';
 import 'proposta/propostas_page.dart';
 import 'roi/roi_page.dart';
+import 'ui/icones_modulos.dart';
 
 class Funcionalidade {
   final String titulo;
   final String descricao;
-  final IconData icone;
+  final IconeModulo icone;
 
   /// Tela que a funcionalidade abre. Nula = ainda em breve.
   final Widget Function()? tela;
@@ -31,58 +32,58 @@ final funcionalidades = <Funcionalidade>[
   Funcionalidade(
     titulo: 'Avaliação de plantio',
     descricao: 'Plantio, fertilizante e emergência',
-    icone: Icons.straighten,
+    icone: IconeModulo.plantio,
     tela: () => const AvaliacaoHubPage(),
   ),
   Funcionalidade(
     titulo: 'Configurador',
     descricao: 'Configuração do equipamento para cada cliente',
-    icone: Icons.tune,
+    icone: IconeModulo.configurador,
     tela: () => const ConfiguradorPage(),
   ),
   Funcionalidade(
     titulo: 'ROI',
     descricao: 'Retorno do investimento para o produtor',
-    icone: Icons.trending_up,
+    icone: IconeModulo.roi,
     tela: () => const RoiPage(),
   ),
   Funcionalidade(
     titulo: 'Proposta comercial',
     descricao: 'Proposta em PDF com produtos, condições e retorno',
-    icone: Icons.request_quote_outlined,
+    icone: IconeModulo.proposta,
     tela: () => const PropostasPage(),
   ),
   Funcionalidade(
     titulo: 'Inteligência de mercado',
     descricao: 'Cotações, concorrência e preços encontrados no campo',
-    icone: Icons.insights,
+    icone: IconeModulo.mercado,
     tela: () => const InteligenciaPage(),
   ),
   Funcionalidade(
     titulo: 'Peças de reposição',
     descricao: 'Vista explodida e códigos das peças de cada produto',
-    icone: Icons.handyman_outlined,
+    icone: IconeModulo.pecas,
     tela: () => const PecasPage(),
   ),
   const Funcionalidade(
     titulo: 'Playbook',
     descricao: 'Roteiro da visita e argumentos para o cliente',
-    icone: Icons.assignment_outlined,
+    icone: IconeModulo.playbook,
   ),
   Funcionalidade(
     titulo: 'Conceito',
     descricao: 'Conceitos técnicos por trás das tecnologias J.Assy',
-    icone: Icons.lightbulb_outline,
+    icone: IconeModulo.conceito,
     tela: () => const ConceitoPage(),
   ),
   const Funcionalidade(
     titulo: 'Material técnico',
     descricao: 'Catálogos, manuais e fichas técnicas',
-    icone: Icons.menu_book_outlined,
+    icone: IconeModulo.materialTecnico,
   ),
   const Funcionalidade(
     titulo: 'Relatórios',
     descricao: 'Avaliações salvas e relatórios enviados',
-    icone: Icons.description_outlined,
+    icone: IconeModulo.relatorios,
   ),
 ];

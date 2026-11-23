@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'ui/icones_modulos.dart';
+
 /// Tela provisória de uma funcionalidade que ainda não foi construída.
 class EmBrevePage extends StatelessWidget {
   final String titulo;
   final String descricao;
-  final IconData icone;
+  final IconeModulo icone;
 
   const EmBrevePage({
     super.key,
@@ -15,7 +17,6 @@ class EmBrevePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cores = Theme.of(context).colorScheme;
     final texto = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(title: Text(titulo)),
@@ -27,7 +28,7 @@ class EmBrevePage extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icone, size: 64, color: cores.onSurfaceVariant),
+                IconeDoModulo.apagado(icone, tamanho: 64),
                 const SizedBox(height: 16),
                 Text(
                   'Em desenvolvimento',
