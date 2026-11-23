@@ -13,7 +13,7 @@ class ConsultorCampoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Consultor de Campo',
+      title: 'JA Campo',
       debugShowCheckedModeBanner: false,
       theme: temaConsultor(),
       home: const HomePage(),
