@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'explicacoes.dart';
 import 'terminal_estado.dart';
 
+part 'terminal_configuracoes.dart';
+
 /// Cores do terminal virtual (capturas do treinamento da Linha Elétric).
 abstract final class _T {
   static const fundo = Color(0xFF3A3A3A);
@@ -129,21 +131,25 @@ class _Tela extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final emTrabalho = e.tela == TelaTerminal.trabalho;
+    final emConfig =
+        e.tela == TelaTerminal.configuracoes || e.tela == TelaTerminal.senha;
     return ColoredBox(
       color: _T.fundo,
       child: Stack(
         children: [
           // Painel esquerdo (480 de largura).
-          _parte(
-            ParteTerminal.barraIcones,
-            const Rect.fromLTWH(0, 0, 480, 30),
-            _BarraIcones(e: e),
-          ),
-          _parte(
-            ParteTerminal.barraMensagens,
-            const Rect.fromLTWH(8, 32, 464, 30),
-            _BarraMensagens(e: e),
-          ),
+          if (!emConfig) ...[
+            _parte(
+              ParteTerminal.barraIcones,
+              const Rect.fromLTWH(0, 0, 480, 30),
+              _BarraIcones(e: e),
+            ),
+            _parte(
+              ParteTerminal.barraMensagens,
+              const Rect.fromLTWH(8, 32, 464, 30),
+              _BarraMensagens(e: e),
+            ),
+          ],
           if (emTrabalho) ..._trabalho(),
           if (e.tela == TelaTerminal.linha)
             Positioned(
@@ -153,13 +159,23 @@ class _Tela extends StatelessWidget {
               height: 412,
               child: _TelaLinha(e: e),
             ),
-          if (e.tela == TelaTerminal.configuracoes)
-            const Positioned(
+          if (emConfig)
+            Positioned(
               left: 0,
-              top: 68,
+              top: 0,
               width: 480,
-              height: 412,
-              child: _TelaConfiguracoes(),
+              height: 480,
+              child: e.tela == TelaTerminal.senha
+                  ? _TelaSenha(
+                      e: e,
+                      explicando: explicando,
+                      aoExplicar: aoExplicar,
+                    )
+                  : _TelaConfig(
+                      e: e,
+                      explicando: explicando,
+                      aoExplicar: aoExplicar,
+                    ),
             ),
           // Teclas A–J à direita.
           ..._teclas(),
@@ -251,7 +267,9 @@ class _Tela extends StatelessWidget {
           child: _ConteudoTecla(
             icone: Icons.speed,
             rotulo: e.fonteVelocidade.rotulo,
-            valor: _n(e.velocidadeKmh),
+            valor: e.semSinalGps && e.fonteVelocidade.gps
+                ? '--'
+                : _n(e.velocidadeKmh),
             unidade: 'km/h',
           ),
         ),
@@ -262,26 +280,35 @@ class _Tela extends StatelessWidget {
         tecla(0, 1),
         _Tecla(
           letra: 'B',
-          child: _ConteudoTecla(
-            icone: Icons.battery_charging_full,
-            valor: _n(e.tensaoV),
-            unidade: 'V',
-          ),
+          child: e.energia == FonteEnergia.alternador
+              ? _ConteudoTecla(
+                  icone: Icons.electric_bolt,
+                  valor: '${e.rotacaoAlternador}',
+                  unidade: 'RPM',
+                )
+              : _ConteudoTecla(
+                  icone: Icons.battery_charging_full,
+                  valor: _n(e.tensaoV),
+                  unidade: 'V',
+                ),
         ),
       ),
-      _parte(
-        ParteTerminal.plantar,
-        tecla(0, 2),
-        _Tecla(
-          letra: 'C',
-          child: _ConteudoTecla(
-            icone: e.plantando ? Icons.upload : Icons.agriculture,
-            valor: null,
-            unidade: e.plantando ? 'Manobrar' : 'Plantar',
+      if (e.levanteManual)
+        _parte(
+          ParteTerminal.plantar,
+          tecla(0, 2),
+          _Tecla(
+            letra: 'C',
+            child: _ConteudoTecla(
+              icone: e.plantando ? Icons.upload : Icons.agriculture,
+              valor: null,
+              unidade: e.plantando ? 'Manobrar' : 'Plantar',
+            ),
           ),
-        ),
-        acao: e.alternarPlantar,
-      ),
+          acao: e.alternarPlantar,
+        )
+      else
+        Positioned.fromRect(rect: tecla(0, 2), child: vazia('C')),
       Positioned.fromRect(rect: tecla(0, 3), child: vazia('D')),
       _parte(
         ParteTerminal.inicio,
@@ -293,14 +320,36 @@ class _Tela extends StatelessWidget {
         ),
         acao: () => e.irPara(TelaTerminal.trabalho),
       ),
-      for (final (i, l) in ['F', 'G', 'H', 'I'].indexed)
+      for (final (i, l) in ['F', 'G', 'H'].indexed)
         Positioned.fromRect(rect: tecla(1, i), child: vazia(l)),
+      if (e.tela == TelaTerminal.configuracoes)
+        _parte(
+          ParteTerminal.cadeado,
+          tecla(1, 3),
+          Semantics(
+            label: e.engenhariaLiberada
+                ? 'Travar parâmetros de engenharia'
+                : 'Liberar parâmetros de engenharia',
+            child: _Tecla(
+              letra: 'I',
+              child: Icon(
+                e.engenhariaLiberada ? Icons.lock_open : Icons.lock,
+                size: 52,
+              ),
+            ),
+          ),
+          acao: e.alternarCadeado,
+        )
+      else
+        Positioned.fromRect(rect: tecla(1, 3), child: vazia('I')),
       _parte(
         ParteTerminal.configuracoes,
         tecla(1, 4),
         _Tecla(
           letra: 'J',
-          ativa: e.tela == TelaTerminal.configuracoes,
+          ativa:
+              e.tela == TelaTerminal.configuracoes ||
+              e.tela == TelaTerminal.senha,
           child: const Icon(Icons.tune, size: 52),
         ),
         acao: () => e.irPara(TelaTerminal.configuracoes),
@@ -1003,57 +1052,6 @@ class _TelaLinha extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Menu de configurações. As telas de cada item chegam na próxima etapa.
-class _TelaConfiguracoes extends StatelessWidget {
-  const _TelaConfiguracoes();
-
-  @override
-  Widget build(BuildContext context) {
-    const itens = [
-      (Icons.settings, 'Sistema'),
-      (Icons.grain, 'Dosagem e Sensoriamento'),
-      (Icons.agriculture, 'Implemento'),
-      (Icons.filter_alt, 'Filtro de Velocidade'),
-      (Icons.speed, 'Fonte de Velocidade'),
-      (Icons.wifi_tethering, 'Enderecamento'),
-      (Icons.battery_charging_full, 'Energia'),
-      (Icons.height, 'Sensor de Levante'),
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 8, 6),
-          child: Text('Configuracoes', style: _mono.copyWith(fontSize: 18)),
-        ),
-        for (final (icone, nome) in itens)
-          Container(
-            height: 36,
-            margin: const EdgeInsets.only(bottom: 2),
-            color: const Color(0xFFCFCFCF),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Icon(icone, size: 20, color: const Color(0xFF444444)),
-                const SizedBox(width: 18),
-                Text(
-                  nome,
-                  style: _mono.copyWith(fontSize: 14, color: Colors.black),
-                ),
-              ],
-            ),
-          ),
-        const SizedBox(height: 8),
-        Text(
-          'Telas de configuracao: proxima etapa do simulador.',
-          textAlign: TextAlign.center,
-          style: _mono.copyWith(fontSize: 11, color: _T.textoApagado),
         ),
       ],
     );

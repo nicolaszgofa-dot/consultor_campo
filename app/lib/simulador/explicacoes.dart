@@ -54,14 +54,16 @@ enum ParteTerminal {
   ),
   tensao(
     'Fonte de energia',
-    'Tensão que chega às linhas (bateria ou alternador hidráulico). Com '
-        'alternador, recomenda-se no mínimo 3000 RPM, mesmo em máquinas com '
-        'menos de 25 linhas.',
+    'Com alternador hidráulico, mostra a rotação do alternador (RPM); com '
+        'bateria, a tensão (V). Recomenda-se no mínimo 3000 RPM, mesmo em '
+        'máquinas com menos de 25 linhas. A fonte é escolhida em '
+        'Configurações > Energia.',
   ),
   plantar(
     'Levante manual',
-    'Quando o levante manual está habilitado, este botão alterna entre '
-        'Plantar e Manobra. Em Manobra os dosadores param.',
+    'Quando o levante manual está habilitado (Configurações > Sensor de '
+        'Levante), este botão alterna entre Plantar e Manobra. Em Manobra os '
+        'dosadores param.',
   ),
   inicio(
     'Tela início',
@@ -73,10 +75,79 @@ enum ParteTerminal {
         'Fonte de Velocidade, Endereçamento, Energia e Sensor de Levante. '
         'Parâmetros de engenharia ficam protegidos por senha.',
   ),
+  cadeado(
+    'Senha de engenharia',
+    'O cadeado trava os parâmetros de uso restrito à engenharia J.Assy '
+        '(Singulação Crítica e Porcentagem de Sujeira). Fechado, eles '
+        'aparecem apagados; tocar no cadeado pede a senha de acesso. Aberto, '
+        'tocar de novo trava.',
+  ),
   rodape(
     'Relógio e páginas',
     'Hora do terminal e a navegação entre as páginas do terminal virtual '
         'do monitor ISOBUS.',
+  ),
+  cfgSistema(
+    'Sistema',
+    'Versão do software, hardware e ID da ECU. Em Ajustes de '
+        'Compatibilidade: liberar a taxa variável no GS3 e informar o máximo '
+        'de seções que o monitor aceita (veja os monitores compatíveis).',
+  ),
+  cfgDosagem(
+    'Dosagem e Sensoriamento',
+    'Número de furos do disco e os limites dos alarmes de qualidade: '
+        'Máximo de Falhas e de Duplos, População Máxima e Mínima (% acima e '
+        'abaixo da taxa alvo), Distribuição Mínima e CV Máximo. Distância de '
+        'Medidas é o intervalo, em metros, entre cada amostragem mostrada na '
+        'tela. Ajuste de População corrige a leitura do sensor para refletir '
+        'a população real no solo; acima de 1, acende o alarme Ganho de '
+        'População Ativo. Os dois últimos são da engenharia (senha).',
+  ),
+  cfgImplemento(
+    'Implemento',
+    'Número de linhas e distância entre elas, e a geometria da plantadeira: '
+        'do engate até as rodas e das rodas até a saída das linhas curtas e '
+        'das longas, e quantas linhas são curtas. Com essas medidas o corte '
+        'de seção liga e desliga cada linha no ponto certo.',
+  ),
+  cfgFiltro(
+    'Filtro de velocidade',
+    'Filtro de dinâmica: evita que os dosadores partam ou parem com '
+        'oscilações de velocidade. Eles só partem acima da Velocidade de '
+        'Partida, depois do Tempo de Partida, e só param abaixo da Velocidade '
+        'de Parada, depois do Tempo de Parada.',
+  ),
+  cfgFonteVelocidade(
+    'Fonte de velocidade',
+    'De onde vem a velocidade: GPS ISOBUS (do monitor ou do trator), GPS '
+        'ECU (antena na ECU J.Assy, com o DOP máximo aceito), Manual '
+        '(velocidade digitada) ou Radar (com a constante de ajuste). A tela '
+        'mostra os dados que estão chegando.',
+  ),
+  cfgEnderecamento(
+    'Endereçamento',
+    'Liga o endereço de cada dosador ao número da linha. Escolha a linha, '
+        'toque em Ler e encoste o ímã no módulo do dosador daquela linha: o '
+        'endereço aparece na tela. Depois toque em Gravar.',
+  ),
+  cfgEnergia(
+    'Energia',
+    'Bateria ou Alternador hidráulico. Com alternador, configure a rotação '
+        'mínima e a máxima: fora da faixa aparecem os alarmes de baixa e de '
+        'alta rotação. Recomendado no mínimo 3000 RPM.',
+  ),
+  cfgLevante(
+    'Sensor de levante',
+    'Sensores que indicam se a plantadeira está erguida (Manobra) ou '
+        'plantando. Habilite os sensores instalados e inverta a lógica se o '
+        'sensor trabalhar ao contrário. Sensor Manual habilita a tecla '
+        'Plantar/Manobrar. Com dois sensores, escolha se basta um ou se os '
+        'dois precisam indicar manobra.',
+  ),
+  senha(
+    'Senha de acesso',
+    'Tela que pede a senha dos parâmetros de engenharia. No simulador, '
+        'qualquer senha libera.',
   );
 
   final String titulo;

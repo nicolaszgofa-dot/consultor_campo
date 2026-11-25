@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../tema.dart';
 import '../ui/componentes.dart';
 import 'explicacoes.dart';
+import 'referencias_terminal.dart';
 import 'terminal_eletric.dart';
 import 'terminal_estado.dart';
 
@@ -123,6 +124,12 @@ class _SimuladorPageState extends State<SimuladorPage> {
   }
 }
 
+final _estiloBotao = OutlinedButton.styleFrom(
+  minimumSize: const Size(64, 48),
+  foregroundColor: Cores.verdeTexto,
+  side: const BorderSide(color: Cores.verde),
+);
+
 class _Painel extends StatelessWidget {
   final TerminalEstado terminal;
   final bool explicando;
@@ -210,6 +217,37 @@ class _Painel extends StatelessWidget {
                       'Acende o alarme de fim de sementes ou entupimento.',
                     ),
                   ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: terminal.pressaoArAlta,
+                    onChanged: (v) =>
+                        terminal.mudar(() => terminal.pressaoArAlta = v),
+                    title: const Text('Pressão de ar alta'),
+                    subtitle: const Text(
+                      'O disco pega sementes duplas: excesso de duplos e '
+                      'distribuição ruim.',
+                    ),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: terminal.alternadorParado,
+                    onChanged: (v) =>
+                        terminal.mudar(() => terminal.alternadorParado = v),
+                    title: const Text('Parar o alternador'),
+                    subtitle: const Text(
+                      'Com a energia em Alternador: rotação zero e alarme.',
+                    ),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: terminal.semSinalGps,
+                    onChanged: (v) =>
+                        terminal.mudar(() => terminal.semSinalGps = v),
+                    title: const Text('Perder o sinal de GPS'),
+                    subtitle: const Text(
+                      'Com a fonte em GPS: fonte de velocidade ausente.',
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     'Velocidade: ${terminal.velocidadeKmh.toStringAsFixed(1)} '
@@ -227,7 +265,8 @@ class _Painel extends StatelessWidget {
                   const Text(
                     'No terminal: toque em TAXA para ajustar, no título do '
                     'gráfico para trocar a grandeza, numa barra para abrir a '
-                    'linha e na tecla C para Plantar ou Manobrar.',
+                    'linha, na tecla C para Plantar ou Manobrar e na tecla J '
+                    'para as configurações.',
                     style: TextStyle(
                       fontSize: 13,
                       color: Cores.textoSecundario,
@@ -237,16 +276,38 @@ class _Painel extends StatelessWidget {
               ),
             ),
           ),
+          if (terminal.alarmes case [final alarme, ...]) ...[
+            const SizedBox(height: 12),
+            CartaoAlarme(tipo: alarme.tipo, texto: alarme.texto),
+          ],
           const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const AlarmesTerminalPage(),
+              ),
+            ),
+            icon: const Icon(Icons.notification_important_outlined),
+            label: const Text('Lista de alarmes'),
+            style: _estiloBotao,
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const MonitoresCompativeisPage(),
+              ),
+            ),
+            icon: const Icon(Icons.monitor),
+            label: const Text('Monitores compatíveis'),
+            style: _estiloBotao,
+          ),
+          const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: aoAbrirPrototipo,
             icon: const Icon(Icons.open_in_new),
             label: const Text('Abrir protótipo (Adobe XD)'),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(64, 48),
-              foregroundColor: Cores.verdeTexto,
-              side: const BorderSide(color: Cores.verde),
-            ),
+            style: _estiloBotao,
           ),
           const SizedBox(height: 8),
           const Text(
