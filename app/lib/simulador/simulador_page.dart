@@ -3,7 +3,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../tema.dart';
 import '../ui/componentes.dart';
-import '../ui/icones_modulos.dart';
+import 'explicacoes.dart';
+import 'terminal_eletric.dart';
+import 'terminal_estado.dart';
 
 /// Protótipo navegável das telas do sistema Elétric (Adobe XD).
 final simuladorEletric = Uri.parse(
@@ -11,20 +13,44 @@ final simuladorEletric = Uri.parse(
   '?fullscreen&hints=off',
 );
 
-/// Apresenta o simulador e abre o protótipo no navegador (ele roda fora do
-/// app e precisa de internet).
-class SimuladorPage extends StatelessWidget {
+/// Simulador do terminal ISOBUS do Elétric: a tela de trabalho com dados
+/// simulados, o modo explicação e o protótipo do Adobe XD como alternativa.
+class SimuladorPage extends StatefulWidget {
   /// Troca a abertura do link nos testes.
   final Future<bool> Function(Uri)? abrirLink;
 
-  const SimuladorPage({super.key, this.abrirLink});
+  /// Nos testes a simulação não roda sozinha (sem relógio).
+  final bool animar;
 
-  Future<void> _abrir(BuildContext context) async {
+  const SimuladorPage({super.key, this.abrirLink, this.animar = true});
+
+  @override
+  State<SimuladorPage> createState() => _SimuladorPageState();
+}
+
+class _SimuladorPageState extends State<SimuladorPage> {
+  final _terminal = TerminalEstado();
+  var _explicando = false;
+  ParteTerminal? _parte;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.animar) _terminal.iniciar();
+  }
+
+  @override
+  void dispose() {
+    _terminal.dispose();
+    super.dispose();
+  }
+
+  Future<void> _abrirPrototipo() async {
     final mensageiro = ScaffoldMessenger.of(context);
     var abriu = false;
     try {
       abriu =
-          await (abrirLink ??
+          await (widget.abrirLink ??
               (u) => launchUrl(u, mode: LaunchMode.externalApplication))(
             simuladorEletric,
           );
@@ -45,103 +71,188 @@ class SimuladorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const dicas = [
-      'Toque nos botões da tela como no monitor do trator.',
-      'Funciona melhor com o celular deitado ou no tablet.',
-      'Precisa de internet: o simulador abre no navegador.',
-    ];
+    final terminal = TerminalEletric(
+      estado: _terminal,
+      explicando: _explicando,
+      aoExplicar: (p) => setState(() => _parte = p),
+    );
+    final painel = _Painel(
+      terminal: _terminal,
+      explicando: _explicando,
+      parte: _parte,
+      aoExplicar: (v) => setState(() {
+        _explicando = v;
+        if (!v) _parte = null;
+      }),
+      aoAbrirPrototipo: _abrirPrototipo,
+    );
     return Scaffold(
       body: Column(
         children: [
           const CabecalhoFluxo(titulo: 'Simulador Elétric'),
           Expanded(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 640),
-                child: ListView(
-                  padding: const EdgeInsets.all(20),
-                  children: [
-                    CartaoBranco(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 56,
-                            height: 56,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Cores.verdeClaro,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: const IconeDoModulo(IconeModulo.simulador),
-                          ),
-                          const SizedBox(width: 14),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Telas do sistema Elétric',
-                                  style: TextStyle(
-                                    fontFamily: fonteTitulo,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Simulação do que o operador vê no monitor '
-                                  'ISOBUS do trator com o Titanium e o '
-                                  'Selenium Elétric. Use para mostrar ao '
-                                  'produtor como o sistema funciona antes da '
-                                  'instalação.',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    height: 1.4,
-                                    color: Cores.textoSecundario,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+            child: LayoutBuilder(
+              builder: (context, box) {
+                final largo = box.maxWidth >= 900;
+                if (largo) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: Center(child: terminal)),
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: 340,
+                          child: SingleChildScrollView(child: painel),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 14),
-                    for (final d in dicas)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(top: 2),
-                              child: Icon(
-                                Icons.check_circle_outline,
-                                size: 18,
-                                color: Cores.verdeTexto,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                d,
-                                style: const TextStyle(fontSize: 15),
-                              ),
-                            ),
-                          ],
+                  );
+                }
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+                  children: [terminal, const SizedBox(height: 12), painel],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Painel extends StatelessWidget {
+  final TerminalEstado terminal;
+  final bool explicando;
+  final ParteTerminal? parte;
+  final ValueChanged<bool> aoExplicar;
+  final VoidCallback aoAbrirPrototipo;
+
+  const _Painel({
+    required this.terminal,
+    required this.explicando,
+    required this.parte,
+    required this.aoExplicar,
+    required this.aoAbrirPrototipo,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: terminal,
+      builder: (context, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CartaoBranco(
+            // SwitchListTile precisa de um Material entre ele e o cartão.
+            child: Material(
+              type: MaterialType.transparency,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: explicando,
+                    onChanged: aoExplicar,
+                    title: const Text(
+                      'Explicar a tela',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    subtitle: const Text(
+                      'Toque numa parte do terminal para ver o que ela mostra.',
+                    ),
+                  ),
+                  if (explicando) ...[
+                    const Divider(),
+                    if (parte == null)
+                      const Text(
+                        'As partes com moldura amarela têm explicação.',
+                        style: TextStyle(color: Cores.textoSecundario),
+                      )
+                    else ...[
+                      Text(
+                        parte!.titulo,
+                        style: const TextStyle(
+                          fontFamily: fonteTitulo,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                    const SizedBox(height: 16),
-                    FilledButton.icon(
-                      onPressed: () => _abrir(context),
-                      icon: const Icon(Icons.open_in_new),
-                      label: const Text('Abrir simulador'),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        parte!.texto,
+                        style: const TextStyle(fontSize: 15, height: 1.4),
+                      ),
+                    ],
                   ],
-                ),
+                ],
               ),
             ),
+          ),
+          const SizedBox(height: 12),
+          CartaoBranco(
+            // SwitchListTile precisa de um Material entre ele e o cartão.
+            child: Material(
+              type: MaterialType.transparency,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const RotuloSecao('Simular no campo'),
+                  const SizedBox(height: 4),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: terminal.linhaEntupida != null,
+                    onChanged: (v) => terminal.entupir(v ? 6 : null),
+                    title: const Text('Entupir a linha 7'),
+                    subtitle: const Text(
+                      'Acende o alarme de fim de sementes ou entupimento.',
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Velocidade: ${terminal.velocidadeKmh.toStringAsFixed(1)} '
+                    'km/h',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  Slider(
+                    value: terminal.velocidadeKmh,
+                    min: 0,
+                    max: 16,
+                    divisions: 32,
+                    label: terminal.velocidadeKmh.toStringAsFixed(1),
+                    onChanged: terminal.mudarVelocidade,
+                  ),
+                  const Text(
+                    'No terminal: toque em TAXA para ajustar, no título do '
+                    'gráfico para trocar a grandeza, numa barra para abrir a '
+                    'linha e na tecla C para Plantar ou Manobrar.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Cores.textoSecundario,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: aoAbrirPrototipo,
+            icon: const Icon(Icons.open_in_new),
+            label: const Text('Abrir protótipo (Adobe XD)'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(64, 48),
+              foregroundColor: Cores.verdeTexto,
+              side: const BorderSide(color: Cores.verde),
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Dados simulados, para treinamento. Os valores do campo vêm do '
+            'terminal no trator.',
+            style: TextStyle(fontSize: 12, color: Cores.textoSecundario),
           ),
         ],
       ),
