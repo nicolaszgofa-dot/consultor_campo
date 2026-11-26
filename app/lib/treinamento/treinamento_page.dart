@@ -7,7 +7,8 @@ import '../tema.dart';
 import '../ui/componentes.dart';
 import 'treinamento_dados.dart';
 
-/// Treinamento da revenda: módulos da Linha Elétric, cada um com aulas
+/// Material técnico (equipe e revenda): módulos da Linha Elétric com
+/// treinamento, instalação e regulagem, cada um com aulas
 /// curtas e um teste no fim. Nada fica salvo (sem servidor, sem histórico).
 class TreinamentoPage extends StatelessWidget {
   final List<ModuloTreino> modulos;
@@ -20,7 +21,7 @@ class TreinamentoPage extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
-          const CabecalhoFluxo(titulo: 'Treinamento da revenda'),
+          const CabecalhoFluxo(titulo: 'Material técnico'),
           Expanded(
             child: Center(
               child: ConstrainedBox(
@@ -29,8 +30,9 @@ class TreinamentoPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                   children: [
                     const Text(
-                      'Linha Elétric para vendedores e mecânicos. Cada módulo '
-                      'tem aulas curtas e um teste de 4 perguntas no fim.',
+                      'Linha Elétric: produto, instalação, regulagem, configuração '
+                      'e alarmes. Cada módulo tem aulas curtas e um teste de 4 '
+                      'perguntas no fim.',
                       style: TextStyle(fontSize: 16, color: Cores.tinta),
                     ),
                     const SizedBox(height: 16),

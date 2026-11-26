@@ -67,10 +67,11 @@ List<List<String>> _linhasAlarmes(List<TipoAlarme> tipos) => [
     [(t.porLinha ? 'Linha XX - ' : '') + t.texto, t.solucao ?? t.descricao],
 ];
 
-/// Treinamento da Linha Elétric para vendedores e mecânicos da revenda.
+/// Material técnico da Linha Elétric (equipe e revenda): treinamento,
+/// instalação e regulagem.
 /// Fontes: apresentações "Treinamento Linha Elétric" e manuais do Selenium e
 /// do Titanium Elétric (pasta CONFIGURADOR/manuais). Ver
-/// docs/revenda/treinamento.md.
+/// docs/material-tecnico/material-tecnico.md.
 final List<ModuloTreino> modulosTreino = [
   const ModuloTreino(
     titulo: 'Componentes do sistema',
@@ -283,8 +284,8 @@ final List<ModuloTreino> modulosTreino = [
     ],
   ),
   const ModuloTreino(
-    titulo: 'Instalação',
-    resumo: 'ECU, antenas, energia, alternador e sensor de levante',
+    titulo: 'Instalação e regulagem',
+    resumo: 'ECU, antenas, alternador, levante e disco e anel',
     icone: Icons.build_outlined,
     aulas: [
       Aula(
@@ -383,6 +384,38 @@ final List<ModuloTreino> modulosTreino = [
         ],
       ),
       Aula(
+        titulo: 'Disco e anel do Titanium',
+        blocos: [
+          Paragrafo(
+            'Cada cultura tem um kit de disco próprio: algodão, amendoim, '
+            'canola, feijão, girassol, milho, soja e sorgo. O anel ajusta a '
+            'altura para o disco girar certo no dosador. Disco e anel errados '
+            'dão falhas, duplas e semente quebrada.',
+          ),
+          Subtitulo('Trocar o disco e o anel'),
+          Lista([
+            '1. Vire o dosador de cabeça para baixo e abra as travas.',
+            '2. Coloque o disco na posição certa, com o furo central na bucha '
+                'de centralização.',
+            '3. Encaixe o anel adaptador no disco, respeitando a posição.',
+            '4. Feche a contrabase e encaixe as travas.',
+          ]),
+          Subtitulo('Se o dosador não fecha'),
+          Lista([
+            'Confira a posição do disco e do anel.',
+            'Limpe a sujeira da contrabase.',
+            'Regule as travas: abrir com facilidade e fechar com aperto leve.',
+            'Nunca deixe as travas soltas: a folga do disco e do anel '
+                'prejudica o plantio.',
+          ]),
+          Nota(
+            'Discos RampFlow têm ondulações na rampa dos furos que reduzem '
+            'duplas e falhas. A tabela de disco e anel por cultura está no '
+            'manual do Titanium.',
+          ),
+        ],
+      ),
+      Aula(
         titulo: 'O que não vem no kit',
         blocos: [
           Lista([
@@ -429,17 +462,17 @@ final List<ModuloTreino> modulosTreino = [
         explicacao: 'Acima de 29 linhas, o indicado são 2 antenas RF.',
       ),
       Pergunta(
-        enunciado: 'Como instalar a ECU?',
+        enunciado: 'Como devem ficar as travas do dosador Titanium?',
         opcoes: [
-          'No centro da máquina, com os conectores para baixo',
-          'Na cabine, ao lado do monitor',
-          'Na ponta da barra, com os conectores para cima',
-          'Dentro da caixa de semente',
+          'Abrindo fácil e fechando com aperto leve',
+          'Soltas, para trocar o disco mais rápido',
+          'O mais apertadas possível',
+          'Tanto faz, o anel segura o disco',
         ],
         correta: 0,
         explicacao:
-            'No centro, à vista do operador, e conectores para baixo para não '
-            'acumular água.',
+            'Trava solta deixa folga no disco e no anel e prejudica o '
+            'plantio.',
       ),
     ],
   ),

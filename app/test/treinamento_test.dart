@@ -124,7 +124,7 @@ void main() {
 
     await tester.tap(find.text('Concluir'));
     await tester.pumpAndSettle();
-    expect(find.text('Treinamento da revenda'), findsOneWidget);
+    expect(find.text('Material técnico'), findsOneWidget);
   });
 
   testWidgets('as aulas reais abrem sem erro de layout', (tester) async {

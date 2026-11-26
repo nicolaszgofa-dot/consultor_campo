@@ -1,10 +1,10 @@
-# Treinamento da revenda
+# Material técnico
 
-Treinamento da Linha Elétric (Selenium Elétric e Titanium Elétric) para vendedores e mecânicos das revendas. Fica só no app da revenda (JA Campo Revenda).
+Treinamento, instalação e regulagem da Linha Elétric (Selenium Elétric e Titanium Elétric). É o mesmo card, com o mesmo conteúdo, no app da equipe (JA Campo) e no da revenda (JA Campo Revenda). Na revenda, ele substitui os antigos "Regulagem e instalação" e "Treinamento da revenda".
 
 ## Como funciona
 
-- A tela inicial do Treinamento lista os módulos. Cada um mostra quantas aulas e perguntas tem.
+- A tela inicial do Material técnico lista os módulos. Cada um mostra quantas aulas e perguntas tem.
 - Cada módulo tem aulas curtas, uma por tela, com "Anterior" e "Próxima aula". A barra do topo mostra o passo.
 - Algumas aulas têm um atalho para praticar: o Simulador Elétric, a lista de alarmes ou os monitores compatíveis.
 - No fim de cada módulo há um teste de 4 perguntas de múltipla escolha. Cada resposta mostra na hora se está certa e o porquê. Com todas respondidas, aparece "X de 4 certas" e, se errou alguma, o botão "Refazer o teste".
@@ -18,11 +18,12 @@ Treinamento da Linha Elétric (Selenium Elétric e Titanium Elétric) para vende
    - a ECU J.Assy;
    - o LED dos drivers;
    - o alternador hidráulico, com a tabela de RPM por número de linhas.
-2. **Instalação:**
+2. **Instalação e regulagem:**
    - ECU e antenas;
    - energia das linhas (até 10 por ramo);
    - ligar e desligar o alternador;
    - sensor de levante;
+   - disco e anel do Titanium: trocar e regular as travas;
    - o que não vem no kit.
 3. **Tela de trabalho:**
    - as partes da tela;
@@ -51,7 +52,8 @@ As fontes estão em `CONFIGURADOR/manuais` e `CONFIGURADOR/TREINAMENTO` (ver [ma
 - o manual do Titanium Elétric, para LED, alternador, instalação, implemento e alarmes;
 - a apresentação "Treinamento Linha Elétric", para benefícios, composição do kit, tela, configurações e monitores;
 - o manual do Selenium, para Configuração do Terminal Virtual, Compatibilidade e Lista de Alarme;
-- o manual do Titanium, para o FAQ de grafite e de velocidade.
+- o manual do Titanium, para o FAQ de grafite e de velocidade;
+- o manual do Titanium Elétric, para a troca do disco e do anel e as travas.
 
 As fotos da ECU, dos LEDs, do alternador e do sensor de levante foram reduzidas para `app/assets/treinamento/`.
 

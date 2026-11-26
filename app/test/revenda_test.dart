@@ -25,7 +25,6 @@ void main() {
     for (final fora in const [
       'Inteligência de mercado',
       'Playbook',
-      'Material técnico',
       'Relatórios',
     ]) {
       expect(titulos, isNot(contains(fora)), reason: fora);
@@ -39,16 +38,15 @@ void main() {
         'Proposta comercial',
         'Pedido de peças',
         'Assistência e garantia',
-        'Regulagem e instalação',
-        'Treinamento da revenda',
+        'Material técnico',
         'Conceito',
       ]),
     );
-    // Regulagem espera o material técnico.
+    // Tudo pronto: nada fica "Em breve" na revenda.
     final emBreve = funcionalidadesRevenda()
         .where((f) => f.emBreve)
         .map((f) => f.titulo);
-    expect(emBreve, ['Regulagem e instalação']);
+    expect(emBreve, isEmpty);
   });
 
   test('pedido de peças: cabeçalho da revenda e as peças', () {

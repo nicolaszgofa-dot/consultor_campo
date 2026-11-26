@@ -93,10 +93,11 @@ List<Funcionalidade> funcionalidadesEquipe() => [
     icone: IconeModulo.simulador,
     tela: () => const SimuladorPage(),
   ),
-  const Funcionalidade(
+  Funcionalidade(
     titulo: 'Material técnico',
-    descricao: 'Catálogos, manuais e fichas técnicas',
+    descricao: _descricaoMaterialTecnico,
     icone: IconeModulo.materialTecnico,
+    tela: () => TreinamentoPage(),
   ),
   const Funcionalidade(
     titulo: 'Relatórios',
@@ -105,9 +106,8 @@ List<Funcionalidade> funcionalidadesEquipe() => [
   ),
 ];
 
-/// App das revendas parceiras: sem Inteligência de mercado, Playbook,
-/// Material técnico e Relatórios; com pedido de peças, assistência e
-/// garantia, regulagem e treinamento.
+/// App das revendas parceiras: sem Inteligência de mercado, Playbook e
+/// Relatórios; com pedido de peças e assistência e garantia.
 List<Funcionalidade> funcionalidadesRevenda() => [
   Funcionalidade(
     titulo: 'Avaliação de plantio',
@@ -145,15 +145,10 @@ List<Funcionalidade> funcionalidadesRevenda() => [
     icone: IconeModulo.assistencia,
     tela: () => const AssistenciaPage(),
   ),
-  const Funcionalidade(
-    titulo: 'Regulagem e instalação',
-    descricao: 'Passo a passo de instalação e regulagem dos produtos',
-    icone: IconeModulo.regulagem,
-  ),
   Funcionalidade(
-    titulo: 'Treinamento da revenda',
-    descricao: 'Linha Elétric para vendedores e mecânicos',
-    icone: IconeModulo.treinamento,
+    titulo: 'Material técnico',
+    descricao: _descricaoMaterialTecnico,
+    icone: IconeModulo.materialTecnico,
     tela: () => TreinamentoPage(),
   ),
   Funcionalidade(
@@ -169,3 +164,7 @@ List<Funcionalidade> funcionalidadesRevenda() => [
     tela: () => const SimuladorPage(),
   ),
 ];
+
+/// Material técnico: treinamento, instalação e regulagem, igual nos dois apps.
+const _descricaoMaterialTecnico =
+    'Treinamento, instalação e regulagem da Linha Elétric';
