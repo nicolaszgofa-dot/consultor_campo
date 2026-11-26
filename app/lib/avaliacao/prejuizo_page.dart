@@ -5,6 +5,7 @@ import '../tema.dart';
 import '../ui/componentes.dart';
 import '../ui/formatos.dart';
 import 'avaliacao_estado.dart';
+import 'avaliacao_pdf_page.dart';
 import 'resultado_page.dart';
 
 class PrejuizoPage extends StatefulWidget {
@@ -132,6 +133,18 @@ class _PrejuizoPageState extends State<PrejuizoPage> {
           style: TextStyle(fontSize: 12, color: Cores.textoSecundario),
         ),
       ],
+      rodape: FilledButton.icon(
+        onPressed: () => abrirRelatorioAvaliacao(
+          context,
+          widget.estado,
+          cenario: _cenario,
+          prejuizo: prejuizo,
+        ),
+        icon: const Icon(Icons.picture_as_pdf_outlined),
+        label: Text(
+          prejuizo == null ? 'Relatório em PDF (sem R\$)' : 'Relatório em PDF',
+        ),
+      ),
     );
   }
 }

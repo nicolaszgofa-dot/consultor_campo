@@ -5,6 +5,7 @@ import '../tema.dart';
 import '../ui/componentes.dart';
 import '../ui/formatos.dart';
 import 'avaliacao_estado.dart';
+import 'avaliacao_pdf_page.dart';
 import 'prejuizo_page.dart';
 
 String nomeCenario(Cenario c) => switch (c) {
@@ -222,6 +223,20 @@ class _ResultadoPageState extends State<ResultadoPage> {
         Text(
           _fonte(id.cultura),
           style: const TextStyle(fontSize: 12, color: Cores.textoSecundario),
+        ),
+        OutlinedButton.icon(
+          onPressed: () => abrirRelatorioAvaliacao(
+            context,
+            widget.estado,
+            cenario: _cenario,
+          ),
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          label: const Text('Relatório em PDF (sem R\$)'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(64, 48),
+            foregroundColor: Cores.verdeTexto,
+            side: const BorderSide(color: Cores.verde),
+          ),
         ),
       ],
       rodape: FilledButton(
