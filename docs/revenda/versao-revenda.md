@@ -11,7 +11,7 @@ Versão do app para as revendas parceiras. O código é o mesmo do app da equipe
 | Inteligência de mercado, Playbook, Material técnico, Relatórios | sim | não |
 | Assistência e garantia | não | sim |
 | Regulagem e instalação | não | em breve |
-| Treinamento da revenda | não | em breve |
+| Treinamento da revenda (Linha Elétric) | não | sim |
 
 Como a escolha é feita na compilação, o conteúdo só da equipe nem entra no app da revenda. Isso vale, por exemplo, para as fichas de concorrência e os preços da concorrência.
 
@@ -25,7 +25,8 @@ Como a escolha é feita na compilação, o conteúdo só da equipe nem entra no 
   - a descrição do problema e o que já foi feito.
 
   "Copiar chamado" monta o texto para o pós-venda. As fotos seguem na mesma conversa.
-- **Regulagem e instalação** e **Treinamento da revenda:** ficam "Em breve" até a J.Assy enviar o material (manuais, passos de regulagem, conteúdo do treinamento).
+- **Treinamento da revenda:** seis módulos da Linha Elétric, com aulas curtas e um teste em cada (ver [treinamento.md](treinamento.md)).
+- **Regulagem e instalação:** fica "Em breve" até a J.Assy enviar o material (manuais e passos de regulagem).
 
 Nada fica salvo: pedido e chamado existem só enquanto a tela está aberta, como as propostas. Isso vale até haver um servidor.
 
@@ -37,4 +38,4 @@ Nada fica salvo: pedido e chamado existem só enquanto a tela está aberta, como
 ## A definir
 
 - O WhatsApp ou e-mail do pós-venda e de peças. Hoje o app só copia o texto, e a revenda escolhe para quem mandar.
-- O material de Regulagem e instalação e do Treinamento da revenda.
+- O material de Regulagem e instalação, e o treinamento das outras linhas de produto.

@@ -155,7 +155,7 @@ class ConceitoDetalhePage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                   children: [
                     for (final b in conceito.blocos) ...[
-                      _BlocoConceito(bloco: b),
+                      BlocoConceito(bloco: b),
                       const SizedBox(height: 12),
                     ],
                   ],
@@ -169,10 +169,11 @@ class ConceitoDetalhePage extends StatelessWidget {
   }
 }
 
-class _BlocoConceito extends StatelessWidget {
+/// Um bloco de texto (também usado nas aulas do Treinamento).
+class BlocoConceito extends StatelessWidget {
   final Bloco bloco;
 
-  const _BlocoConceito({required this.bloco});
+  const BlocoConceito({super.key, required this.bloco});
 
   @override
   Widget build(BuildContext context) {
@@ -261,6 +262,31 @@ class _BlocoConceito extends StatelessWidget {
               ),
           ],
         ),
+      ),
+      Imagem(:final asset, :final legenda) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              color: Cores.branco,
+              constraints: const BoxConstraints(maxHeight: 280),
+              width: double.infinity,
+              child: Image.asset(asset, fit: BoxFit.contain),
+            ),
+          ),
+          if (legenda != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                legenda,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Cores.textoSecundario,
+                ),
+              ),
+            ),
+        ],
       ),
       Nota(:final texto) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,

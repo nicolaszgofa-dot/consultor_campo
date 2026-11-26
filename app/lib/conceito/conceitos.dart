@@ -37,6 +37,13 @@ class Nota extends Bloco {
   const Nota(this.texto);
 }
 
+/// Foto ou desenho dos assets do app, com legenda opcional.
+class Imagem extends Bloco {
+  final String asset;
+  final String? legenda;
+  const Imagem(this.asset, {this.legenda});
+}
+
 class Conceito {
   final String titulo;
   final String resumo;

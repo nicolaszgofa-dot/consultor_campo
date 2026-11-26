@@ -37,6 +37,7 @@ flutter:
     - assets/marcas/
     - assets/pecas/
     - assets/proposta/
+    - assets/treinamento/
   # Barlow (SIL Open Font License, assets/fonts/OFL.txt), embutida para
   # funcionar sem internet no campo.
   fonts:

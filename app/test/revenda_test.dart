@@ -44,11 +44,11 @@ void main() {
         'Conceito',
       ]),
     );
-    // Regulagem e treinamento esperam o material técnico.
+    // Regulagem espera o material técnico.
     final emBreve = funcionalidadesRevenda()
         .where((f) => f.emBreve)
         .map((f) => f.titulo);
-    expect(emBreve, ['Regulagem e instalação', 'Treinamento da revenda']);
+    expect(emBreve, ['Regulagem e instalação']);
   });
 
   test('pedido de peças: cabeçalho da revenda e as peças', () {

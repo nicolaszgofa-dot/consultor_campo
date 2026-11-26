@@ -10,6 +10,7 @@ import 'perfil.dart';
 import 'proposta/propostas_page.dart';
 import 'roi/roi_page.dart';
 import 'simulador/simulador_page.dart';
+import 'treinamento/treinamento_page.dart';
 import 'ui/icones_modulos.dart';
 
 class Funcionalidade {
@@ -149,10 +150,11 @@ List<Funcionalidade> funcionalidadesRevenda() => [
     descricao: 'Passo a passo de instalação e regulagem dos produtos',
     icone: IconeModulo.regulagem,
   ),
-  const Funcionalidade(
+  Funcionalidade(
     titulo: 'Treinamento da revenda',
-    descricao: 'Produtos e técnica para vendedores e mecânicos',
+    descricao: 'Linha Elétric para vendedores e mecânicos',
     icone: IconeModulo.treinamento,
+    tela: () => TreinamentoPage(),
   ),
   Funcionalidade(
     titulo: 'Conceito',
