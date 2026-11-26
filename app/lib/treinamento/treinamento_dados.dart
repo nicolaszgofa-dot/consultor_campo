@@ -7,7 +7,8 @@ import '../simulador/alarmes.dart';
 enum Atalho {
   simulador('Praticar no Simulador Elétric', Icons.touch_app_outlined),
   alarmes('Ver a lista de alarmes', Icons.notifications_active_outlined),
-  monitores('Ver os monitores compatíveis', Icons.tv_outlined);
+  monitores('Ver os monitores compatíveis', Icons.tv_outlined),
+  desligamento('Configurar o desligamento de linha', Icons.tune);
 
   final String rotulo;
   final IconData icone;
@@ -1032,6 +1033,7 @@ final List<ModuloTreino> modulosTreino = [
             'Teste numa cabeceira e confira no chão.',
           ]),
         ],
+        atalho: Atalho.desligamento,
       ),
     ],
     perguntas: [

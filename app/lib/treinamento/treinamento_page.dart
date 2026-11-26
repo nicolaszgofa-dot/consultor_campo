@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../conceito/conceito_page.dart';
 import '../simulador/referencias_terminal.dart';
+import '../desligamento/desligamento_page.dart';
 import '../simulador/simulador_page.dart';
 import '../tema.dart';
 import '../ui/componentes.dart';
@@ -36,6 +37,23 @@ class TreinamentoPage extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: Cores.tinta),
                     ),
                     const SizedBox(height: 16),
+                    const RotuloSecao('Ferramenta de campo'),
+                    const SizedBox(height: 8),
+                    _CartaoFerramenta(
+                      titulo: 'Desligamento de linha',
+                      resumo:
+                          'Monitor e ativações, medidas da plantadeira e '
+                          'ajuste do tempo de liga e desliga no campo',
+                      icone: Icons.tune,
+                      aoAbrir: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const DesligamentoPage(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const RotuloSecao('Módulos'),
+                    const SizedBox(height: 8),
                     for (var i = 0; i < modulos.length; i++) ...[
                       _CartaoModulo(
                         numero: i + 1,
@@ -63,6 +81,80 @@ class TreinamentoPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Ferramenta de campo no topo do Material técnico (fundo escuro, para não
+/// parecer mais um módulo).
+class _CartaoFerramenta extends StatelessWidget {
+  final String titulo;
+  final String resumo;
+  final IconData icone;
+  final VoidCallback aoAbrir;
+
+  const _CartaoFerramenta({
+    required this.titulo,
+    required this.resumo,
+    required this.icone,
+    required this.aoAbrir,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: titulo,
+      child: Material(
+        color: Cores.verdeEscuro,
+        borderRadius: BorderRadius.circular(20),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: aoAbrir,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Cores.verde,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(icone, size: 28, color: Cores.branco),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        titulo,
+                        style: const TextStyle(
+                          fontFamily: fonteTitulo,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: Cores.branco,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        resumo,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFFCFE8C9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Cores.branco),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -297,6 +389,7 @@ class _ModuloPageState extends State<ModuloPage> {
     Atalho.simulador => const SimuladorPage(),
     Atalho.alarmes => const AlarmesTerminalPage(),
     Atalho.monitores => const MonitoresCompativeisPage(),
+    Atalho.desligamento => const DesligamentoPage(),
   };
 
   List<Widget> _teste() {
