@@ -20,10 +20,67 @@ void main() {
       expect(a.passos, isNotEmpty, reason: a.modelo);
       expect(a.compatibilidade.modelo, a.modelo);
     }
-    // Só o que foi conferido no manual do fabricante leva o selo.
-    expect(ajustesMonitores.where((a) => a.confirmado).map((a) => a.modelo), [
-      'GS4',
-    ]);
+    // Só o CCI 1200 ainda não tem tutorial J.Assy nem manual conferido; os
+    // tutoriais trazem o vídeo e o campo do ajuste fino.
+    expect(
+      ajustesMonitores
+          .where((a) => !a.conferencia.conferido)
+          .map((a) => a.modelo),
+      ['CCI 1200'],
+    );
+    for (final a in ajustesMonitores) {
+      if (a.conferencia == Conferencia.tutorialJassy) {
+        expect(a.video, startsWith('https://www.youtube.com/'));
+        expect(a.campo, isNotNull, reason: a.modelo);
+      }
+    }
+  });
+
+  group('instrução por monitor', () {
+    final atrasou = CorrecaoTempo.calcular(
+      ocorrencia: Ocorrencia.desligouDepois,
+      distanciaM: 1,
+      velocidadeKmh: 7.2,
+    )!;
+    AjusteMonitor m(String modelo) =>
+        ajustesMonitores.firstWhere((a) => a.modelo == modelo);
+
+    test('tempo: aumenta o campo de desligar em segundos', () {
+      final i = atrasou.instrucaoPara(m('GPX-750').campo)!;
+      expect(i.campo, 'Latência desligada');
+      expect(i.aumentar, isTrue);
+      expect(i.valor, closeTo(0.5, 1e-9));
+      expect(i.unidade, 's');
+      expect(i.novoValor(0.3), closeTo(0.8, 1e-9));
+    });
+
+    test('distância: InCommand em metros', () {
+      final i = atrasou.instrucaoPara(m('InCommand 1200').campo)!;
+      expect(i.campo, 'Antecipação Desligar');
+      expect(i.aumentar, isTrue);
+      expect(i.valor, 1);
+      expect(i.unidade, 'm');
+    });
+
+    test('Hexagon: saída maior desliga mais tarde, então diminui', () {
+      final i = atrasou.instrucaoPara(m('Ti7 e Ti10').campo)!;
+      expect(i.campo, 'Antecipação de saída');
+      expect(i.aumentar, isFalse);
+      // Ao ligar, a entrada segue o sentido normal.
+      final ligouTarde = CorrecaoTempo.calcular(
+        ocorrencia: Ocorrencia.ligouDepois,
+        distanciaM: 0.5,
+        velocidadeKmh: 6,
+      )!;
+      final e = ligouTarde.instrucaoPara(m('Ti7 e Ti10').campo)!;
+      expect(e.campo, 'Antecipação de entrada');
+      expect(e.aumentar, isTrue);
+      expect(e.valor, 0.5);
+    });
+
+    test('sem campo conhecido, sem instrução', () {
+      expect(atrasou.instrucaoPara(m('CCI 1200').campo), isNull);
+    });
   });
 
   group('ajuste no campo', () {
@@ -133,8 +190,17 @@ void main() {
     tester.view.physicalSize = const Size(420, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    final abertos = <Uri>[];
     await tester.pumpWidget(
-      MaterialApp(theme: temaConsultor(), home: const DesligamentoPage()),
+      MaterialApp(
+        theme: temaConsultor(),
+        home: DesligamentoPage(
+          abrirLink: (u) async {
+            abertos.add(u);
+            return true;
+          },
+        ),
+      ),
     );
 
     // Monitor.
@@ -142,9 +208,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Retardo mecânico'), findsWidgets);
     expect(find.text('Conferido no manual do fabricante'), findsOneWidget);
-    await tester.tap(find.text('Hexagon Ti7 e Ti10'));
+    await tester.tap(find.text('CCI 1200'));
     await tester.pumpAndSettle();
     expect(find.text('Confira no manual do monitor'), findsOneWidget);
+    await tester.tap(find.text('Trimble GPX-750'));
+    await tester.pumpAndSettle();
+    expect(find.text('Conferido no tutorial J.Assy'), findsOneWidget);
+    await tester.tap(find.text('Ver o tutorial em vídeo'));
+    expect(abertos.single.toString(), contains('po5IVsjCkRg'));
 
     // Geometria.
     await tester.tap(find.text('Geometria'));
@@ -166,10 +237,15 @@ void main() {
     await tester.tap(_rotulo('Desligou depois'));
     await campo('Medido no chão (m)', '1');
     await campo('Velocidade (km/h)', '7,2');
-    await campo('Tempo atual no monitor (s), opcional', '0,3');
+    await campo('Valor atual no monitor, opcional', '0,3');
     await tester.pump();
-    expect(find.text('Aumente o tempo de desligar'), findsOneWidget);
-    expect(find.text('+ 0,50 s'), findsOneWidget);
+    expect(
+      find.text('Monitor: Trimble GPX-750 (ajuste em segundos)'),
+      findsOne,
+    );
+    expect(find.text('Desligar mais cedo'), findsOneWidget);
+    expect(find.text('0,50 s'), findsOneWidget);
+    expect(find.text('Aumente "Latência desligada" em 0,50 s'), findsOneWidget);
     expect(find.text('De 0,30 s para 0,80 s'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

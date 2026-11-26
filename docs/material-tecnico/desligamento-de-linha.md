@@ -8,12 +8,14 @@ Para abrir: Material técnico > "Ferramenta de campo: Desligamento de linha", ou
 
 Você escolhe um dos 9 monitores compatíveis (a mesma lista do simulador). Para cada um, a ferramenta mostra:
 
-- as ativações pedidas pelo treinamento da Linha Elétric;
-- o controle de seção, o Task Controller e o máximo de seções, do manual do Selenium;
-- o nome do ajuste de tempo de liga e desliga nesse monitor e onde ele fica;
-- um selo:
-  - **"Conferido no manual do fabricante"**, quando o caminho foi lido na documentação oficial;
-  - **"Confira no manual do monitor"**, quando é só orientação geral.
+- **Selo de origem:**
+  - **"Conferido no tutorial J.Assy":** GS3, C3000, Pro 700/1200, CR7, GFX 750, InCommand 1200 e Hexagon.
+  - **"Conferido no manual do fabricante":** GS4.
+  - **"Confira no manual do monitor":** CCI 1200, que ainda não tem tutorial.
+- **Licenças:** o que comprar e o que já vem liberado.
+- **Passo a passo:** onde fica o corte de seção, com as recomendações da J.Assy.
+- **Ajuste fino:** o nome do campo de ligar e o de desligar, em segundos ou em metros.
+- **Vídeo:** o botão "Ver o tutorial em vídeo", que abre o tutorial J.Assy no YouTube.
 
 Depois vem a lista do que conferir antes de ir ao campo:
 - ativações;
@@ -21,6 +23,25 @@ Depois vem a lista do que conferir antes de ir ao campo:
 - medidas do implemento;
 - sinal de GPS;
 - linhas endereçadas.
+
+| Monitor | Licença para o corte | Ajuste fino (ligar / desligar) | Unidade |
+|---|---|---|---|
+| John Deere GS3 | Controle de seção | Ligar / Desligar (atraso) | s |
+| John Deere GS4 | Controle de seção | Retardo mecânico Ligado / Desligado | s |
+| Topcon C3000 | Controle automático de seção (até 32) | Tempo de atividade / Tempo de inatividade | s |
+| Case Pro 700 | Task Controller (até 48) | Atraso do produto | s |
+| Case Pro 1200 | De fábrica + Controlador de tarefas | Atraso iniciar / Atraso interromper (com Calibrar) | s |
+| Raven CR7 | Controlador de tarefas | Olhar adiante para ligar / desligar | s |
+| Trimble GFX 750 | Task Controller (até 256, por QR Code) | Latência ligada / desligada | s |
+| Ag Leader InCommand 1200 | ISOBUS | Antecipação Ligar / Desligar | m |
+| Hexagon Ti7/Ti10 | TC e VT | Antecipação de entrada / de saída | m |
+
+Recomendações dos tutoriais para a sobreposição:
+- **Hexagon:** 50%.
+- **InCommand:** 50 a 70%.
+- **Pro 1200 e GFX 750:** não usar 99%, porque o corte fica muito sensível.
+- **Hexagon:** deixe "Sempre sobrepor" desligado.
+- **InCommand:** deixe desmarcados os atrasos de seção vindos da ECU, porque o ajuste é feito no monitor.
 
 ## Geometria
 
@@ -30,51 +51,52 @@ São as medidas para o terminal J.Assy (Configurações > Implemento), nos três
 - **Desencontradas:** o mesmo, com saída curta e saída longa, e se a linha 1 é curta ou longa.
 - **Personalizadas:** você toca nas linhas do desenho para marcar quais são longas.
 
-O desenho mostra a plantadeira vista de cima com as cotas, e o resultado vem pronto para digitar no terminal, com a largura de trabalho. A ferramenta avisa quando uma medida parece errada:
-- mais de 62 linhas;
-- espaçamento fora de 0,15 a 1,2 m;
-- saída longa mais perto das rodas que a curta;
-- medida acima de 15 m.
+O desenho mostra a plantadeira vista de cima com as cotas, e o resultado vem pronto para digitar no terminal, com a largura de trabalho. Nos tutoriais, os monitores puxam essas medidas do terminal J.Assy sozinhos; a posição da antena GPS no trator é configurada no próprio monitor.
 
 ## No campo
 
 O técnico informa o que viu no chão:
 
-| | Regulagem | No chão | O que fazer |
+| | Regulagem | No chão | O comando precisa vir |
 |---|---|---|---|
-| Desligou antes | adiantada | falha | diminuir o tempo de desligar |
-| Desligou depois | atrasada | sobreposição | aumentar o tempo de desligar |
-| Ligou antes | adiantada | sobreposição | diminuir o tempo de ligar |
-| Ligou depois | atrasada | falha | aumentar o tempo de ligar |
+| Desligou antes | adiantada | falha | mais tarde |
+| Desligou depois | atrasada | sobreposição | mais cedo |
+| Ligou antes | adiantada | sobreposição | mais tarde |
+| Ligou depois | atrasada | falha | mais cedo |
 
-A correção é **tempo = distância medida ÷ velocidade** (km/h ÷ 3,6). Exemplo: 1 m a 7,2 km/h = 0,5 s. Com o tempo atual do monitor, a ferramenta já dá o novo valor, que nunca fica abaixo de zero.
+A correção em tempo é **distância medida ÷ velocidade** (km/h ÷ 3,6). Exemplo: 1 m a 7,2 km/h = 0,5 s.
 
-"Tempo" aqui é o tempo de reação que o monitor desconta para mandar ligar ou desligar antes. Cada marca chama de um jeito: retardo, atraso, antecipação ou look-ahead. Aumentar faz o comando sair mais cedo.
+Com o monitor escolhido na aba Monitor, a ferramenta diz o campo exato, por exemplo: Aumente "Latência desligada" em 0,50 s.
+
+- Nos ajustes de tempo, valor maior manda o comando mais cedo.
+- Nos de distância (InCommand e Hexagon), a correção é a própria distância medida.
+- No Hexagon, a saída é o contrário: valor maior desliga mais tarde, então a ferramenta inverte o sentido.
+
+Com o valor atual, ela já dá o novo, que nunca fica abaixo de zero. Sem monitor escolhido, a resposta vem em segundos e em metros.
 
 ## Fontes
 
-- **Treinamento Linha Elétric:**
-  - ativações por monitor;
-  - regulagem adiantada e atrasada;
-  - medidas do implemento.
-- **Manual do Titanium Elétric:**
-  - tipos de implemento;
-  - "regular os tempos de sobreposição e saltos conferindo no solo";
-  - consultar o fornecedor do monitor.
+- **Tutoriais J.Assy** no YouTube, playlist [Monitores ISOBUS](https://www.youtube.com/playlist?list=PL_ya3TnusvURcXwA5VPsZpmBsxidQGwC9). Lidos pela transcrição:
+  - [GS3](https://www.youtube.com/watch?v=OIZF7UgBhIk);
+  - [Pro 700](https://www.youtube.com/watch?v=XfvS9gRLkL8);
+  - [Pro 1200](https://www.youtube.com/watch?v=Ax1rRUE6AwQ);
+  - [C3000](https://www.youtube.com/watch?v=1sMy4I6cnHc);
+  - [CR7](https://www.youtube.com/watch?v=WXhLNXwpL-w);
+  - [GFX 750](https://www.youtube.com/watch?v=po5IVsjCkRg);
+  - [InCommand 1200](https://www.youtube.com/watch?v=V7r-_KhTvn8);
+  - [Hexagon Ti10](https://www.youtube.com/watch?v=tBoc9WMMJYM).
+- **Treinamento Linha Elétric:** ativações por monitor e regulagem adiantada e atrasada.
+- **Manual do Titanium Elétric:** tipos de implemento e "regular os tempos de sobreposição e saltos conferindo no solo".
 - **Manual do Selenium:** compatibilidade.
-- **John Deere Geração 4** (ajuda on-line do 4640):
-  - [Retardo mecânico](https://displaysimulator.deere.com/onscreen_help/4640/current/en/seedstar/impl_profile_mechanical_delay.htm): Mechanical Delay On/Off, de 0,10 a 15 s, com o procedimento de medição e o Ajuste de desempenho (Performance Tuning);
-  - [como o controle de seção decide](https://displaysimulator.deere.com/onscreen_help/4640/current/en/section_control/section_control_theory.htm).
+- **John Deere Geração 4** (ajuda on-line do 4640): [Retardo mecânico](https://displaysimulator.deere.com/onscreen_help/4640/current/en/seedstar/impl_profile_mechanical_delay.htm), de 0,10 a 15 s, com o Ajuste de desempenho.
 - **John Deere** ([perfil de implemento](https://displaysimulator.deere.com/onscreen_help/S7combine/current/en/implement_profiles/implement_profiles_mechanical_delay.htm)): para plantadeiras, 0,5 a 1,0 s para ligar e 0,3 s para desligar, como valor de partida.
-- **Raven:** manual do Viper Pro (look-ahead de ligar e desligar, em segundos).
-- **Topcon:** índice do manual do X35 (Controle de seção > Temporização).
-- **ISOBUS:** DDI [205](https://www.isobus.net/isobus/dDEntity/926) e [206](https://www.isobus.net/isobus/dDEntity/927) (SC Setpoint Turn On/Off Time).
 
 ## A confirmar
 
-- **Tempos de partida para o Elétric:** o motor elétrico responde diferente de uma transmissão mecânica. Hoje a ferramenta só mostra o valor da John Deere para plantadeiras.
-- **Se a ECU J.Assy informa os tempos ao monitor:** pelo ISOBUS (DDI 205 e 206) o implemento pode mandar o seu tempo de ligar e desligar.
-- **O caminho do menu nos monitores:** CCI 1200, Case IH, Trimble, Ag Leader, Hexagon, Raven CR7, Topcon C3000 e o GS3.
+- **CCI 1200:** onde fica o ajuste fino. Ainda não há tutorial.
+- **Pro 700:** os nomes exatos das distâncias em metros do menu Sobreposição, porque a transcrição ficou incompleta nesse trecho.
+- **Tempos de partida para o Elétric:** hoje a ferramenta só mostra a referência da John Deere.
+- **Se a ECU J.Assy informa os atrasos ao monitor:** o InCommand tem a opção de usar os atrasos vindos da ECU, mas o tutorial deixa desmarcada.
 
 ## Código
 

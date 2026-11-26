@@ -15,6 +15,8 @@ Material oficial da J.Assy usado como fonte do app. Os arquivos ficam fora do re
 | `Treinamento_SeleniumPro_VendasPDM (2).pptx` | Selenium Pro | Treinamento de vendas e pós-venda: para quem é, principais concorrentes e quiz. | ainda não |
 | `Catalogo de produtos.pdf` | Todos | Catálogo comercial da linha. | ainda não |
 
+Vídeos: a playlist [Monitores ISOBUS](https://www.youtube.com/playlist?list=PL_ya3TnusvURcXwA5VPsZpmBsxidQGwC9) da J.Assy no YouTube tem um tutorial por monitor (GS3, Pro 700, Pro 1200, C3000, CR7, GFX 750, InCommand 1200 e Hexagon Ti10). Dá para ler a transcrição pelo navegador do app. Já foi usada no Desligamento de linha.
+
 O material de 2024 usado no Simulador Elétric (`TREINAMENTO/Manual-Selenium_removed.pdf` e `Treinamento Linha Elétric 2024 (1).pptx`) continua valendo. A apresentação nova da Linha Elétric inclui os mesmos slides.
 
 ## Como extrair o texto

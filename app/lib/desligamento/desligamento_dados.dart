@@ -1,37 +1,77 @@
 import '../simulador/referencias_terminal.dart';
 
 // ---------------------------------------------------------------------------
-// Monitor: ativações e onde ajustar o tempo de liga e desliga.
+// Monitor: licenças e onde ajustar o liga e desliga.
 // ---------------------------------------------------------------------------
+
+/// De onde veio o passo a passo de um monitor.
+enum Conferencia {
+  tutorialJassy('Conferido no tutorial J.Assy'),
+  manualFabricante('Conferido no manual do fabricante'),
+  conferir('Confira no manual do monitor');
+
+  final String selo;
+
+  const Conferencia(this.selo);
+
+  bool get conferido => this != conferir;
+}
+
+/// Os campos de ajuste fino do liga e desliga num monitor.
+class CampoAjuste {
+  /// Nome do campo do comando de ligar e do de desligar.
+  final String ligar;
+  final String desligar;
+
+  /// true quando o ajuste é uma distância (m); false, um tempo (s).
+  final bool emMetros;
+
+  /// true quando, no campo de desligar, valor maior desliga mais tarde
+  /// (é uma sobreposição de saída, não uma antecipação).
+  final bool desligarMaiorEhMaisTarde;
+
+  /// Dica extra do monitor (assistente de calibração, por exemplo).
+  final String? observacao;
+
+  const CampoAjuste({
+    required this.ligar,
+    required this.desligar,
+    this.emMetros = false,
+    this.desligarMaiorEhMaisTarde = false,
+    this.observacao,
+  });
+}
 
 /// O que o técnico precisa saber de um monitor para o desligamento de linha.
 class AjusteMonitor {
   /// Modelo como está em [monitoresCompativeis].
   final String modelo;
 
-  /// Ativações pedidas pelo treinamento da Linha Elétric.
+  /// Licenças e ativações para o corte de seção.
   final String ativacoes;
 
-  /// Nome do ajuste de tempo no monitor (como o fabricante chama).
-  final String nomeDoAjuste;
-
-  /// Onde fica e como ajustar, em passos.
+  /// Onde ficam as configurações do corte de seção, em passos.
   final List<String> passos;
 
-  /// true quando o caminho foi conferido no manual do fabricante; false
-  /// quando é orientação geral e precisa ser conferido no monitor.
-  final bool confirmado;
+  /// Os campos de ajuste fino; nulo quando ainda não se sabe.
+  final CampoAjuste? campo;
+
+  final Conferencia conferencia;
 
   /// De onde veio a informação.
   final String fonte;
 
+  /// Tutorial em vídeo da J.Assy, quando há.
+  final String? video;
+
   const AjusteMonitor({
     required this.modelo,
     required this.ativacoes,
-    required this.nomeDoAjuste,
     required this.passos,
-    required this.confirmado,
+    required this.campo,
+    required this.conferencia,
     required this.fonte,
+    this.video,
   });
 
   MonitorCompativel get compatibilidade =>
@@ -47,117 +87,245 @@ class AjusteMonitor {
   }
 }
 
-const _consultar =
-    'O manual J.Assy orienta consultar o manual do monitor ou o '
-    'fornecedor: cada marca tem o seu menu.';
+const _tutorial = 'Tutorial J.Assy no YouTube (playlist Monitores ISOBUS).';
+const _yt = 'https://www.youtube.com/watch?v=';
 
 /// Na mesma ordem de [monitoresCompativeis].
 const ajustesMonitores = <AjusteMonitor>[
   AjusteMonitor(
     modelo: 'GS3',
-    ativacoes: 'Controle de seção (até 16 seções)',
-    nomeDoAjuste: 'Tempo de ligar e de desligar (Turn On/Off)',
+    ativacoes:
+        'Comprar a licença Controle de seção (até 16 seções). '
+        'Terminal universal, taxa variável e multiprodutos já vêm liberados.',
     passos: [
-      'Na aba de configuração, habilite Documentação, Orientação e Controle '
-          'de seção.',
-      'Marque o Controle de seção mestre.',
-      'Confira as configurações de sobreposição e os tempos de ligar e '
-          'desligar.',
+      'Equipamento > Máquina: confira a posição da antena GPS no trator.',
+      'O implemento J.Assy aparece sozinho em Plantadeira, com as medidas do '
+          'terminal J.Assy.',
+      'Controle de seção: habilite o Controle de seção mestre e a operação.',
+      'Configurações de sobreposição (limites externos, internos e '
+          'cobertura): minimizar falhas, minimizar sobreposição ou uma '
+          'porcentagem.',
+      'Configurações de ligar e desligar: o atraso do sistema, do comando até '
+          'a semente chegar ao solo.',
+      'Taxa variável: na tela J.Assy, menu Sistema, habilite a '
+          'compatibilidade com o GS3.',
     ],
-    confirmado: false,
-    fonte: 'Guia de plantadeira de revenda John Deere para o GS3 2630.',
+    campo: CampoAjuste(ligar: 'Ligar (atraso)', desligar: 'Desligar (atraso)'),
+    conferencia: Conferencia.tutorialJassy,
+    fonte: _tutorial,
+    video: '${_yt}OIZF7UgBhIk',
   ),
   AjusteMonitor(
     modelo: 'GS4',
     ativacoes: 'Controle de seção',
-    nomeDoAjuste:
-        'Retardo mecânico Ligado e Desligado (Mechanical Delay '
-        'On/Off)',
     passos: [
       'Abra o Perfil do implemento e a página de Retardo mecânico.',
       'Ligado: tempo da primeira semente chegar ao solo depois do comando '
           'de ligar. Desligado: tempo da última semente depois do comando de '
-          'desligar. Valores de 0,10 a 15 s.',
-      'Para corrigir falhas e sobreposições, o ícone de Ajuste de desempenho '
-          '(Performance Tuning) abre o Controle de seção: você informa a '
-          'distância medida e a velocidade e ele recalcula os tempos.',
+          'desligar. De 0,10 a 15 s.',
+      'O ícone de Ajuste de desempenho (Performance Tuning) abre o Controle '
+          'de seção: você informa a distância medida e a velocidade e ele '
+          'recalcula os tempos.',
       'Não mude os tempos enquanto planta.',
     ],
-    confirmado: true,
+    campo: CampoAjuste(
+      ligar: 'Retardo mecânico Ligado',
+      desligar: 'Retardo mecânico Desligado',
+      observacao:
+          'Ou use o Ajuste de desempenho com a distância e a '
+          'velocidade medidas.',
+    ),
+    conferencia: Conferencia.manualFabricante,
     fonte: 'Ajuda on-line dos monitores John Deere Geração 4 (4640).',
   ),
   AjusteMonitor(
     modelo: 'CCI 1200',
     ativacoes: 'Task Controller liberado; Controle de seção comprado',
-    nomeDoAjuste: 'Tempo de ligar e de desligar da seção',
-    passos: [_consultar],
-    confirmado: false,
+    passos: [
+      'Ainda sem tutorial J.Assy. O manual J.Assy orienta consultar o manual '
+          'do monitor ou o fornecedor.',
+    ],
+    campo: null,
+    conferencia: Conferencia.conferir,
     fonte: 'Manual do Selenium (Compatibilidade).',
   ),
   AjusteMonitor(
     modelo: 'C3000',
-    ativacoes: 'Todas já ativas (até 12 seções no treinamento; 32 no manual)',
-    nomeDoAjuste: 'Temporização do controle de seção (Timing)',
+    ativacoes:
+        'Comprar o Controle automático de seção (até 32 seções) e, '
+        'para mapas, a taxa variável. O terminal virtual já vem liberado, mas '
+        'pode estar desabilitado em monitor novo.',
     passos: [
-      'No Topcon X35, o ajuste fica em Controle de seção > Temporização '
-          '(Timing), com a tela de conferir a temporização.',
-      'Confira o menu equivalente no C3000 (versão AGCO).',
+      'Sistema > Características > Implemento: confira as licenças.',
+      'No implemento, use só as funções que vai usar (controle de seção e '
+          'taxa).',
+      'Implemento > Controle de seção > Seções: a geometria de cada seção '
+          'vem da tela J.Assy.',
+      'Tempo de atividade (ligar) e Tempo de inatividade (desligar): '
+          'antecipação em segundos, sem valores negativos.',
+      'Controle automático de seção: a escala de sobreposição vai de 0 '
+          '(desliga ao encostar na área plantada) a 10 (invade o máximo).',
     ],
-    confirmado: false,
-    fonte: 'Manual do operador Topcon X35 (índice).',
+    campo: CampoAjuste(
+      ligar: 'Tempo de atividade',
+      desligar: 'Tempo de inatividade',
+    ),
+    conferencia: Conferencia.tutorialJassy,
+    fonte: _tutorial,
+    video: '${_yt}1sMy4I6cnHc',
   ),
   AjusteMonitor(
     modelo: 'PRO700, PR1200',
     ativacoes:
-        'Pro 700 e Intelliview IV: Controlador de tarefas (48 seções). '
-        'Pro 1200 e Intelliview 12: Controle de seção (24, ou 128 com '
-        'desbloqueio)',
-    nomeDoAjuste: 'Atraso de ligar e de desligar da seção',
+        'Pro 700: comprar o Task Controller (corte de até 48 seções e '
+        'taxa variável). Pro 1200: controle de seção, taxa variável e '
+        'multiprodutos vêm de fábrica nas últimas versões; também precisa do '
+        'Controlador de tarefas.',
     passos: [
-      'O ajuste fica no aplicativo Task Controller do monitor (manual Case IH '
-          '47938688 para o Pro 700).',
-      _consultar,
+      'Pro 700: Ferramentas > Sobreposição. Habilite o controle de '
+          'sobreposição e o de limite, escolha a camada Elétric e ajuste as '
+          'porcentagens e as distâncias de início e de fim em metros.',
+      'Pro 700: na camada do Task Controller, ajuste o Atraso do produto. A '
+          'tarefa precisa estar iniciada no Task Controller.',
+      'Pro 1200: no implemento, Atraso iniciar e Atraso interromper. O '
+          'botão Calibrar guia a medição: você informa o erro médio em cm e '
+          'ele calcula o novo atraso.',
+      'Sobreposição: a J.Assy não recomenda 99%; um valor menor deixa o mapa '
+          'melhor.',
     ],
-    confirmado: false,
-    fonte: 'Treinamento Linha Elétric; manual Task Controller Case IH.',
+    campo: CampoAjuste(
+      ligar: 'Atraso iniciar (Pro 1200) ou Atraso do produto (Pro 700)',
+      desligar: 'Atraso interromper (Pro 1200) ou Atraso do produto (Pro 700)',
+      observacao: 'No Pro 1200, o Calibrar faz a conta com o erro médio em cm.',
+    ),
+    conferencia: Conferencia.tutorialJassy,
+    fonte: _tutorial,
+    video: '${_yt}Ax1rRUE6AwQ',
   ),
   AjusteMonitor(
     modelo: 'CR7',
-    ativacoes: 'Controlador de tarefas e VRA (taxa variável)',
-    nomeDoAjuste: 'Antecipação (look-ahead) de ligar e de desligar',
+    ativacoes:
+        'Comprar o Controlador de tarefas (corte de seção). Taxa '
+        'variável e Multi VRA (multiprodutos) também são pagos.',
     passos: [
-      'Nos monitores Raven, a antecipação de ligar e a de desligar são '
-          'tempos em segundos, sempre positivos.',
-      'Confira no manual do CR7 a tela de controle de seção.',
+      'Menu > Controle de seção: escolha o implemento e habilite o controle '
+          'de seção.',
+      'Olhar adiante para ligar e Olhar adiante para desligar: o atraso do '
+          'sistema, em segundos.',
+      'Porcentagem de sobreposição e de limite; sobreposição de entrada e de '
+          'saída em metros.',
+      'Na tela de operação, a chave de corte de seção: azul é automático, '
+          'verde planta sempre e vermelho desliga tudo.',
     ],
-    confirmado: false,
-    fonte: 'Manual do Raven Viper Pro.',
+    campo: CampoAjuste(
+      ligar: 'Olhar adiante para ligar',
+      desligar: 'Olhar adiante para desligar',
+    ),
+    conferencia: Conferencia.tutorialJassy,
+    fonte: _tutorial,
+    video: '${_yt}WXhLNXwpL-w',
   ),
   AjusteMonitor(
     modelo: 'GPX-750',
-    ativacoes: 'ISOBUS, Task Controller e Multi-Product Control',
-    nomeDoAjuste: 'Atraso (latência) de ligar e de desligar',
-    passos: [_consultar],
-    confirmado: false,
-    fonte: 'Treinamento Linha Elétric.',
+    ativacoes:
+        'Comprar o Task Controller (corte de até 256 seções), ativado '
+        'por QR Code. Precision IQ e terminal universal já vêm liberados.',
+    passos: [
+      'Em Sistemas de mensagens, ligue o envio da velocidade do GPS para a '
+          'tela J.Assy.',
+      'No implemento: Latência ligada e Latência desligada, o atraso do '
+          'sistema em segundos; Aplicar latência ao limite.',
+      'Iniciar e finalizar sobreposição em metros; porcentagem de '
+          'sobreposição e de limite.',
+      'A J.Assy recomenda baixar um pouco a sobreposição de 99%, que faz '
+          'cortes em trechos muito pequenos.',
+      'Controle de aplicação: a opção de latências negativas e de desligar '
+          'na taxa zero.',
+    ],
+    campo: CampoAjuste(
+      ligar: 'Latência ligada',
+      desligar: 'Latência desligada',
+    ),
+    conferencia: Conferencia.tutorialJassy,
+    fonte: _tutorial,
+    video: '${_yt}po5IVsjCkRg',
   ),
   AjusteMonitor(
     modelo: 'InCommand 1200',
-    ativacoes: 'Todas já ativas',
-    nomeDoAjuste: 'Atraso de ligar e de desligar',
-    passos: [_consultar],
-    confirmado: false,
-    fonte: 'Treinamento Linha Elétric.',
+    ativacoes:
+        'A licença ISOBUS (controlador de tarefas). Se estiver travada, '
+        'compre com a revenda do monitor e use Destravar.',
+    passos: [
+      'Configurações ISOBUS: habilite o controlador de tarefas. Deixe '
+          'desmarcados os atrasos de seção vindos da ECU: o ajuste é feito no '
+          'monitor.',
+      'Implemento > chave > Fechamento de seção.',
+      'Cobertura: a J.Assy recomenda definição de usuário em 50 a 70%, entre '
+          'minimizar falhas e minimizar sobreposição.',
+      'Antecipação Ligar e Desligar: a distância que o sistema antecipa cada '
+          'comando. É aqui o ajuste fino quando liga ou desliga atrasado.',
+    ],
+    campo: CampoAjuste(
+      ligar: 'Antecipação Ligar',
+      desligar: 'Antecipação Desligar',
+      emMetros: true,
+    ),
+    conferencia: Conferencia.tutorialJassy,
+    fonte: _tutorial,
+    video: '${_yt}V7r-_KhTvn8',
   ),
   AjusteMonitor(
     modelo: 'Ti7 e Ti10',
-    ativacoes: 'VT e TC ISOBUS (Ti7: 40 seções; Ti10: 60)',
-    nomeDoAjuste: 'Antecipação de abertura e fechamento',
-    passos: [_consultar],
-    confirmado: false,
-    fonte: 'Treinamento Linha Elétric.',
+    ativacoes:
+        'As licenças TC (controle de seção) e VT. Depois de inserir, '
+        'reinicie o monitor.',
+    passos: [
+      'Mantenha o monitor na versão mais nova.',
+      'No implemento, as dimensões e as seções vêm da tela J.Assy.',
+      'Controle de seção: deixe "Sempre sobrepor" desabilitado, senão ele '
+          'nunca desliga.',
+      'Sobreposição: a J.Assy recomenda 50%.',
+      'Antecipação: entrada e saída em metros. Entrada maior liga mais cedo; '
+          'saída maior desliga mais tarde. O ajuste costuma ser mais na '
+          'entrada.',
+      'Na tela de operação, deixe as seções no "A" (automático).',
+    ],
+    campo: CampoAjuste(
+      ligar: 'Antecipação de entrada',
+      desligar: 'Antecipação de saída',
+      emMetros: true,
+      desligarMaiorEhMaisTarde: true,
+    ),
+    conferencia: Conferencia.tutorialJassy,
+    fonte: _tutorial,
+    video: '${_yt}tBoc9WMMJYM',
   ),
 ];
+
+/// Instrução para o campo de um monitor, a partir da correção medida.
+class InstrucaoAjuste {
+  final String campo;
+  final bool aumentar;
+  final double valor;
+  final bool emMetros;
+
+  const InstrucaoAjuste({
+    required this.campo,
+    required this.aumentar,
+    required this.valor,
+    required this.emMetros,
+  });
+
+  String get unidade => emMetros ? 'm' : 's';
+
+  double? novoValor(double? atual) => _novo(atual, aumentar, valor);
+}
+
+double? _novo(double? atual, bool aumentar, double delta) {
+  if (atual == null) return null;
+  final v = aumentar ? atual + delta : atual - delta;
+  return v < 0 ? 0 : v;
+}
 
 /// O que conferir antes de ir para o campo, valendo para todo monitor.
 const checklistDesligamento = [
@@ -248,10 +416,20 @@ class CorrecaoTempo {
 
   /// Novo valor a partir do atual, quando o técnico sabe o atual. Nunca
   /// negativo.
-  double? novoValor(double? atual) {
-    if (atual == null) return null;
-    final v = aumentar ? atual + segundos : atual - segundos;
-    return v < 0 ? 0 : v;
+  double? novoValor(double? atual) => _novo(atual, aumentar, segundos);
+
+  /// O que mexer no campo de um monitor: em segundos ou em metros, e no
+  /// sentido certo (no Hexagon, a saída maior desliga mais tarde).
+  InstrucaoAjuste? instrucaoPara(CampoAjuste? c) {
+    if (c == null) return null;
+    final desligar = ocorrencia.desligar;
+    final inverte = desligar && c.desligarMaiorEhMaisTarde;
+    return InstrucaoAjuste(
+      campo: desligar ? c.desligar : c.ligar,
+      aumentar: inverte ? !aumentar : aumentar,
+      valor: c.emMetros ? distanciaM : segundos,
+      emMetros: c.emMetros,
+    );
   }
 
   static CorrecaoTempo? calcular({

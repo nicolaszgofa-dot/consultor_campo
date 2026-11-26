@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../tema.dart';
 import '../ui/componentes.dart';
@@ -8,13 +9,25 @@ import 'desligamento_dados.dart';
 
 /// Configuração do desligamento de linha: monitor e ativações, geometria da
 /// plantadeira e o ajuste fino no campo. Nada fica salvo.
-class DesligamentoPage extends StatelessWidget {
+class DesligamentoPage extends StatefulWidget {
   final int abaInicial;
 
-  const DesligamentoPage({super.key, this.abaInicial = 0});
+  /// Abre o tutorial em vídeo (nos testes, um falso).
+  final Future<bool> Function(Uri)? abrirLink;
+
+  const DesligamentoPage({super.key, this.abaInicial = 0, this.abrirLink});
+
+  @override
+  State<DesligamentoPage> createState() => _DesligamentoPageState();
+}
+
+class _DesligamentoPageState extends State<DesligamentoPage> {
+  /// Monitor escolhido na aba Monitor; a aba No campo usa os campos dele.
+  AjusteMonitor? _monitor;
 
   @override
   Widget build(BuildContext context) {
+    final abaInicial = widget.abaInicial;
     return DefaultTabController(
       length: 3,
       initialIndex: abaInicial,
@@ -73,9 +86,17 @@ class DesligamentoPage extends StatelessWidget {
                 ),
               ),
             ),
-            const Expanded(
+            Expanded(
               child: TabBarView(
-                children: [_AbaMonitor(), _AbaGeometria(), _AbaAjuste()],
+                children: [
+                  _AbaMonitor(
+                    monitor: _monitor,
+                    aoEscolher: (m) => setState(() => _monitor = m),
+                    abrirLink: widget.abrirLink,
+                  ),
+                  const _AbaGeometria(),
+                  _AbaAjuste(monitor: _monitor),
+                ],
               ),
             ),
           ],
@@ -142,28 +163,24 @@ Widget _itens(List<String> itens, {bool numerados = false}) => Column(
 // Aba 1: monitor.
 // ---------------------------------------------------------------------------
 
-class _AbaMonitor extends StatefulWidget {
-  const _AbaMonitor();
+class _AbaMonitor extends StatelessWidget {
+  final AjusteMonitor? monitor;
+  final ValueChanged<AjusteMonitor> aoEscolher;
+  final Future<bool> Function(Uri)? abrirLink;
 
-  @override
-  State<_AbaMonitor> createState() => _AbaMonitorState();
-}
-
-class _AbaMonitorState extends State<_AbaMonitor>
-    with AutomaticKeepAliveClientMixin {
-  AjusteMonitor? _monitor;
-
-  @override
-  bool get wantKeepAlive => true;
+  const _AbaMonitor({
+    required this.monitor,
+    required this.aoEscolher,
+    this.abrirLink,
+  });
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    final m = _monitor;
+    final m = monitor;
     return _Rolagem([
       const Text(
-        'Escolha o monitor do trator para ver as ativações e onde fica o '
-        'ajuste de tempo de liga e desliga.',
+        'Escolha o monitor do trator para ver as licenças, onde fica o corte '
+        'de seção e o campo do ajuste fino de liga e desliga.',
         style: _corpo,
       ),
       Wrap(
@@ -174,11 +191,11 @@ class _AbaMonitorState extends State<_AbaMonitor>
             ChoiceChip(
               label: Text(a.nome),
               selected: a == m,
-              onSelected: (_) => setState(() => _monitor = a),
+              onSelected: (_) => aoEscolher(a),
             ),
         ],
       ),
-      if (m != null) ..._detalhe(m),
+      if (m != null) _detalhe(context, m),
       const RotuloSecao('Antes de ir para o campo'),
       CartaoBranco(child: _itens(checklistDesligamento)),
       const Text(
@@ -190,78 +207,96 @@ class _AbaMonitorState extends State<_AbaMonitor>
     ]);
   }
 
-  List<Widget> _detalhe(AjusteMonitor a) {
+  Widget _detalhe(BuildContext context, AjusteMonitor a) {
     final c = a.compatibilidade;
-    return [
-      CartaoBranco(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              a.nome,
-              style: const TextStyle(
-                fontFamily: fonteTitulo,
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-              ),
+    final campo = a.campo;
+    return CartaoBranco(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            a.nome,
+            style: const TextStyle(
+              fontFamily: fonteTitulo,
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
             ),
-            const SizedBox(height: 8),
-            const RotuloSecao('Ativações'),
-            Text(a.ativacoes, style: _corpo),
+          ),
+          const SizedBox(height: 4),
+          _Selo(conferencia: a.conferencia),
+          const SizedBox(height: 10),
+          const RotuloSecao('Licenças'),
+          Text(a.ativacoes, style: _corpo),
+          const SizedBox(height: 4),
+          Text(
+            'Controle de seção: ${c.controleSecao} · Task Controller: '
+            '${c.taskController} · máximo de seções: ${c.maximoSecoes}',
+            style: _pequeno,
+          ),
+          const SizedBox(height: 12),
+          const RotuloSecao('Passo a passo'),
+          const SizedBox(height: 4),
+          _itens(a.passos, numerados: a.passos.length > 1),
+          if (campo != null) ...[
             const SizedBox(height: 6),
-            Text(
-              'Controle de seção: ${c.controleSecao} · Task Controller: '
-              '${c.taskController} · máximo de seções: ${c.maximoSecoes}',
-              style: _pequeno,
-            ),
-            const SizedBox(height: 12),
-            const RotuloSecao('Ajuste de tempo'),
-            Text(
-              a.nomeDoAjuste,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 6),
-            _itens(a.passos, numerados: a.passos.length > 1),
+            const RotuloSecao('Ajuste fino'),
             const SizedBox(height: 4),
-            _Selo(confirmado: a.confirmado),
-            const SizedBox(height: 6),
-            Text('Fonte: ${a.fonte}', style: _pequeno),
+            Text(
+              'Ligar: ${campo.ligar}\nDesligar: ${campo.desligar}\n'
+              'Em ${campo.emMetros ? 'metros' : 'segundos'}',
+              style: _corpo.copyWith(fontWeight: FontWeight.w600),
+            ),
+            if (campo.observacao != null)
+              Text(campo.observacao!, style: _pequeno),
           ],
-        ),
+          if (a.video case final v?) ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () =>
+                  (abrirLink ??
+                  (u) => launchUrl(u, mode: LaunchMode.externalApplication))(
+                    Uri.parse(v),
+                  ),
+              icon: const Icon(Icons.play_circle_outline),
+              label: const Text('Ver o tutorial em vídeo'),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Text('Fonte: ${a.fonte}', style: _pequeno),
+        ],
       ),
-    ];
+    );
   }
 }
 
 class _Selo extends StatelessWidget {
-  final bool confirmado;
+  final Conferencia conferencia;
 
-  const _Selo({required this.confirmado});
+  const _Selo({required this.conferencia});
 
   @override
   Widget build(BuildContext context) {
-    final cor = confirmado ? Cores.verdeTexto : Cores.atencao;
+    final ok = conferencia.conferido;
+    final cor = ok ? Cores.verdeTexto : Cores.atencao;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: confirmado ? Cores.verdeClaro : const Color(0xFFFFF3CD),
+        color: ok ? Cores.verdeClaro : const Color(0xFFFFF3CD),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            confirmado ? Icons.verified_outlined : Icons.help_outline,
+            ok ? Icons.verified_outlined : Icons.help_outline,
             size: 16,
             color: cor,
           ),
           const SizedBox(width: 6),
           Flexible(
             child: Text(
-              confirmado
-                  ? 'Conferido no manual do fabricante'
-                  : 'Confira no manual do monitor',
+              conferencia.selo,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -543,7 +578,10 @@ class _ResultadoGeometria extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _AbaAjuste extends StatefulWidget {
-  const _AbaAjuste();
+  /// Monitor escolhido na aba Monitor (nulo: resposta genérica).
+  final AjusteMonitor? monitor;
+
+  const _AbaAjuste({required this.monitor});
 
   @override
   State<_AbaAjuste> createState() => _AbaAjusteState();
@@ -570,6 +608,8 @@ class _AbaAjusteState extends State<_AbaAjuste>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final monitor = widget.monitor;
+    final emMetros = monitor?.campo?.emMetros ?? false;
     final correcao = CorrecaoTempo.calcular(
       ocorrencia: _ocorrencia,
       distanciaM: lerNumero(_distancia.text),
@@ -580,6 +620,14 @@ class _AbaAjusteState extends State<_AbaAjuste>
         'Passe na cabeceira em velocidade constante, cruzando uma área já '
         'plantada, e confira no chão onde a linha parou e voltou a plantar.',
         style: _corpo,
+      ),
+      Text(
+        monitor == null
+            ? 'Escolha o monitor na aba Monitor para ver o campo exato a '
+                  'mexer.'
+            : 'Monitor: ${monitor.nome}'
+                  '${monitor.campo == null ? '' : ' (ajuste em ${emMetros ? 'metros' : 'segundos'})'}',
+        style: _pequeno.copyWith(fontWeight: FontWeight.w600),
       ),
       const RotuloSecao('O que aconteceu?'),
       LayoutBuilder(
@@ -625,9 +673,12 @@ class _AbaAjusteState extends State<_AbaAjuste>
       TextField(
         controller: _atual,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        decoration: const InputDecoration(
-          labelText: 'Tempo atual no monitor (s), opcional',
-          helperText: 'Para calcular o novo valor',
+        decoration: InputDecoration(
+          labelText: 'Valor atual no monitor, opcional',
+          helperText: monitor?.campo == null
+              ? 'Em segundos, para calcular o novo valor'
+              : 'Em ${emMetros ? 'metros' : 'segundos'}, para calcular o '
+                    'novo valor',
         ),
         onChanged: (_) => setState(() {}),
       ),
@@ -637,7 +688,11 @@ class _AbaAjusteState extends State<_AbaAjuste>
           style: _pequeno,
         )
       else
-        _ResultadoAjuste(c: correcao, atual: lerNumero(_atual.text)),
+        _ResultadoAjuste(
+          c: correcao,
+          monitor: monitor,
+          atual: lerNumero(_atual.text),
+        ),
       const RotuloSecao('Como medir'),
       _itens(const [
         'Mantenha a velocidade de plantio constante ao entrar e sair da área '
@@ -645,12 +700,12 @@ class _AbaAjusteState extends State<_AbaAjuste>
         'Marque a borda da área já plantada.',
         'Meça da borda até a última semente (ao desligar) ou até a primeira '
             'semente (ao ligar).',
-        'Ajuste um tempo de cada vez e passe de novo para conferir.',
+        'Ajuste um valor de cada vez e passe de novo para conferir.',
       ]),
       const Text(
-        'Conta: tempo = distância ÷ velocidade (km/h ÷ 3,6). O nome do tempo '
-        'muda conforme o monitor (retardo, atraso, antecipação ou '
-        'look-ahead): veja a aba Monitor.',
+        'Conta: tempo = distância ÷ velocidade (km/h ÷ 3,6). Nos ajustes de '
+        'tempo (atraso, latência, olhar adiante), valor maior manda o comando '
+        'mais cedo.',
         style: _pequeno,
       ),
     ]);
@@ -721,14 +776,43 @@ class _CartaoOcorrencia extends StatelessWidget {
 
 class _ResultadoAjuste extends StatelessWidget {
   final CorrecaoTempo c;
+  final AjusteMonitor? monitor;
   final double? atual;
 
-  const _ResultadoAjuste({required this.c, required this.atual});
+  const _ResultadoAjuste({
+    required this.c,
+    required this.monitor,
+    required this.atual,
+  });
+
+  static const _claro = Color(0xFFCFE8C9);
 
   @override
   Widget build(BuildContext context) {
-    final novo = c.novoValor(atual);
-    final verbo = c.aumentar ? 'Aumente' : 'Diminua';
+    final instrucao = c.instrucaoPara(monitor?.campo);
+    final quando = c.aumentar ? 'mais cedo' : 'mais tarde';
+    final comando = c.ocorrencia.desligar ? 'Desligar' : 'Ligar';
+
+    final String acao;
+    final double? novo;
+    final String unidade;
+    if (instrucao != null) {
+      final v = numeroBr(instrucao.valor, 2);
+      acao =
+          '${instrucao.aumentar ? 'Aumente' : 'Diminua'} '
+          '"${instrucao.campo}" em $v ${instrucao.unidade}';
+      novo = instrucao.novoValor(atual);
+      unidade = instrucao.unidade;
+    } else {
+      acao =
+          'Nos ajustes de tempo (atraso, latência, olhar adiante): '
+          '${c.aumentar ? 'aumente' : 'diminua'} '
+          '${numeroBr(c.segundos, 2)} s. Nos de distância: '
+          '${numeroBr(c.distanciaM, 2)} m.';
+      novo = c.novoValor(atual);
+      unidade = 's';
+    }
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -739,15 +823,15 @@ class _ResultadoAjuste extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '$verbo o tempo de ${c.qualTempo}',
+            '$comando $quando',
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFCFE8C9),
+              color: _claro,
             ),
           ),
           Text(
-            '${c.aumentar ? '+' : '−'} ${numeroBr(c.segundos, 2)} s',
+            '${numeroBr(c.segundos, 2)} s',
             style: const TextStyle(
               fontFamily: fonteTitulo,
               fontSize: 44,
@@ -756,21 +840,53 @@ class _ResultadoAjuste extends StatelessWidget {
               color: Cores.branco,
             ),
           ),
-          if (novo != null)
-            Text(
-              'De ${numeroBr(atual!, 2)} s para ${numeroBr(novo, 2)} s',
-              style: const TextStyle(fontSize: 16, color: Cores.branco),
-            ),
-          const SizedBox(height: 6),
           Text(
             '${numeroBr(c.distanciaM, 2)} m a '
             '${numeroBr(c.velocidadeKmh, 1)} km/h '
-            '(${numeroBr(c.velocidadeMs, 2)} m/s) = '
-            '${numeroBr(c.segundos, 2)} s. A linha '
-            '${c.ocorrencia.desligar ? 'desligou' : 'ligou'} '
+            '(${numeroBr(c.velocidadeMs, 2)} m/s)',
+            style: const TextStyle(fontSize: 13.5, color: _claro),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Cores.branco,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (monitor != null && instrucao != null)
+                  Text('No ${monitor!.nome}:', style: _pequeno),
+                Text(
+                  acao,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Cores.tinta,
+                  ),
+                ),
+                if (novo != null)
+                  Text(
+                    'De ${numeroBr(atual!, 2)} $unidade para '
+                    '${numeroBr(novo, 2)} $unidade',
+                    style: _corpo,
+                  ),
+                if (monitor?.campo?.observacao case final o?)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(o, style: _pequeno),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'A linha ${c.ocorrencia.desligar ? 'desligou' : 'ligou'} '
             '${c.ocorrencia.adiantado ? 'cedo' : 'tarde'} e deixou '
             '${c.ocorrencia.resultadoNoChao}.',
-            style: const TextStyle(fontSize: 13.5, color: Color(0xFFCFE8C9)),
+            style: const TextStyle(fontSize: 13.5, color: _claro),
           ),
         ],
       ),
