@@ -14,35 +14,36 @@ Treinamento, instalação e regulagem da Linha Elétric (Selenium Elétric e Tit
 
 ## Módulos
 
-1. **Componentes do sistema:**
+1. **Conceitos de plantio:** os 8 conceitos do card Conceito (plantabilidade, estande, duplas e falhas, CV, singularização, perdas, emergência e downforce), com o mesmo texto, em `conceito/conceitos.dart`, e um teste de 4 perguntas.
+2. **Componentes do sistema:**
    - por que a Linha Elétric (argumentos de venda);
    - as peças do sistema e o motor do dosador;
    - a ECU J.Assy;
    - o LED dos drivers;
    - o alternador hidráulico, com a tabela de RPM por número de linhas.
-2. **Instalação e regulagem:**
+3. **Instalação e regulagem:**
    - ECU e antenas;
    - energia das linhas (até 10 por ramo);
    - ligar e desligar o alternador;
    - sensor de levante;
    - disco e anel do Titanium: trocar e regular as travas;
    - o que não vem no kit.
-3. **Tela de trabalho:**
+4. **Tela de trabalho:**
    - as partes da tela;
    - a barra de ícones e a de mensagens;
    - os boxes e os gráficos;
    - os botões virtuais.
-4. **Configurações:**
+5. **Configurações:**
    - Dosagem e sensoriamento, com cada parâmetro e o alarme que ele dispara;
    - Implemento (linhas encontradas, desencontradas ou personalizadas);
    - fonte e filtro de velocidade;
    - endereçamento com o ímã;
    - energia, levante e sistema.
-5. **Alarmes:**
+6. **Alarmes:**
    - como ler um alarme;
    - os mais comuns, com o primeiro passo. A tabela vem do catálogo do simulador (`simulador/alarmes.dart`), com as soluções do Selenium;
    - o que muda no Titanium: grafite, disco e anel em vez da pressão de ar.
-6. **Monitores e corte de seção:**
+7. **Monitores e corte de seção:**
    - as ativações em cada monitor;
    - o sinal de GPS;
    - a regulagem do liga e desliga (adiantada ou atrasada, tempos de sobreposição e salto).

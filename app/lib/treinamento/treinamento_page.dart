@@ -31,9 +31,9 @@ class CapacitacaoPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                   children: [
                     const Text(
-                      'Linha Elétric: produto, instalação, regulagem, configuração '
-                      'e alarmes. Cada módulo tem aulas curtas e um teste de 4 '
-                      'perguntas no fim.',
+                      'Conceitos de plantio e a Linha Elétric: produto, instalação, '
+                      'regulagem, configuração e alarmes. Cada módulo tem aulas '
+                      'curtas e um teste de 4 perguntas no fim.',
                       style: TextStyle(fontSize: 16, color: Cores.tinta),
                     ),
                     const SizedBox(height: 16),

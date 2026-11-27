@@ -68,12 +68,68 @@ List<List<String>> _linhasAlarmes(List<TipoAlarme> tipos) => [
     [(t.porLinha ? 'Linha XX - ' : '') + t.texto, t.solucao ?? t.descricao],
 ];
 
+/// Módulo de conceitos: as aulas são os próprios textos do card Conceito
+/// (conceito/conceitos.dart), então os dois ficam sempre iguais.
+final moduloConceitos = ModuloTreino(
+  titulo: 'Conceitos de plantio',
+  resumo: 'Plantabilidade, duplas e falhas, CV, perdas e downforce',
+  icone: Icons.lightbulb_outline,
+  aulas: [for (final c in conceitos) Aula(titulo: c.titulo, blocos: c.blocos)],
+  perguntas: const [
+    Pergunta(
+      enunciado:
+          'Com 14 sementes/m, o espaçamento ideal é de 7,1 cm. Um espaçamento '
+          'de 12 cm entre duas plantas é…',
+      opcoes: ['Dupla', 'Aceitável', 'Falha'],
+      correta: 2,
+      explicacao:
+          'Acima de 1,5 × o ideal (10,7 cm) é falha; abaixo de 0,5 × '
+          '(3,6 cm), dupla.',
+    ),
+    Pergunta(
+      enunciado: 'Como se calcula o CV dos espaçamentos?',
+      opcoes: [
+        'Desvio padrão ÷ média × 100',
+        'Média ÷ desvio padrão × 100',
+        '% de falhas + % de duplas',
+        'Plantas medidas ÷ plantas esperadas',
+      ],
+      correta: 0,
+      explicacao:
+          'CV baixo quer dizer espaçamentos regulares. Não compare com o CV '
+          'por trecho de alguns aplicativos.',
+    ),
+    Pergunta(
+      enunciado:
+          'Um dosador teve 3% de falhas e 2% de múltiplas. Qual a '
+          'singularização?',
+      opcoes: ['95%', '97%', '98%', '100%'],
+      correta: 0,
+      explicacao: 'Singularização = 100 − % de falhas − % de múltiplas.',
+    ),
+    Pergunta(
+      enunciado: 'Downforce acima do adequado causa o quê no sulco?',
+      opcoes: [
+        'Compactação (espelhamento), que prejudica as raízes',
+        'Sulco que desmorona antes das rodas cobridoras',
+        'Semente que não alcança a umidade',
+        'Nenhum efeito',
+      ],
+      correta: 0,
+      explicacao:
+          'Abaixo do ideal, o sulco desmorona; muito abaixo, a semente não '
+          'alcança a umidade.',
+    ),
+  ],
+);
+
 /// Material técnico da Linha Elétric (equipe e revenda): treinamento,
 /// instalação e regulagem.
 /// Fontes: apresentações "Treinamento Linha Elétric" e manuais do Selenium e
 /// do Titanium Elétric (pasta CONFIGURADOR/manuais). Ver
 /// docs/material-tecnico/material-tecnico.md.
 final List<ModuloTreino> modulosTreino = [
+  moduloConceitos,
   const ModuloTreino(
     titulo: 'Componentes do sistema',
     resumo: 'Por que a Linha Elétric, ECU, drivers e alternador',

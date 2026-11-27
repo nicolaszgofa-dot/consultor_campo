@@ -261,7 +261,7 @@ void main() {
       MaterialApp(theme: temaConsultor(), home: const MaterialTecnicoPage()),
     );
     expect(find.text('1 ferramenta: Desligamento de linha'), findsOneWidget);
-    expect(find.text('6 módulos · 24 perguntas'), findsOneWidget);
+    expect(find.text('7 módulos · 28 perguntas'), findsOneWidget);
 
     // Ferramentas de campo > Desligamento de linha.
     await tester.tap(_rotulo('Ferramentas de campo'));

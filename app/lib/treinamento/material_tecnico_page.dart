@@ -63,7 +63,7 @@ class MaterialTecnicoPage extends StatelessWidget {
         ),
         _CartaoGrande(
           titulo: 'Capacitação',
-          resumo: 'Produto, instalação, regulagem, configuração e alarmes',
+          resumo: 'Conceitos de plantio e a Linha Elétric: produto, instalação, regulagem e alarmes',
           detalhe: '${modulosTreino.length} módulos · $perguntas perguntas',
           icone: Icons.school_outlined,
           aoAbrir: () => abrir(CapacitacaoPage()),

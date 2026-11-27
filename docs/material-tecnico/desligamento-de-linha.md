@@ -2,7 +2,7 @@
 
 Ferramenta de campo do Material técnico, igual nos apps da equipe e da revenda. Ajuda a configurar o corte de seção (desligamento linha a linha) da Linha Elétric em três abas. Nada fica salvo.
 
-Para abrir: Material técnico > Ferramentas de campo > Desligamento de linha, ou o atalho na aula "Regulagem do liga e desliga" do módulo 6 (Capacitação).
+Para abrir: Material técnico > Ferramentas de campo > Desligamento de linha, ou o atalho na aula "Regulagem do liga e desliga" do módulo 7 (Capacitação).
 
 ## Monitor
 

@@ -23,7 +23,7 @@ Como a escolha é feita na compilação, o conteúdo só da equipe nem entra no 
   - a descrição do problema e o que já foi feito.
 
   "Copiar chamado" monta o texto para o pós-venda. As fotos seguem na mesma conversa.
-- **Material técnico** (também no app da equipe): treinamento, instalação e regulagem da Linha Elétric em seis módulos, com aulas curtas e um teste em cada (ver [material-tecnico.md](../material-tecnico/material-tecnico.md)). Ele substitui os antigos "Regulagem e instalação" e "Treinamento da revenda".
+- **Material técnico** (também no app da equipe): conceitos de plantio e o treinamento, a instalação e a regulagem da Linha Elétric em sete módulos, com aulas curtas e um teste em cada (ver [material-tecnico.md](../material-tecnico/material-tecnico.md)). Ele substitui os antigos "Regulagem e instalação" e "Treinamento da revenda".
 
 Nada fica salvo: pedido e chamado existem só enquanto a tela está aberta, como as propostas. Isso vale até haver um servidor.
 

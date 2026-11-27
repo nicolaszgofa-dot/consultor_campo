@@ -12,7 +12,8 @@ Finder _rotulo(String texto) => find.byWidgetPredicate(
 
 void main() {
   test('módulos com aulas e 4 perguntas válidas', () {
-    expect(modulosTreino, hasLength(6));
+    expect(modulosTreino, hasLength(7));
+    expect(modulosTreino.first.aulas, hasLength(conceitos.length));
     for (final m in modulosTreino) {
       expect(m.aulas, isNotEmpty, reason: m.titulo);
       expect(m.perguntas, hasLength(4), reason: m.titulo);
