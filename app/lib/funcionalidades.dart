@@ -10,7 +10,7 @@ import 'perfil.dart';
 import 'proposta/propostas_page.dart';
 import 'roi/roi_page.dart';
 import 'simulador/simulador_page.dart';
-import 'treinamento/treinamento_page.dart';
+import 'treinamento/material_tecnico_page.dart';
 import 'ui/icones_modulos.dart';
 
 class Funcionalidade {
@@ -97,7 +97,7 @@ List<Funcionalidade> funcionalidadesEquipe() => [
     titulo: 'Material técnico',
     descricao: _descricaoMaterialTecnico,
     icone: IconeModulo.materialTecnico,
-    tela: () => TreinamentoPage(),
+    tela: () => const MaterialTecnicoPage(),
   ),
   const Funcionalidade(
     titulo: 'Relatórios',
@@ -149,7 +149,7 @@ List<Funcionalidade> funcionalidadesRevenda() => [
     titulo: 'Material técnico',
     descricao: _descricaoMaterialTecnico,
     icone: IconeModulo.materialTecnico,
-    tela: () => TreinamentoPage(),
+    tela: () => const MaterialTecnicoPage(),
   ),
   Funcionalidade(
     titulo: 'Conceito',

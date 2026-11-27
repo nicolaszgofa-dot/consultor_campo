@@ -2,6 +2,7 @@ import 'package:consultor_campo/desligamento/desligamento_dados.dart';
 import 'package:consultor_campo/desligamento/desligamento_page.dart';
 import 'package:consultor_campo/simulador/referencias_terminal.dart';
 import 'package:consultor_campo/tema.dart';
+import 'package:consultor_campo/treinamento/material_tecnico_page.dart';
 import 'package:consultor_campo/treinamento/treinamento_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -250,15 +251,34 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('o Material técnico abre a ferramenta', (tester) async {
+  testWidgets('Material técnico: dois cards, ferramentas e capacitação', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(420, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp(theme: temaConsultor(), home: TreinamentoPage()),
+      MaterialApp(theme: temaConsultor(), home: const MaterialTecnicoPage()),
     );
+    expect(find.text('1 ferramenta: Desligamento de linha'), findsOneWidget);
+    expect(find.text('6 módulos · 24 perguntas'), findsOneWidget);
+
+    // Ferramentas de campo > Desligamento de linha.
+    await tester.tap(_rotulo('Ferramentas de campo'));
+    await tester.pumpAndSettle();
+    expect(find.byType(FerramentasCampoPage), findsOneWidget);
     await tester.tap(_rotulo('Desligamento de linha'));
     await tester.pumpAndSettle();
     expect(find.byType(DesligamentoPage), findsOneWidget);
+
+    // Volta e abre a capacitação, com os módulos.
+    Navigator.of(tester.element(find.byType(DesligamentoPage))).pop();
+    await tester.pumpAndSettle();
+    Navigator.of(tester.element(find.byType(FerramentasCampoPage))).pop();
+    await tester.pumpAndSettle();
+    await tester.tap(_rotulo('Capacitação'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CapacitacaoPage), findsOneWidget);
+    expect(find.text('Componentes do sistema'), findsOneWidget);
   });
 }

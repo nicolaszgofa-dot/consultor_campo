@@ -85,7 +85,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: temaConsultor(),
-        home: TreinamentoPage(modulos: const [modulo]),
+        home: CapacitacaoPage(modulos: const [modulo]),
       ),
     );
     expect(find.text('2 aulas · 2 perguntas'), findsOneWidget);
@@ -124,7 +124,7 @@ void main() {
 
     await tester.tap(find.text('Concluir'));
     await tester.pumpAndSettle();
-    expect(find.text('Material técnico'), findsOneWidget);
+    expect(find.text('Capacitação'), findsOneWidget);
   });
 
   testWidgets('as aulas reais abrem sem erro de layout', (tester) async {

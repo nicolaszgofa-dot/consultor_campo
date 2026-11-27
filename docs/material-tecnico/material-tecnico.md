@@ -4,7 +4,9 @@ Treinamento, instalação e regulagem da Linha Elétric (Selenium Elétric e Tit
 
 ## Como funciona
 
-- A tela inicial do Material técnico abre com a ferramenta de campo [Desligamento de linha](desligamento-de-linha.md) e lista os módulos. Cada módulo mostra quantas aulas e perguntas tem.
+- A tela inicial do Material técnico tem dois cards:
+  - **Ferramentas de campo:** hoje só o [Desligamento de linha](desligamento-de-linha.md);
+  - **Capacitação:** os módulos, cada um mostrando quantas aulas e perguntas tem.
 - Cada módulo tem aulas curtas, uma por tela, com "Anterior" e "Próxima aula". A barra do topo mostra o passo.
 - Algumas aulas têm um atalho para praticar: o Simulador Elétric, a lista de alarmes ou os monitores compatíveis.
 - No fim de cada módulo há um teste de 4 perguntas de múltipla escolha. Cada resposta mostra na hora se está certa e o porquê. Com todas respondidas, aparece "X de 4 certas" e, se errou alguma, o botão "Refazer o teste".
@@ -65,6 +67,6 @@ As fotos da ECU, dos LEDs, do alternador e do sensor de levante foram reduzidas 
 
 ## Código
 
-- O conteúdo fica em `app/lib/treinamento/treinamento_dados.dart` e as telas em `app/lib/treinamento/treinamento_page.dart`.
+- O conteúdo fica em `app/lib/treinamento/treinamento_dados.dart`. A entrada (os dois cards e a lista de ferramentas) fica em `material_tecnico_page.dart`, e a capacitação, as aulas e o teste em `treinamento_page.dart`.
 - As aulas usam os mesmos blocos de texto do Conceito (`conceito/conceitos.dart`), mais o bloco `Imagem`.
 - Os testes ficam em `app/test/treinamento_test.dart`.

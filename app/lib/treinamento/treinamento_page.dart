@@ -8,13 +8,13 @@ import '../tema.dart';
 import '../ui/componentes.dart';
 import 'treinamento_dados.dart';
 
-/// Material técnico (equipe e revenda): módulos da Linha Elétric com
-/// treinamento, instalação e regulagem, cada um com aulas
-/// curtas e um teste no fim. Nada fica salvo (sem servidor, sem histórico).
-class TreinamentoPage extends StatelessWidget {
+/// Capacitação do Material técnico (equipe e revenda): módulos da Linha
+/// Elétric com aulas curtas e um teste no fim. Nada fica salvo (sem
+/// servidor, sem histórico).
+class CapacitacaoPage extends StatelessWidget {
   final List<ModuloTreino> modulos;
 
-  TreinamentoPage({super.key, List<ModuloTreino>? modulos})
+  CapacitacaoPage({super.key, List<ModuloTreino>? modulos})
     : modulos = modulos ?? modulosTreino;
 
   @override
@@ -22,7 +22,7 @@ class TreinamentoPage extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
-          const CabecalhoFluxo(titulo: 'Material técnico'),
+          const CabecalhoFluxo(titulo: 'Capacitação'),
           Expanded(
             child: Center(
               child: ConstrainedBox(
@@ -37,23 +37,6 @@ class TreinamentoPage extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: Cores.tinta),
                     ),
                     const SizedBox(height: 16),
-                    const RotuloSecao('Ferramenta de campo'),
-                    const SizedBox(height: 8),
-                    _CartaoFerramenta(
-                      titulo: 'Desligamento de linha',
-                      resumo:
-                          'Monitor e ativações, medidas da plantadeira e '
-                          'ajuste do tempo de liga e desliga no campo',
-                      icone: Icons.tune,
-                      aoAbrir: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const DesligamentoPage(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const RotuloSecao('Módulos'),
-                    const SizedBox(height: 8),
                     for (var i = 0; i < modulos.length; i++) ...[
                       _CartaoModulo(
                         numero: i + 1,
@@ -81,80 +64,6 @@ class TreinamentoPage extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Ferramenta de campo no topo do Material técnico (fundo escuro, para não
-/// parecer mais um módulo).
-class _CartaoFerramenta extends StatelessWidget {
-  final String titulo;
-  final String resumo;
-  final IconData icone;
-  final VoidCallback aoAbrir;
-
-  const _CartaoFerramenta({
-    required this.titulo,
-    required this.resumo,
-    required this.icone,
-    required this.aoAbrir,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: titulo,
-      child: Material(
-        color: Cores.verdeEscuro,
-        borderRadius: BorderRadius.circular(20),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: aoAbrir,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: Cores.verde,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(icone, size: 28, color: Cores.branco),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        titulo,
-                        style: const TextStyle(
-                          fontFamily: fonteTitulo,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Cores.branco,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        resumo,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFFCFE8C9),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right, color: Cores.branco),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
